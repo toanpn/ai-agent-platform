@@ -1,0 +1,12 @@
+/Users/toanpn/development/ai-agent-platform/backend/shared/bin/Debug/net7.0/AgentPlatform.Shared.deps.json
+/Users/toanpn/development/ai-agent-platform/backend/shared/bin/Debug/net7.0/AgentPlatform.Shared.dll
+/Users/toanpn/development/ai-agent-platform/backend/shared/bin/Debug/net7.0/AgentPlatform.Shared.pdb
+/Users/toanpn/development/ai-agent-platform/backend/shared/obj/Debug/net7.0/AgentPlatform.Shared.GeneratedMSBuildEditorConfig.editorconfig
+/Users/toanpn/development/ai-agent-platform/backend/shared/obj/Debug/net7.0/AgentPlatform.Shared.AssemblyInfoInputs.cache
+/Users/toanpn/development/ai-agent-platform/backend/shared/obj/Debug/net7.0/AgentPlatform.Shared.AssemblyInfo.cs
+/Users/toanpn/development/ai-agent-platform/backend/shared/obj/Debug/net7.0/AgentPlatform.Shared.csproj.CoreCompileInputs.cache
+/Users/toanpn/development/ai-agent-platform/backend/shared/obj/Debug/net7.0/AgentPlatform.Shared.sourcelink.json
+/Users/toanpn/development/ai-agent-platform/backend/shared/obj/Debug/net7.0/AgentPlatform.Shared.dll
+/Users/toanpn/development/ai-agent-platform/backend/shared/obj/Debug/net7.0/refint/AgentPlatform.Shared.dll
+/Users/toanpn/development/ai-agent-platform/backend/shared/obj/Debug/net7.0/AgentPlatform.Shared.pdb
+/Users/toanpn/development/ai-agent-platform/backend/shared/obj/Debug/net7.0/ref/AgentPlatform.Shared.dll

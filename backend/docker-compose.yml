@@ -1,0 +1,56 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15
+    container_name: agentplatform-postgres
+    environment:
+      POSTGRES_DB: agentplatform
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./scripts/setup_db.sql:/docker-entrypoint-initdb.d/setup_db.sql
+    networks:
+      - agentplatform-network
+
+  api:
+    build:
+      context: .
+      dockerfile: ./AgentPlatform.API/Dockerfile
+    container_name: agentplatform-api
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Host=postgres;Database=agentplatform;Username=postgres;Password=postgres
+      - AgentRuntime__BaseUrl=http://adk-agent:8000
+    ports:
+      - "5000:80"
+    depends_on:
+      - postgres
+    volumes:
+      - ./uploads:/app/uploads
+    networks:
+      - agentplatform-network
+
+  adk-agent:
+    build:
+      context: ./ADKAgentCore
+      dockerfile: Dockerfile
+    container_name: agentplatform-adk
+    environment:
+      - PYTHONPATH=/app
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./ADKAgentCore/uploads:/app/uploads
+    networks:
+      - agentplatform-network
+
+volumes:
+  postgres_data:
+
+networks:
+  agentplatform-network:
+    driver: bridge 
