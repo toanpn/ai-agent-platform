@@ -125,11 +125,17 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-// Ensure database is created
+// Ensure database is migrated
 using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-    context.Database.EnsureCreated();
+    context.Database.Migrate();
+    
+    // Seed database with initial data in development environment
+    if (app.Environment.IsDevelopment())
+    {
+        await DatabaseSeeder.SeedAsync(context);
+    }
 }
 
 app.Run(); 

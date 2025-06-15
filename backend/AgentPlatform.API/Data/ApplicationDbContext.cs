@@ -41,7 +41,8 @@ namespace AgentPlatform.API.Data
                 entity.Property(e => e.Department).IsRequired().HasMaxLength(100);
                 entity.Property(e => e.Instructions).HasColumnType("nvarchar(max)");
                 entity.Property(e => e.CreatedAt).HasDefaultValueSql("GETDATE()");
-                entity.HasOne(e => e.CreatedBy).WithMany().HasForeignKey(e => e.CreatedById);
+                entity.HasOne(e => e.CreatedBy).WithMany().HasForeignKey(e => e.CreatedById)
+                    .OnDelete(DeleteBehavior.Restrict);
                 entity.HasMany(e => e.Files).WithOne(f => f.Agent).HasForeignKey(f => f.AgentId);
                 entity.HasMany(e => e.Functions).WithOne(f => f.Agent).HasForeignKey(f => f.AgentId);
             });
@@ -74,7 +75,8 @@ namespace AgentPlatform.API.Data
                 entity.Property(e => e.ContentType).HasMaxLength(100);
                 entity.Property(e => e.CreatedAt).HasDefaultValueSql("GETDATE()");
                 entity.HasOne(e => e.Agent).WithMany(a => a.Files).HasForeignKey(e => e.AgentId);
-                entity.HasOne(e => e.UploadedBy).WithMany().HasForeignKey(e => e.UploadedById);
+                entity.HasOne(e => e.UploadedBy).WithMany().HasForeignKey(e => e.UploadedById)
+                    .OnDelete(DeleteBehavior.Restrict);
             });
 
             // AgentFunction entity configuration
