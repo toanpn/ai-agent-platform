@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  agent-platform-core:
+    build: .
+    ports:
+      - "8001:8000"  # Changed port to avoid conflict with .NET API
+    environment:
+      - DATABASE_URL=mssql+pyodbc://sa:YourStrong@Passw0rd@sqlserver:1433/agentplatform?driver=ODBC+Driver+18+for+SQL+Server&TrustServerCertificate=yes
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY}
+      - DEBUG=true
+      - LOG_LEVEL=INFO
+    depends_on:
+      - sqlserver
+    volumes:
+      - ./src:/app/src  # For development hot-reload
+    command: ["python", "-m", "uvicorn", "agent_platform_core.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+    networks:
+      - agent-platform-network
+
+  # SQL Server database (same as used by .NET API)
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=YourStrong@Passw0rd
+      - MSSQL_PID=Developer
+    ports:
+      - "1433:1433"
+    volumes:
+      - sqlserver_data:/var/opt/mssql
+    networks:
+      - agent-platform-network
+
+volumes:
+  sqlserver_data:
+
+networks:
+  agent-platform-network:
+    driver: bridge 

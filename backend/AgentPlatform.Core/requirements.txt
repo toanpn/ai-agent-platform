@@ -1,0 +1,19 @@
+# Core Web Framework
+fastapi>=0.115.0
+uvicorn[standard]>=0.34.0
+pydantic>=2.7.2
+python-dotenv==1.0.0
+
+# Google ADK - Agent Development Kit
+google-adk>=1.0.0
+
+# Database Dependencies (keep existing)
+sqlalchemy==2.0.23
+pyodbc==5.0.1
+aioodbc==0.4.0
+
+# Utility Dependencies
+python-multipart==0.0.6
+httpx>=0.28.1
+beautifulsoup4==4.12.2
+python-dateutil==2.8.2 
