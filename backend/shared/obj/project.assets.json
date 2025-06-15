@@ -1,11 +1,11 @@
 {
   "version": 3,
   "targets": {
-    "net7.0": {}
+    "net8.0": {}
   },
   "libraries": {},
   "projectFileDependencyGroups": {
-    "net7.0": []
+    "net8.0": []
   },
   "packageFolders": {
     "/Users/toanpn/.nuget/packages/": {}
@@ -23,14 +23,14 @@
         "/Users/toanpn/.nuget/NuGet/NuGet.Config"
       ],
       "originalTargetFrameworks": [
-        "net7.0"
+        "net8.0"
       ],
       "sources": {
         "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {
-        "net7.0": {
-          "targetAlias": "net7.0",
+        "net8.0": {
+          "targetAlias": "net8.0",
           "projectReferences": {}
         }
       },
@@ -47,8 +47,8 @@
       "SdkAnalysisLevel": "10.0.100"
     },
     "frameworks": {
-      "net7.0": {
-        "targetAlias": "net7.0",
+      "net8.0": {
+        "targetAlias": "net8.0",
         "imports": [
           "net461",
           "net462",
@@ -63,11 +63,11 @@
         "downloadDependencies": [
           {
             "name": "Microsoft.AspNetCore.App.Ref",
-            "version": "[7.0.20, 7.0.20]"
+            "version": "[8.0.15, 8.0.15]"
           },
           {
             "name": "Microsoft.NETCore.App.Ref",
-            "version": "[7.0.20, 7.0.20]"
+            "version": "[8.0.15, 8.0.15]"
           }
         ],
         "frameworkReferences": {
@@ -75,7 +75,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/10.0.100-preview.4.25258.110/RuntimeIdentifierGraph.json",
+        "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/10.0.100-preview.4.25258.110/PortableRuntimeIdentifierGraph.json",
         "packagesToPrune": {
           "Microsoft.CSharp": "(, 4.7.32767]",
           "Microsoft.NETCore.App": "(, 2.1.32767]",
@@ -237,7 +237,7 @@
           "System.Buffers": "(, 4.5.32767]",
           "System.Collections": "(, 4.3.32767]",
           "System.Collections.Concurrent": "(, 4.3.32767]",
-          "System.Collections.Immutable": "(, 7.0.32767]",
+          "System.Collections.Immutable": "(, 8.0.32767]",
           "System.Collections.NonGeneric": "(, 4.3.32767]",
           "System.Collections.Specialized": "(, 4.3.32767]",
           "System.ComponentModel": "(, 4.3.32767]",
@@ -250,7 +250,7 @@
           "System.Data.DataSetExtensions": "(, 4.5.32767]",
           "System.Diagnostics.Contracts": "(, 4.3.32767]",
           "System.Diagnostics.Debug": "(, 4.3.32767]",
-          "System.Diagnostics.DiagnosticSource": "(, 7.0.32767]",
+          "System.Diagnostics.DiagnosticSource": "(, 8.0.32767]",
           "System.Diagnostics.FileVersionInfo": "(, 4.3.32767]",
           "System.Diagnostics.Process": "(, 4.3.32767]",
           "System.Diagnostics.StackTrace": "(, 4.3.32767]",
@@ -260,7 +260,7 @@
           "System.Diagnostics.Tracing": "(, 4.3.32767]",
           "System.Drawing.Primitives": "(, 4.3.32767]",
           "System.Dynamic.Runtime": "(, 4.3.32767]",
-          "System.Formats.Asn1": "(, 7.0.32767]",
+          "System.Formats.Asn1": "(, 8.0.32767]",
           "System.Globalization": "(, 4.3.32767]",
           "System.Globalization.Calendars": "(, 4.3.32767]",
           "System.Globalization.Extensions": "(, 4.3.32767]",
@@ -283,7 +283,7 @@
           "System.Linq.Queryable": "(, 4.3.32767]",
           "System.Memory": "(, 4.5.32767]",
           "System.Net.Http": "(, 4.3.32767]",
-          "System.Net.Http.Json": "(, 7.0.32767]",
+          "System.Net.Http.Json": "(, 8.0.32767]",
           "System.Net.NameResolution": "(, 4.3.32767]",
           "System.Net.NetworkInformation": "(, 4.3.32767]",
           "System.Net.Ping": "(, 4.3.32767]",
@@ -304,7 +304,7 @@
           "System.Reflection.Emit.ILGeneration": "(, 4.7.32767]",
           "System.Reflection.Emit.Lightweight": "(, 4.7.32767]",
           "System.Reflection.Extensions": "(, 4.3.32767]",
-          "System.Reflection.Metadata": "(, 7.0.32767]",
+          "System.Reflection.Metadata": "(, 8.0.32767]",
           "System.Reflection.Primitives": "(, 4.3.32767]",
           "System.Reflection.TypeExtensions": "(, 4.7.32767]",
           "System.Resources.Reader": "(, 4.3.32767]",
@@ -340,16 +340,16 @@
           "System.Security.Principal.Windows": "(, 5.0.32767]",
           "System.Security.SecureString": "(, 4.3.32767]",
           "System.Text.Encoding": "(, 4.3.32767]",
-          "System.Text.Encoding.CodePages": "(, 7.0.32767]",
+          "System.Text.Encoding.CodePages": "(, 8.0.32767]",
           "System.Text.Encoding.Extensions": "(, 4.3.32767]",
-          "System.Text.Encodings.Web": "(, 7.0.32767]",
-          "System.Text.Json": "(, 7.0.32767]",
+          "System.Text.Encodings.Web": "(, 8.0.32767]",
+          "System.Text.Json": "(, 8.0.32767]",
           "System.Text.RegularExpressions": "(, 4.3.32767]",
           "System.Threading": "(, 4.3.32767]",
-          "System.Threading.Channels": "(, 7.0.32767]",
+          "System.Threading.Channels": "(, 8.0.32767]",
           "System.Threading.Overlapped": "(, 4.3.32767]",
           "System.Threading.Tasks": "(, 4.3.32767]",
-          "System.Threading.Tasks.Dataflow": "(, 7.0.32767]",
+          "System.Threading.Tasks.Dataflow": "(, 8.0.32767]",
           "System.Threading.Tasks.Extensions": "(, 4.5.32767]",
           "System.Threading.Tasks.Parallel": "(, 4.3.32767]",
           "System.Threading.Thread": "(, 4.3.32767]",

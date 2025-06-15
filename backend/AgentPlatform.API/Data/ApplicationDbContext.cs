@@ -30,7 +30,7 @@ namespace AgentPlatform.API.Data
                 entity.Property(e => e.PasswordHash).IsRequired();
                 entity.Property(e => e.FirstName).HasMaxLength(100);
                 entity.Property(e => e.LastName).HasMaxLength(100);
-                entity.Property(e => e.CreatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP");
+                entity.Property(e => e.CreatedAt).HasDefaultValueSql("GETDATE()");
             });
 
             // Agent entity configuration
@@ -39,8 +39,8 @@ namespace AgentPlatform.API.Data
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.Name).IsRequired().HasMaxLength(200);
                 entity.Property(e => e.Department).IsRequired().HasMaxLength(100);
-                entity.Property(e => e.Instructions).HasColumnType("text");
-                entity.Property(e => e.CreatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP");
+                entity.Property(e => e.Instructions).HasColumnType("nvarchar(max)");
+                entity.Property(e => e.CreatedAt).HasDefaultValueSql("GETDATE()");
                 entity.HasOne(e => e.CreatedBy).WithMany().HasForeignKey(e => e.CreatedById);
                 entity.HasMany(e => e.Files).WithOne(f => f.Agent).HasForeignKey(f => f.AgentId);
                 entity.HasMany(e => e.Functions).WithOne(f => f.Agent).HasForeignKey(f => f.AgentId);
@@ -50,7 +50,7 @@ namespace AgentPlatform.API.Data
             modelBuilder.Entity<ChatSession>(entity =>
             {
                 entity.HasKey(e => e.Id);
-                entity.Property(e => e.CreatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP");
+                entity.Property(e => e.CreatedAt).HasDefaultValueSql("GETDATE()");
                 entity.HasOne(e => e.User).WithMany().HasForeignKey(e => e.UserId);
                 entity.HasMany(e => e.Messages).WithOne(m => m.ChatSession).HasForeignKey(m => m.ChatSessionId);
             });
@@ -59,8 +59,8 @@ namespace AgentPlatform.API.Data
             modelBuilder.Entity<ChatMessage>(entity =>
             {
                 entity.HasKey(e => e.Id);
-                entity.Property(e => e.Content).IsRequired().HasColumnType("text");
-                entity.Property(e => e.CreatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP");
+                entity.Property(e => e.Content).IsRequired().HasColumnType("nvarchar(max)");
+                entity.Property(e => e.CreatedAt).HasDefaultValueSql("GETDATE()");
                 entity.Property(e => e.Role).IsRequired().HasMaxLength(50);
                 entity.HasOne(e => e.ChatSession).WithMany(s => s.Messages).HasForeignKey(e => e.ChatSessionId);
             });
@@ -72,7 +72,7 @@ namespace AgentPlatform.API.Data
                 entity.Property(e => e.FileName).IsRequired().HasMaxLength(500);
                 entity.Property(e => e.FilePath).IsRequired().HasMaxLength(1000);
                 entity.Property(e => e.ContentType).HasMaxLength(100);
-                entity.Property(e => e.CreatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP");
+                entity.Property(e => e.CreatedAt).HasDefaultValueSql("GETDATE()");
                 entity.HasOne(e => e.Agent).WithMany(a => a.Files).HasForeignKey(e => e.AgentId);
                 entity.HasOne(e => e.UploadedBy).WithMany().HasForeignKey(e => e.UploadedById);
             });
@@ -82,10 +82,10 @@ namespace AgentPlatform.API.Data
             {
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.Name).IsRequired().HasMaxLength(200);
-                entity.Property(e => e.Description).HasColumnType("text");
-                entity.Property(e => e.Schema).HasColumnType("jsonb");
+                entity.Property(e => e.Description).HasColumnType("nvarchar(max)");
+                entity.Property(e => e.Schema).HasColumnType("nvarchar(max)");
                 entity.Property(e => e.EndpointUrl).HasMaxLength(500);
-                entity.Property(e => e.CreatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP");
+                entity.Property(e => e.CreatedAt).HasDefaultValueSql("GETDATE()");
                 entity.HasOne(e => e.Agent).WithMany(a => a.Functions).HasForeignKey(e => e.AgentId);
             });
         }

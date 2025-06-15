@@ -1,18 +1,17 @@
 version: '3.8'
 
 services:
-  postgres:
-    image: postgres:15
-    container_name: agentplatform-postgres
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: agentplatform-sqlserver
     environment:
-      POSTGRES_DB: agentplatform
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      SA_PASSWORD: "YourStrong@Passw0rd"
+      ACCEPT_EULA: "Y"
+      MSSQL_PID: "Express"
     ports:
-      - "5432:5432"
+      - "1433:1433"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
-      - ./scripts/setup_db.sql:/docker-entrypoint-initdb.d/setup_db.sql
+      - sqlserver_data:/var/opt/mssql
     networks:
       - agentplatform-network
 
@@ -23,12 +22,12 @@ services:
     container_name: agentplatform-api
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - ConnectionStrings__DefaultConnection=Host=postgres;Database=agentplatform;Username=postgres;Password=postgres
+      - ConnectionStrings__DefaultConnection=Server=sqlserver,1433;Database=agentplatform;User Id=sa;Password=YourStrong@Passw0rd;TrustServerCertificate=true;MultipleActiveResultSets=true
       - AgentRuntime__BaseUrl=http://adk-agent:8000
     ports:
       - "5000:80"
     depends_on:
-      - postgres
+      - sqlserver
     volumes:
       - ./uploads:/app/uploads
     networks:
@@ -49,7 +48,7 @@ services:
       - agentplatform-network
 
 volumes:
-  postgres_data:
+  sqlserver_data:
 
 networks:
   agentplatform-network:

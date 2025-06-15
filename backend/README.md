@@ -1,36 +1,79 @@
 # 🤖 AI Agent Platform - Backend
 
-A multi-agent platform with department-specific AI agents that can handle HR, IT support, and general queries through a central router.
+A comprehensive backend system for managing AI agents with secure user authentication, real-time chat capabilities, and flexible agent management.
 
-## 🏗️ Architecture
+## 🏗️ Architecture Overview
 
 ```
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│  AgentPlatform  │    │  AgentRuntime   │    │  ADKAgentCore   │
-│      .API       │───▶│   (.NET 7)      │───▶│   (Python)      │
-│   (.NET 7)      │    │                 │    │                 │
+│   Frontend      │    │   Backend API   │    │   Agent Core    │
+│   (React/Next)  │◄──►│  (.NET 8 API)  │◄──►│   (Python)     │
 └─────────────────┘    └─────────────────┘    └─────────────────┘
-         │                                              │
-         ▼                                              ▼
-┌─────────────────┐                          ┌─────────────────┐
-│   PostgreSQL    │                          │   Router Agent  │
-│    Database     │                          │   HR Bot        │
-│                 │                          │   IT Bot        │
-└─────────────────┘                          └─────────────────┘
+                              │
+                              ▼
+                       ┌─────────────────┐
+                       │   SQL Server    │
+                       │                 │
+                       └─────────────────┘
+                              │
+                              ▼
+                       ┌─────────────────┐
+                       │   Router Agent  │
+                       │   (Main Bot)    │
+                       └─────────────────┘
+                              │
+                   ┌──────────┼──────────┐
+                   ▼          ▼          ▼
+            ┌──────────┐ ┌──────────┐ ┌──────────┐
+            │ HR Bot   │ │ IT Bot   │ │ ... Bot  │
+            └──────────┘ └──────────┘ └──────────┘
 ```
+
+## 🌟 Features
+
+### Core Features
+- **User Management**: Registration, authentication, profile management
+- **Agent Management**: Create, configure, and manage AI agents
+- **Chat System**: Real-time messaging with agents
+- **File Management**: Upload and manage agent knowledge files
+- **Function Integration**: Define custom functions for agents
+- **Department-based Access**: Role-based agent access control
+
+### Technical Features
+- **JWT Authentication**: Secure token-based authentication
+- **Rate Limiting**: API rate limiting for security
+- **File Upload**: Secure file handling with validation
+- **Logging**: Comprehensive logging with Serilog
+- **Docker Support**: Containerized deployment
+- **Auto-migration**: Database schema management
+
+## 🛠️ Tech Stack
+
+| Component | Technology | Purpose |
+|-----------|------------|---------|
+| API Framework | .NET 8 Web API | REST API endpoints |
+| Database | SQL Server | Data persistence |
+| ORM | Entity Framework Core | Database operations |
+| Authentication | JWT Bearer | Secure authentication |
+| Validation | FluentValidation | Input validation |
+| Logging | Serilog | Application logging |
+| Rate Limiting | AspNetCoreRateLimit | API protection |
+| Agent Runtime | Python FastAPI | AI agent execution |
+
+## 📋 Prerequisites
+
+- [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
+- [Docker Desktop](https://www.docker.com/products/docker-desktop)
+- [Python 3.11+](https://www.python.org/downloads/) (for agent development)
 
 ## 🚀 Quick Start
 
-### Prerequisites
-- Docker & Docker Compose
-- .NET 7 SDK (for local development)
-- Python 3.11+ (for local development)
+### Using Docker (Recommended)
 
-### 🐳 Docker Setup (Recommended)
-
-1. **Clone and navigate to backend directory:**
+1. **Clone the repository:**
    ```bash
-   cd backend
+   git clone <repository-url>
+   cd ai-agent-platform/backend
    ```
 
 2. **Start all services:**
@@ -38,89 +81,54 @@ A multi-agent platform with department-specific AI agents that can handle HR, IT
    docker-compose up -d
    ```
 
-3. **Verify services are running:**
-   ```bash
-   docker-compose ps
-   ```
+3. **Access the application:**
+   - API: http://localhost:5000
+   - Swagger UI: http://localhost:5000/swagger
+   - Agent Core: http://localhost:8000
 
-### 🌐 Service Endpoints
+### Services Overview
 
 | Service | URL | Description |
 |---------|-----|-------------|
 | API | http://localhost:5000 | Main REST API |
-| Runtime | http://localhost:5001 | Agent runtime service |
-| ADK Core | http://localhost:8000 | Python agent core |
-| Database | localhost:5432 | PostgreSQL database |
-| Swagger UI | http://localhost:5000/swagger | API documentation |
+| Database | localhost:1433 | SQL Server database |
+| Agent Core | http://localhost:8000 | Python agent runtime |
+| Swagger | http://localhost:5000/swagger | API documentation |
 
-## 📋 API Endpoints
+## 🤖 Agents Overview
 
-### Authentication
-- `POST /api/auth/register` - Register new user
-- `POST /api/auth/login` - Login user
+The system includes several specialized agents:
 
-### Chat
-- `POST /api/chat/message` - Send message to agents
-- `GET /api/chat/history` - Get chat history
-- `GET /api/chat/sessions/{id}` - Get specific chat session
-- `DELETE /api/chat/sessions/{id}` - Delete chat session
+### 🎯 Main Router Agent
+**Purpose**: Central coordinator that routes user queries to appropriate specialized agents
+- Analyzes user intent
+- Routes to HR, IT, or other domain-specific agents
+- Provides general assistance when no specific agent is needed
 
-### Agents
-- `GET /api/agent` - List user's agents
-- `POST /api/agent` - Create new agent
-- `GET /api/agent/{id}` - Get agent details
-- `PUT /api/agent/{id}` - Update agent
-- `DELETE /api/agent/{id}` - Delete agent
-- `POST /api/agent/{id}/functions` - Add function to agent
+### 👥 HR Bot
+**Purpose**: Human Resources support and information
+- Employee handbook queries
+- PTO policies and requests
+- Benefits information
+- Company policies
 
-### Files
-- `POST /api/file/upload/{agentId}` - Upload file to agent
-- `GET /api/file/{id}/download` - Download file
-- `DELETE /api/file/{id}` - Delete file
-- `POST /api/file/{id}/index` - Index file for RAG
+### 🖥️ IT Bot
+**Purpose**: Technical support and IT assistance
+- Password reset procedures
+- Software installation guides
+- Network troubleshooting
+- Equipment requests
 
-## 🤖 Available Agents
+### ➕ Extensible Architecture
+- Easy to add new specialized agents
+- Each agent can have custom knowledge files
+- Configurable routing logic
 
-### 1. Router Agent (Main)
-- **Purpose**: Analyzes user messages and routes to appropriate department
-- **Triggers**: Default for all unspecified requests
-- **Capabilities**: 
-  - Intent detection
-  - Department routing
-  - General assistance
-
-### 2. HR Bot
-- **Department**: Human Resources
-- **Expertise**:
-  - PTO/vacation requests
-  - Benefits information
-  - Payroll questions
-  - Company policies
-  - Employee handbook
-
-### 3. IT Bot
-- **Department**: Information Technology  
-- **Expertise**:
-  - Password resets
-  - Email/Outlook issues
-  - Hardware troubleshooting
-  - Software installation
-  - Network connectivity
-
-## 💬 Example Chat Flow
-
+**Example Interaction:**
 ```
-User: "I need to reset my password"
+User: "How do I request time off?"
 ↓
-Router Agent: Analyzes message → Routes to IT
-↓
-IT Bot: Provides password reset instructions
-```
-
-```
-User: "How many vacation days do I have?"
-↓
-Router Agent: Analyzes message → Routes to HR
+Main Router: Analyzes query → Routes to HR Bot
 ↓
 HR Bot: Provides PTO information and next steps
 ```
@@ -131,7 +139,7 @@ HR Bot: Provides PTO information and next steps
 
 1. **Setup database:**
    ```bash
-   docker-compose up postgres -d
+   docker-compose up sqlserver -d
    ```
 
 2. **Run API locally:**
@@ -173,15 +181,14 @@ HR Bot: Provides PTO information and next steps
 
 ### Database Configuration
 
-The system uses PostgreSQL with Entity Framework Core. Database schema is automatically created on first run.
+The system uses SQL Server with Entity Framework Core. Database schema is automatically created on first run.
 
 **Default Connection:**
 ```
-Host: localhost
+Server: localhost,1433
 Database: agentplatform
-Username: postgres
-Password: postgres
-Port: 5432
+User Id: sa
+Password: YourStrong@Passw0rd
 ```
 
 ## 📁 Project Structure
@@ -202,109 +209,146 @@ backend/
 │   │   └── it_bot.py
 │   └── main.py               # FastAPI application
 ├── shared/                    # Shared models
-└── scripts/                   # Database scripts
+├── scripts/                   # Database scripts
+└── docker-compose.yml        # Container orchestration
 ```
 
-## 🔐 Security Features
+## 🔧 API Endpoints
 
-- JWT authentication
-- Rate limiting
-- CORS configuration
-- Input validation
-- Error handling middleware
-- Secure file upload
+### Authentication
+- `POST /api/auth/login` - User login
+- `POST /api/auth/register` - User registration
 
-## 📈 Monitoring & Logging
+### Users
+- `GET /api/users/profile` - Get user profile
+- `PUT /api/users/profile` - Update profile
 
-- Structured logging with Serilog
-- Health check endpoints
-- Request/response logging
-- Error tracking
+### Agents
+- `GET /api/agents` - List all agents
+- `POST /api/agents` - Create new agent
+- `GET /api/agents/{id}` - Get agent details
+- `PUT /api/agents/{id}` - Update agent
+- `DELETE /api/agents/{id}` - Delete agent
 
-## 🚀 Deployment
+### Chat
+- `GET /api/chat/sessions` - Get chat sessions
+- `POST /api/chat/sessions` - Create chat session
+- `GET /api/chat/sessions/{id}/messages` - Get messages
+- `POST /api/chat/sessions/{id}/messages` - Send message
+
+### Files
+- `POST /api/files/upload` - Upload file
+- `GET /api/files/{id}` - Download file
+- `DELETE /api/files/{id}` - Delete file
+
+## 🗂️ Database Schema
+
+### Core Tables
+- **Users**: User accounts and authentication
+- **Agents**: AI agent configurations
+- **ChatSessions**: Chat conversation sessions
+- **ChatMessages**: Individual chat messages
+- **AgentFiles**: File attachments for agents
+- **AgentFunctions**: Custom functions for agents
+
+### Relationships
+- Users can have multiple ChatSessions
+- Agents can have multiple Files and Functions
+- ChatSessions contain multiple ChatMessages
+
+## 🐳 Docker Deployment
 
 ### Production Deployment
 
-1. **Update configuration:**
-   - Change JWT keys
-   - Update database connections
-   - Configure production URLs
-
-2. **Deploy with Docker:**
+1. **Build and deploy:**
    ```bash
    docker-compose -f docker-compose.prod.yml up -d
    ```
 
-### Scaling Considerations
+2. **Environment variables:**
+   ```env
+   ASPNETCORE_ENVIRONMENT=Production
+   ConnectionStrings__DefaultConnection=<production-connection>
+   Jwt__Key=<secure-jwt-key>
+   ```
 
-- API can be horizontally scaled
-- Database connection pooling configured
-- Stateless agent processing
-- File storage can be moved to cloud storage
+## 🧪 Testing
 
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create feature branch: `git checkout -b feature/amazing-feature`
-3. Commit changes: `git commit -m 'Add amazing feature'`
-4. Push to branch: `git push origin feature/amazing-feature`
-5. Open Pull Request
-
-## 📝 API Testing
-
-### Sample Requests
-
-**Register User:**
+### Unit Tests
 ```bash
-curl -X POST http://localhost:5000/api/auth/register \
-  -H "Content-Type: application/json" \
-  -d '{
-    "email": "user@company.com",
-    "password": "SecurePass123",
-    "firstName": "John",
-    "lastName": "Doe",
-    "department": "Engineering"
-  }'
+dotnet test
 ```
 
-**Send Chat Message:**
+### Integration Tests
 ```bash
-curl -X POST http://localhost:5000/api/chat/message \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
-  -d '{
-    "message": "I need help with my password"
-  }'
+docker-compose -f docker-compose.test.yml up --abort-on-container-exit
 ```
 
-## 🐛 Troubleshooting
+## 🔍 Troubleshooting
 
 ### Common Issues
 
 1. **Database Connection Failed**
-   - Ensure PostgreSQL container is running
-   - Check connection string configuration
+   - Ensure SQL Server container is running
+   - Verify connection string format
+   - Check network connectivity
 
-2. **Agent Not Responding**
-   - Verify Python agent core is running
-   - Check runtime service connectivity
-
-3. **Authentication Errors**
-   - Verify JWT configuration
+2. **JWT Authentication Failed**
+   - Verify JWT key configuration
    - Check token expiration
+   - Ensure correct issuer/audience
 
-### Logs Location
+3. **Agent Core Unreachable**
+   - Verify Python service is running
+   - Check network configuration
+   - Review agent core logs
 
-- API Logs: `./logs/`
-- Container Logs: `docker-compose logs [service-name]`
+### Logs and Monitoring
 
-## 📞 Support
+- **API Logs**: `./logs/log-{date}.txt`
+- **Docker Logs**: `docker-compose logs [service]`
+- **Database Logs**: SQL Server container logs
 
-For technical support or questions:
-- Create an issue in the repository
-- Check existing documentation
-- Review API documentation at `/swagger`
+## 🚀 Production Considerations
+
+### Security
+- Use environment variables for secrets
+- Enable HTTPS in production
+- Configure proper CORS policies
+- Set up proper authentication
+
+### Performance
+- Configure connection pooling
+- Implement caching where appropriate
+- Set up proper indexing
+- Monitor resource usage
+
+### Scalability
+- Consider load balancing
+- Database connection limits
+- Agent runtime scaling
+- File storage considerations
+
+## 📈 Monitoring and Logging
+
+The application uses **Serilog** for structured logging with:
+- Console output for development
+- File-based logging for production
+- Configurable log levels
+- Request/response logging
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Write tests
+5. Submit a pull request
+
+## 📄 License
+
+This project is licensed under the [MIT License](LICENSE).
 
 ---
 
-**Built with ❤️ using .NET 7, FastAPI, and PostgreSQL** 
+**Built with ❤️ using .NET 8, FastAPI, and SQL Server** 

@@ -1,263 +1,219 @@
-# AI Agent Platform
+# 🤖 AI Agent Platform
 
-This repository contains a multi-agent platform with both frontend chatbot UI and backend services for handling AI agent interactions.
+A comprehensive platform for creating, managing, and interacting with specialized AI agents. Built with modern web technologies and a microservices architecture.
 
-## Project Structure
+## 🏗️ Architecture Overview
 
-```
-ai-agent-platform/
-├── chatbot-ui/               # Next.js frontend application
-├── supabase/                 # Supabase configuration files
-└── backend/                  # Backend services (.NET 7 + Python)
-    ├── AgentPlatform.API/    # Main REST API (.NET 7)
-    ├── shared/               # Shared models and utilities
-    ├── ADKAgentCore/         # Python agent core (FastAPI)
-    ├── scripts/              # Database setup scripts
-    ├── ai-agent-platform.sln # Visual Studio solution file
-    └── docker-compose.yml    # Docker orchestration
-```
+This platform consists of multiple specialized AI agents that can handle different domains (HR, IT, General Support) through a central routing system.
 
-## Backend Setup
+### Services Overview
+
+| Service | Port | Technology | Description |
+|---------|------|------------|-------------|
+| Frontend | 3000 | Next.js + React | Modern web interface |
+| Backend API | 5000 | .NET 8 | REST API and business logic |
+| Database | 1433 | SQL Server | Data persistence |
+| Agent Core | 8000 | Python FastAPI | AI agent runtime |
+
+### 🎯 Key Features
+
+- **Multi-Agent System**: Specialized agents for different departments
+- **Intelligent Routing**: Automatic message routing to appropriate agents
+- **Real-time Chat**: WebSocket-based real-time messaging
+- **File Management**: Upload and process documents for agent knowledge
+- **User Management**: Secure authentication and user profiles
+- **Modern UI**: Clean, responsive interface built with React/Next.js
+
+## 🚀 Quick Start
 
 ### Prerequisites
 
-- Docker & Docker Compose
-- .NET 7 SDK (for local development)
-- Python 3.11+ (for local development)
+- [Docker Desktop](https://www.docker.com/products/docker-desktop)
+- [Node.js 18+](https://nodejs.org/) (for frontend development)
+- [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0) (for backend development)
 
-### 🐳 Quick Start with Docker
+### Running with Docker
 
-1. **Navigate to backend directory:**
+1. **Clone the repository:**
    ```bash
-   cd backend
+   git clone <repository-url>
+   cd ai-agent-platform
    ```
 
-2. **Start all services:**
+2. **Start the backend services:**
    ```bash
+   cd backend
    docker-compose up -d
    ```
 
-3. **Verify services are running:**
+3. **Start the frontend:**
    ```bash
-   docker-compose ps
+   cd chatbot-ui
+   npm install
+   npm run dev
    ```
 
-### 🌐 Backend Service Endpoints
+4. **Access the applications:**
+   - Frontend: http://localhost:3000
+   - Backend API: http://localhost:5000
+   - API Documentation: http://localhost:5000/swagger
 
-| Service | URL | Description |
-|---------|-----|-------------|
-| API | http://localhost:5000 | Main REST API |
-| ADK Core | http://localhost:8000 | Python agent core |
-| Database | localhost:5432 | PostgreSQL database |
-| Swagger UI | http://localhost:5000/swagger | API documentation |
+## 🛠️ Technology Stack
 
-### 🛠️ Local Development
+### Frontend
+- **Framework**: Next.js 14 with React 18
+- **Styling**: Tailwind CSS
+- **UI Components**: Radix UI
+- **State Management**: Zustand
+- **Database**: Supabase (PostgreSQL)
+- **Authentication**: Supabase Auth
 
-**Build the solution:**
+### Backend
+- **API**: .NET 8 Web API
+- **Database**: SQL Server with Entity Framework Core
+- **Authentication**: JWT Bearer tokens
+- **Logging**: Serilog
+- **Rate Limiting**: AspNetCoreRateLimit
+- **Agent Runtime**: Python FastAPI
+
+### Infrastructure
+- **Containerization**: Docker & Docker Compose
+- **Database**: SQL Server
+- **File Storage**: Local file system (configurable)
+
+## 🤖 Available Agents
+
+### 🎯 Router Agent (Main)
+- **Purpose**: Analyzes incoming messages and routes to appropriate specialized agents
+- **Capabilities**: Intent detection, department routing, general assistance
+
+### 👥 HR Agent
+- **Department**: Human Resources
+- **Expertise**: PTO requests, benefits, payroll, company policies, employee handbook
+
+### 🖥️ IT Agent  
+- **Department**: Information Technology
+- **Expertise**: Password resets, email issues, hardware troubleshooting, software installation
+
+## 📁 Project Structure
+
+```
+ai-agent-platform/
+├── backend/                    # .NET 8 Backend
+│   ├── AgentPlatform.API/     # Main REST API
+│   ├── ADKAgentCore/          # Python Agent Runtime
+│   ├── shared/                # Shared models
+│   └── docker-compose.yml    # Backend services
+├── chatbot-ui/                # Next.js Frontend
+│   ├── components/            # React components
+│   ├── app/                   # Next.js app directory
+│   ├── lib/                   # Utilities and helpers
+│   └── supabase/             # Database migrations
+└── docs/                      # Documentation
+```
+
+## 🔧 Development
+
+### Backend Development
+
 ```bash
 cd backend
-dotnet build ai-agent-platform.sln
+docker-compose up -d sqlserver  # Start database
+cd AgentPlatform.API
+dotnet run                      # Start API
 ```
 
-**Run API locally:**
-```bash
-cd backend/AgentPlatform.API
-dotnet run
-```
-
-**Run Python Agent Core:**
-```bash
-cd backend/ADKAgentCore
-python -m venv venv
-source venv/bin/activate  # or `venv\Scripts\activate` on Windows
-pip install -r requirements.txt
-python main.py
-```
-
-## Frontend Setup
-
-### Prerequisites
-
-- Node.js (v18 or later recommended)
-- npm or yarn
-- Supabase CLI
-
-### Local Development Setup
-
-#### 1. Set Up Supabase Locally
-
-Install the Supabase CLI:
-
-**MacOS/Linux**
-```bash
-brew install supabase/tap/supabase
-```
-
-**Windows**
-```bash
-scoop bucket add supabase https://github.com/supabase/scoop-bucket.git
-scoop install supabase
-```
-
-Start Supabase:
-```bash
-supabase start
-```
-
-#### 2. Configure Environment Variables
-
-```bash
-cd chatbot-ui
-cp .env.local.example .env.local
-```
-
-Get the required values by running:
-```bash
-supabase status
-```
-
-Fill in the values in your `.env.local` file:
-- Use `API URL` from `supabase status` for `NEXT_PUBLIC_SUPABASE_URL`
-- Use `anon key` for `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-- Use `service_role_key` for appropriate variables
-
-#### 3. Configure SQL Setup
-
-In the migration file `supabase/migrations/20240108234540_setup.sql`, update:
-- `project_url` (line 53): Should be `http://supabase_kong_chatbotui:8000` by default
-- `service_role_key` (line 54): Use the value from `supabase status`
-
-#### 4. Install Dependencies and Run
+### Frontend Development
 
 ```bash
 cd chatbot-ui
 npm install
-npm run chat
+npm run dev
 ```
 
-Your local instance should now be running at [http://localhost:3000](http://localhost:3000).
-
-## Available AI Agents
-
-### 1. Router Agent (Main)
-- **Purpose**: Analyzes user messages and routes to appropriate department
-- **Capabilities**: Intent detection, department routing, general assistance
-
-### 2. HR Bot
-- **Department**: Human Resources
-- **Expertise**: PTO/vacation requests, benefits information, payroll questions, company policies
-
-### 3. IT Bot
-- **Department**: Information Technology  
-- **Expertise**: Password resets, email/Outlook issues, hardware troubleshooting, software installation
-
-## Production Deployment
-
-### Backend Deployment
-
-1. **Update configuration:**
-   - Change JWT keys
-   - Update database connections
-   - Configure production URLs
-
-2. **Deploy with Docker:**
-   ```bash
-   cd backend
-   docker-compose -f docker-compose.prod.yml up -d
-   ```
-
-### Frontend Deployment
-
-#### 1. Create a Supabase Project
-
-Go to [Supabase](https://supabase.com/) and create a new project.
-
-#### 2. Configure Authentication
-
-In the Supabase dashboard:
-- Go to Authentication → Providers
-- Enable Email provider
-- Configure other settings as needed
-
-#### 3. Connect to Hosted Database
-
-Get your project values from the Supabase dashboard:
-- Project URL
-- Project ID
-- Anon key
-- Service role key
-
-Link your project:
-```bash
-supabase login
-supabase link --project-ref <project-id>
-```
-
-Apply migrations:
-```bash
-supabase db push
-```
-
-#### 4. Deploy Frontend
-
-The chatbot-ui is a Next.js application that can be deployed to platforms like Vercel:
+### Agent Development
 
 ```bash
-cd chatbot-ui
-npm run build
+cd backend/ADKAgentCore
+python -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+python main.py
 ```
 
-Follow the deployment instructions for your chosen hosting platform (Vercel, Netlify, etc.).
+## 🌟 Features
 
-## Features
+### For End Users
+- **Multi-Agent Chat**: Seamless conversation with specialized AI agents
+- **Department Routing**: Automatic routing to HR, IT, or general support
+- **File Upload**: Share documents for agent analysis
+- **Chat History**: Access previous conversations
+- **Responsive Design**: Works on desktop and mobile
 
-### Backend Features
-- Multi-agent architecture with department-specific bots
-- JWT authentication and authorization
-- PostgreSQL database with Entity Framework Core
-- RESTful API with OpenAPI/Swagger documentation
-- Docker containerization
-- Rate limiting and security middleware
+### For Administrators
+- **Agent Management**: Create and configure custom agents
+- **User Management**: User registration and authentication
+- **Analytics**: Monitor agent performance and usage
+- **File Management**: Organize and manage agent knowledge files
+
+## 🔐 Security
+
+- JWT-based authentication
+- Rate limiting on API endpoints
+- Input validation and sanitization
+- Secure file upload handling
+- CORS configuration
+- Environment-based configuration
+
+## 📈 Monitoring & Logging
+
 - Structured logging with Serilog
+- Request/response logging
+- Error tracking and reporting
+- Health check endpoints
+- Docker container logging
 
-### Frontend Features
-- Modern chat interface
-- Integration with various AI models
-- User authentication
-- Conversation history storage
-- Customizable UI
+## 🚀 Deployment
 
-## API Testing
+### Production Deployment
 
-### Sample Requests
+1. **Configure environment variables**
+2. **Set up SSL certificates**
+3. **Configure production database**
+4. **Deploy with Docker Compose**
 
-**Register User:**
-```bash
-curl -X POST http://localhost:5000/api/auth/register \
-  -H "Content-Type: application/json" \
-  -d '{
-    "email": "user@company.com",
-    "password": "SecurePass123",
-    "firstName": "John",
-    "lastName": "Doe",
-    "department": "Engineering"
-  }'
+### Environment Variables
+
+```env
+# Backend
+ConnectionStrings__DefaultConnection=<sql-server-connection>
+Jwt__Key=<secure-jwt-key>
+ASPNETCORE_ENVIRONMENT=Production
+
+# Frontend
+NEXT_PUBLIC_API_URL=<backend-api-url>
+NEXT_PUBLIC_SUPABASE_URL=<supabase-url>
+NEXT_PUBLIC_SUPABASE_ANON_KEY=<supabase-key>
 ```
 
-**Send Chat Message:**
-```bash
-curl -X POST http://localhost:5000/api/chat/message \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
-  -d '{
-    "message": "I need help with my password"
-  }'
-```
+## 🤝 Contributing
 
-## Contributing
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+## 📄 License
 
-## License
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-This project is licensed under the terms of the MIT license.
+## 🆘 Support
+
+- 📧 Email: support@agentplatform.com
+- 📖 Documentation: [docs/](./docs/)
+- 🐛 Issues: [GitHub Issues](../../issues)
+
+---
+
+**Built with ❤️ using Next.js, .NET 8, and SQL Server**
