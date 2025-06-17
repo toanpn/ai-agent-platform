@@ -1,0 +1,30 @@
+<div class="p-4">
+  <div class="flex justify-between items-center mb-4">
+    <h1 class="text-2xl font-bold">Agents</h1>
+    <a routerLink="/agents/new" class="px-4 py-2 font-bold text-white bg-blue-500 rounded-lg hover:bg-blue-700">
+      Create Agent
+    </a>
+  </div>
+
+  <table class="min-w-full bg-white">
+    <thead>
+      <tr>
+        <th class="py-2 px-4 border-b">Name</th>
+        <th class="py-2 px-4 border-b">Department</th>
+        <th class="py-2 px-4 border-b">Description</th>
+        <th class="py-2 px-4 border-b">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let agent of agents">
+        <td class="py-2 px-4 border-b">{{ agent.name }}</td>
+        <td class="py-2 px-4 border-b">{{ agent.department }}</td>
+        <td class="py-2 px-4 border-b">{{ agent.description }}</td>
+        <td class="py-2 px-4 border-b">
+          <a [routerLink]="['/agents', agent.id]" class="text-blue-500 hover:underline">View</a>
+          <a [routerLink]="['/agents', agent.id, 'edit']" class="ml-4 text-blue-500 hover:underline">Edit</a>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>

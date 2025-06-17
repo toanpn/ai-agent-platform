@@ -1,11 +1,11 @@
 <div class="mb-4" [ngClass]="{
-  'flex justify-end': message.sender === 'user',
-  'flex justify-start': message.sender === 'assistant'
+  'flex justify-end': message.role === 'user',
+  'flex justify-start': message.role === 'assistant'
 }">
   <div class="rounded-lg px-4 py-2" [ngClass]="{
-    'bg-blue-500 text-white': message.sender === 'user',
-    'bg-gray-300 text-black': message.sender === 'assistant'
+    'bg-blue-500 text-white': message.role === 'user',
+    'bg-gray-300 text-black': message.role === 'assistant'
   }">
-    <p>{{ message.text }}</p>
+    <p>{{ message.content }}</p>
   </div>
 </div>
