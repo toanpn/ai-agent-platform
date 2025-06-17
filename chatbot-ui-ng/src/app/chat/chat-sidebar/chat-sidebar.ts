@@ -1,5 +1,6 @@
-import { Component } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { Component, inject } from '@angular/core';
+import { Router, RouterLink } from '@angular/router';
+import { AuthService } from '../../services/auth';
 
 @Component({
   selector: 'app-chat-sidebar',
@@ -8,5 +9,11 @@ import { RouterLink } from '@angular/router';
   styleUrl: './chat-sidebar.css'
 })
 export class ChatSidebar {
+  authService = inject(AuthService);
+  router = inject(Router);
 
+  logout() {
+    this.authService.logout();
+    this.router.navigate(['/login']);
+  }
 }

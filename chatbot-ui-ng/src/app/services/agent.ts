@@ -2,13 +2,14 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Agent, CreateAgentRequest, UpdateAgentRequest } from '../types/agent';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AgentService {
   private http = inject(HttpClient);
-  private apiUrl = '/api/agent'; // Replace with your actual API URL
+  private apiUrl = `${environment.apiUrl}/agent`;
 
   getAgents(): Observable<Agent[]> {
     return this.http.get<Agent[]>(this.apiUrl);

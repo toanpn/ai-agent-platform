@@ -1,5 +1,6 @@
 import { Component, Input } from '@angular/core';
 import { NgClass } from '@angular/common';
+import { ChatMessage as ChatMessageType } from '../../types/chat';
 
 @Component({
   selector: 'app-chat-message',
@@ -8,5 +9,5 @@ import { NgClass } from '@angular/common';
   styleUrl: './chat-message.css'
 })
 export class ChatMessage {
-  @Input() message: any;
+  @Input() message!: ChatMessageType;
 }

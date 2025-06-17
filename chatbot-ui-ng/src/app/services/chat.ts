@@ -2,13 +2,14 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { SendMessageRequest, ChatResponse, ChatHistory } from '../types/chat';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ChatService {
   private http = inject(HttpClient);
-  private apiUrl = '/api/chat'; // Replace with your actual API URL
+  private apiUrl = `${environment.apiUrl}/chat`;
 
   sendMessage(request: SendMessageRequest): Observable<ChatResponse> {
     return this.http.post<ChatResponse>(`${this.apiUrl}/message`, request);

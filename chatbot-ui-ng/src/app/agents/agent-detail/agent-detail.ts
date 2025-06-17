@@ -25,7 +25,7 @@ export class AgentDetail implements OnInit {
   }
 
   deleteAgent() {
-    if (this.agent) {
+    if (this.agent && confirm('Are you sure you want to delete this agent?')) {
       this.agentService.deleteAgent(this.agent.id).subscribe(() => {
         this.router.navigate(['/agents']);
       });
