@@ -91,7 +91,61 @@ This is the primary interface for the application.
 
 ---
 
-## 3. Component Sourcing
+## 3. Agent Management Views
+
+### 3.1. Agent List View
+
+A view displaying a table of agents with a button to create new ones.
+
+```
++--------------------------------------------------------------------------+
+| Top Bar                                                                  |
++--------------------------------------------------------------------------+
+| Agents                                               [Create Agent]      |
++--------------------------------------------------------------------------+
+|                                                                          |
+|  +--------------------------------------------------------------------+  |
+|  | Name     | Department      | Description                 | Actions |  |
+|  +----------+-----------------+-----------------------------+---------+  |
+|  | Agent 1  | Sales           | Handles sales inquiries.    | [View]  |  |
+|  | Agent 2  | Support         | Assists with support...     | [Edit]  |  |
+|  +--------------------------------------------------------------------+  |
+|                                                                          |
++--------------------------------------------------------------------------+
+```
+- **Components:** `AgentListComponent`.
+
+### 3.2. Agent Form / Detail View
+
+A form for creating or editing an agent's details. The same layout is used to display agent details in a read-only fashion.
+
+```
++--------------------------------------------------------------------------+
+| Top Bar                                                                  |
++--------------------------------------------------------------------------+
+| Create Agent / Edit Agent / Agent Details              [Save] [Delete]   |
++--------------------------------------------------------------------------+
+|                                                                          |
+|  Name                                                                    |
+|  +--------------------------------------------------------------------+  |
+|  | [Agent Name Input]                                                 |  |
+|  +--------------------------------------------------------------------+  |
+|                                                                          |
+|  Department                                                              |
+|  +--------------------------------------------------------------------+  |
+|  | [Department Input]                                                 |  |
+|  +--------------------------------------------------------------------+  |
+|                                                                          |
+|  Description                                                             |
+|  +--------------------------------------------------------------------+  |
+|  | [Description Text Area]                                            |  |
+|  +--------------------------------------------------------------------+  |
+|                                                                          |
++--------------------------------------------------------------------------+
+```
+- **Components:** `AgentFormComponent`, `AgentDetailComponent`.
+
+## 4. Component Sourcing
 
 - All interactive elements like **Buttons**, **Input Fields**, and **Cards** will be implemented using the **Hashbrown** component library.
 - Layout and positioning will be handled using **Tailwind CSS** utility classes. 

@@ -2,7 +2,7 @@
 
 This document outlines missing features from the backend API and potential improvements for the Angular frontend (`chatbot-ui-ng`).
 
-## Backend: Missing Features
+## Backend: Missing Features (To-Do)
 
 Based on the existing controllers and business specifications, here are some key features that appear to be missing from the `AgentPlatform.API`:
 
@@ -20,27 +20,21 @@ Based on the existing controllers and business specifications, here are some key
 
 ---
 
-## Frontend: Potential Improvements
+## Frontend Improvements
 
-The `chatbot-ui-ng` project has a solid foundation, but the following areas can be improved for robustness, security, and user experience.
+### Completed
 
-### 1. Security
+The following improvements have been implemented in the `chatbot-ui-ng` project:
 
-*   **Route Guards:** The `/chat` and `/agents` routes are currently unprotected. An `AuthGuard` should be implemented to prevent unauthenticated users from accessing these routes.
+*   **Security - Route Guards:** An `AuthGuard` has been implemented to prevent unauthenticated users from accessing protected routes.
+*   **Code Quality - Environment Variables:** The API URL has been moved from hardcoded strings in services to Angular's environment configuration files.
+*   **UI/UX - Loading & Error States:** The Agent List now displays loading spinners and user-friendly error messages.
+*   **UI/UX - Confirmation Dialogs:** A confirmation dialog has been added to the delete agent functionality to prevent accidental deletions.
+*   **UI/UX - Empty State Displays:** The Agent List now shows a user-friendly message when no agents are available.
+*   **Code Quality - Stronger Typing:** The `message` property in the `ChatMessageComponent` has been updated from `any` to a specific `ChatMessage` interface.
+
+### To-Do / Potential Future Enhancements
+
 *   **Secure Token Storage:** Storing the JWT in `localStorage` is functional but vulnerable to XSS attacks. A more secure long-term solution would be for the backend to set an `httpOnly` cookie.
-
-### 2. State Management
-
-*   **Centralized Store:** The application could benefit from a centralized state management solution. Using a signal-based store (given the use of Angular and Hashbrown) or a more robust library like NgRx would help manage application-wide state (like user info, chat sessions, etc.) more effectively than individual services.
-
-### 3. UI/UX (User Experience)
-
-*   **Loading Indicators:** The application lacks feedback while data is being fetched. Adding spinners or loading indicators would greatly improve the user experience.
-*   **User-Friendly Error Handling:** API errors are currently logged to the console. A user-facing notification system, such as toast messages, should be implemented to inform users when actions fail.
-*   **Confirmation Dialogs:** Destructive actions like deleting an agent are instantaneous. A confirmation dialog should be added to prevent accidental deletions.
-*   **Empty State Displays:** The UI should gracefully handle cases where there is no data to display (e.g., an empty agent list).
-
-### 4. Code Quality & Best Practices
-
-*   **Environment Variables:** The API URL is currently hardcoded in services. It should be moved to Angular's environment configuration files (`environment.ts` and `environment.prod.ts`).
-*   **Stronger Typing:** Some component properties (e.g., the `message` input in `ChatMessageComponent`) use `any` as a type, which defeats the purpose of TypeScript. These should be replaced with their specific interfaces. 
+*   **Centralized State Management:** The application could benefit from a centralized state management solution like NgRx or a signal-based store to manage application-wide state more effectively.
+*   **Advanced User-Friendly Error Handling:** API errors are currently logged to the console in many places. A global, user-facing notification system, such as toast messages, should be implemented. 
