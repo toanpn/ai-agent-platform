@@ -1,0 +1,11 @@
+<div class="mb-4" [ngClass]="{
+  'flex justify-end': message.sender === 'user',
+  'flex justify-start': message.sender === 'assistant'
+}">
+  <div class="rounded-lg px-4 py-2" [ngClass]="{
+    'bg-blue-500 text-white': message.sender === 'user',
+    'bg-gray-300 text-black': message.sender === 'assistant'
+  }">
+    <p>{{ message.text }}</p>
+  </div>
+</div>
