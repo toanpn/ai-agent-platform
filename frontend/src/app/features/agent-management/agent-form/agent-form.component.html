@@ -1,0 +1,102 @@
+<div class="agent-form-container">
+	<div class="header">
+		<h1>{{ isEditMode ? 'Edit Agent' : 'Create New Agent' }}</h1>
+	</div>
+
+	<div class="loading-indicator" *ngIf="loading">
+		<p>{{ isEditMode ? 'Loading agent details...' : 'Creating agent...' }}</p>
+	</div>
+
+	<div class="error-message" *ngIf="saveError">
+		<p>{{ saveError }}</p>
+	</div>
+
+	<form [formGroup]="agentForm" (ngSubmit)="onSubmit()" *ngIf="!loading || isEditMode">
+		<div class="form-group">
+			<label for="name">Agent Name</label>
+			<input type="text" id="name" formControlName="name" placeholder="Enter agent name" />
+			<div
+				class="validation-error"
+				*ngIf="agentForm.get('name')?.invalid && agentForm.get('name')?.touched"
+			>
+				<p *ngIf="agentForm.get('name')?.errors?.['required']">Name is required</p>
+				<p *ngIf="agentForm.get('name')?.errors?.['minlength']">
+					Name must be at least 3 characters
+				</p>
+				<p *ngIf="agentForm.get('name')?.errors?.['maxlength']">
+					Name cannot exceed 50 characters
+				</p>
+			</div>
+		</div>
+
+		<div class="form-group">
+			<label for="description">Description</label>
+			<textarea
+				id="description"
+				formControlName="description"
+				placeholder="Describe what this agent does"
+				rows="4"
+			></textarea>
+			<div
+				class="validation-error"
+				*ngIf="
+					agentForm.get('description')?.invalid && agentForm.get('description')?.touched
+				"
+			>
+				<p *ngIf="agentForm.get('description')?.errors?.['required']">
+					Description is required
+				</p>
+				<p *ngIf="agentForm.get('description')?.errors?.['minlength']">
+					Description must be at least 10 characters
+				</p>
+				<p *ngIf="agentForm.get('description')?.errors?.['maxlength']">
+					Description cannot exceed 500 characters
+				</p>
+			</div>
+		</div>
+
+		<div class="form-group">
+			<label for="capabilities">Capabilities</label>
+			<input
+				type="text"
+				id="capabilities"
+				formControlName="capabilities"
+				placeholder="Enter capabilities, separated by commas"
+			/>
+			<div class="helper-text">
+				<p>Examples: text-generation, image-generation, search, weather</p>
+			</div>
+		</div>
+
+		<div class="form-group">
+			<label for="configuration">Configuration (JSON)</label>
+			<textarea
+				id="configuration"
+				formControlName="configuration"
+				placeholder="Enter agent configuration in JSON format"
+				rows="8"
+			></textarea>
+			<div
+				class="validation-error"
+				*ngIf="
+					agentForm.get('configuration')?.invalid &&
+					agentForm.get('configuration')?.touched
+				"
+			>
+				<p *ngIf="agentForm.get('configuration')?.errors?.['invalidJson']">
+					Invalid JSON format
+				</p>
+			</div>
+			<div class="helper-text">
+				<p>Enter configuration parameters for the agent in valid JSON format.</p>
+			</div>
+		</div>
+
+		<div class="form-actions">
+			<button type="button" class="cancel-button" (click)="cancel()">Cancel</button>
+			<button type="submit" class="save-button" [disabled]="agentForm.invalid || loading">
+				{{ isEditMode ? 'Save Changes' : 'Create Agent' }}
+			</button>
+		</div>
+	</form>
+</div>

@@ -1,0 +1,69 @@
+<div class="agent-detail-container">
+	<div class="loading-indicator" *ngIf="loading">
+		<p>Loading agent details...</p>
+	</div>
+
+	<div class="error-message" *ngIf="errorMessage">
+		<p>{{ errorMessage }}</p>
+		<button routerLink="/agents">Back to Agents</button>
+	</div>
+
+	<ng-container *ngIf="agent && !loading">
+		<div class="header">
+			<div class="title-section">
+				<h1>{{ agent.name }}</h1>
+				<div class="actions">
+					<button class="edit-button" (click)="editAgent()">Edit</button>
+					<button class="delete-button" (click)="deleteAgent()">Delete</button>
+				</div>
+			</div>
+			<button class="chat-button" (click)="startChat()">
+				<span class="icon">💬</span>
+				Start Chat with this Agent
+			</button>
+		</div>
+
+		<div class="agent-details">
+			<div class="section">
+				<h2>Description</h2>
+				<p>{{ agent.description }}</p>
+			</div>
+
+			<div class="section">
+				<h2>Capabilities</h2>
+				<div class="capabilities-list" *ngIf="agent.capabilities?.length">
+					<span class="capability-tag" *ngFor="let capability of agent.capabilities">
+						{{ capability }}
+					</span>
+				</div>
+				<p *ngIf="!agent.capabilities?.length" class="empty-state">
+					No capabilities specified
+				</p>
+			</div>
+
+			<div class="section">
+				<h2>Configuration</h2>
+				<pre class="configuration-json">{{ agent.configuration | json }}</pre>
+			</div>
+
+			<div class="section meta-info">
+				<div class="meta-item">
+					<span class="label">Created:</span>
+					<span class="value">{{ agent.createdAt | date: 'medium' }}</span>
+				</div>
+				<div class="meta-item">
+					<span class="label">Last Updated:</span>
+					<span class="value">{{ agent.updatedAt | date: 'medium' }}</span>
+				</div>
+			</div>
+		</div>
+
+		<div class="footer-actions">
+			<button class="back-button" routerLink="/agents">Back to Agents</button>
+			<button class="chat-button" (click)="startChat()">
+				<span class="icon">💬</span>
+				Start Chat with this Agent
+			</button>
+		</div>
+	</ng-container>
+</div>

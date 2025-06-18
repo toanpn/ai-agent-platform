@@ -1,0 +1,40 @@
+<div class="app-container">
+	<!-- Top toolbar -->
+	<mat-toolbar color="primary" class="app-toolbar">
+		<button mat-icon-button *ngIf="isLoggedIn" (click)="toggleSidebar()">
+			<mat-icon>menu</mat-icon>
+		</button>
+		<span class="app-title">Chatbot UI</span>
+		<span class="spacer"></span>
+		<button mat-icon-button *ngIf="isLoggedIn" (click)="logout()">
+			<mat-icon>logout</mat-icon>
+		</button>
+	</mat-toolbar>
+
+	<div class="app-content">
+		<!-- Sidebar (only visible when user is logged in) -->
+		<mat-sidenav-container class="sidenav-container">
+			<mat-sidenav
+				#sidenav
+				[mode]="'side'"
+				[opened]="sidebarOpen && isLoggedIn"
+				class="app-sidebar"
+			>
+				<div class="sidebar-header">
+					<h3>{{ user?.username || 'User' }}</h3>
+				</div>
+				<mat-divider></mat-divider>
+				<div class="sidebar-content">
+					<app-chat-sidebar *ngIf="isLoggedIn"></app-chat-sidebar>
+				</div>
+			</mat-sidenav>
+
+			<!-- Main content area -->
+			<mat-sidenav-content>
+				<div class="main-content">
+					<router-outlet></router-outlet>
+				</div>
+			</mat-sidenav-content>
+		</mat-sidenav-container>
+	</div>
+</div>
