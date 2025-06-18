@@ -5,21 +5,21 @@ import { LoginRequest, AuthResponse } from '../types/auth';
 import { environment } from '../../environments/environment';
 
 @Injectable({
-  providedIn: 'root'
+	providedIn: 'root',
 })
 export class AuthService {
-  private http = inject(HttpClient);
-  private apiUrl = `${environment.apiUrl}/auth`;
+	private http = inject(HttpClient);
+	private apiUrl = `${environment.apiUrl}/auth`;
 
-  login(credentials: LoginRequest): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(`${this.apiUrl}/login`, credentials);
-  }
+	login(credentials: LoginRequest): Observable<AuthResponse> {
+		return this.http.post<AuthResponse>(`${this.apiUrl}/login`, credentials);
+	}
 
-  logout() {
-    localStorage.removeItem('authToken');
-  }
+	logout() {
+		localStorage.removeItem('authToken');
+	}
 
-  isAuthenticated(): boolean {
-    return !!localStorage.getItem('authToken');
-  }
+	isAuthenticated(): boolean {
+		return !!localStorage.getItem('authToken');
+	}
 }

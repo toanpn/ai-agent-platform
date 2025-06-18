@@ -1,13 +1,13 @@
 <div class="flex h-screen">
-  <app-chat-sidebar class="w-1/4 h-full"></app-chat-sidebar>
-  <div class="flex flex-col w-3/4 h-full">
-    <div class="flex-grow p-4 overflow-y-auto">
-      <!-- Message Area -->
-      <app-chat-message *ngFor="let message of messages" [message]="message"></app-chat-message>
-    </div>
-    <div class="p-4 border-t">
-      <!-- Input Area -->
-      <app-chat-input (sendMessage)="handleSendMessage($event)"></app-chat-input>
-    </div>
-  </div>
+	<app-chat-sidebar class="w-1/4 h-full"></app-chat-sidebar>
+	<div class="flex flex-col w-3/4 h-full">
+		<div class="flex-grow p-4 overflow-y-auto">
+			<!-- Message Area -->
+			<app-chat-message *ngFor="let message of messages" [message]="message"></app-chat-message>
+		</div>
+		<div class="p-4 border-t">
+			<!-- Input Area -->
+			<app-chat-input (sendMessage)="handleSendMessage($event)"></app-chat-input>
+		</div>
+	</div>
 </div>

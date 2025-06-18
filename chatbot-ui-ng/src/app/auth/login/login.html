@@ -1,32 +1,47 @@
 <div class="flex items-center justify-center h-screen bg-gray-100">
-  <div class="w-full max-w-md p-8 space-y-8 bg-white rounded-lg shadow-md">
-    <div class="text-center">
-      <h2 class="text-2xl font-bold">Company Logo</h2>
-    </div>
-    <form class="space-y-6" [formGroup]="loginForm" (ngSubmit)="onSubmit()">
-      <div>
-        <label for="email" class="sr-only">Email</label>
-        <input id="email" name="email" type="email" autocomplete="email" required formControlName="email"
-          class="relative block w-full px-3 py-2 text-gray-900 placeholder-gray-500 border border-gray-300 rounded-md appearance-none focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-          placeholder="Email address">
-      </div>
-      <div>
-        <label for="password" class="sr-only">Password</label>
-        <input id="password" name="password" type="password" autocomplete="current-password" required formControlName="password"
-          class="relative block w-full px-3 py-2 text-gray-900 placeholder-gray-500 border border-gray-300 rounded-md appearance-none focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-          placeholder="Password">
-      </div>
-      <div>
-        <button type="submit" [disabled]="!loginForm.valid"
-          class="relative flex justify-center w-full px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md group hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:bg-indigo-400">
-          Sign in
-        </button>
-      </div>
-    </form>
-    <div class="text-sm text-center">
-      <a href="#" class="font-medium text-indigo-600 hover:text-indigo-500">
-        Don't have an account? Sign up
-      </a>
-    </div>
-  </div>
+	<div class="w-full max-w-md p-8 space-y-8 bg-white rounded-lg shadow-md">
+		<div class="text-center">
+			<h2 class="text-2xl font-bold">Company Logo</h2>
+		</div>
+		<form class="space-y-6" [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+			<div>
+				<label for="email" class="sr-only">Email</label>
+				<input
+					id="email"
+					name="email"
+					type="email"
+					autocomplete="email"
+					required
+					formControlName="email"
+					class="relative block w-full px-3 py-2 text-gray-900 placeholder-gray-500 border border-gray-300 rounded-md appearance-none focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+					placeholder="Email address"
+				/>
+			</div>
+			<div>
+				<label for="password" class="sr-only">Password</label>
+				<input
+					id="password"
+					name="password"
+					type="password"
+					autocomplete="current-password"
+					required
+					formControlName="password"
+					class="relative block w-full px-3 py-2 text-gray-900 placeholder-gray-500 border border-gray-300 rounded-md appearance-none focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+					placeholder="Password"
+				/>
+			</div>
+			<div>
+				<button
+					type="submit"
+					[disabled]="!loginForm.valid"
+					class="relative flex justify-center w-full px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md group hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:bg-indigo-400"
+				>
+					Sign in
+				</button>
+			</div>
+		</form>
+		<div class="text-sm text-center">
+			<a href="#" class="font-medium text-indigo-600 hover:text-indigo-500"> Don't have an account? Sign up </a>
+		</div>
+	</div>
 </div>
