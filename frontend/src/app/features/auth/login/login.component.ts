@@ -39,6 +39,7 @@ export class LoginComponent implements OnDestroy {
 	/** User credentials from the login form */
 	loginCredentials: LoginRequest = {
 		username: '',
+		email: '',
 		password: '',
 	};
 
@@ -47,6 +48,8 @@ export class LoginComponent implements OnDestroy {
 		username: '',
 		email: '',
 		password: '',
+		firstName: '',
+		lastName: '',
 	};
 
 	/** Error message to display in the UI */
@@ -134,11 +137,20 @@ export class LoginComponent implements OnDestroy {
 	 * @returns true if form is valid, false otherwise
 	 */
 	private validateLoginForm(): boolean {
-		if (!this.loginCredentials.username || !this.loginCredentials.password) {
-			this.loginError = 'Please enter both username and password';
-			this.notificationService.showWarning('Please enter both username and password');
+		if (!this.loginCredentials.username || !this.loginCredentials.email || !this.loginCredentials.password) {
+			this.loginError = 'Please fill out all fields';
+			this.notificationService.showWarning('Please fill out all fields');
 			return false;
 		}
+
+		// Basic email validation
+		const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+		if (!emailPattern.test(this.loginCredentials.email)) {
+			this.loginError = 'Please enter a valid email address';
+			this.notificationService.showWarning('Please enter a valid email address');
+			return false;
+		}
+
 		return true;
 	}
 
@@ -150,7 +162,9 @@ export class LoginComponent implements OnDestroy {
 		if (
 			!this.registerCredentials.username ||
 			!this.registerCredentials.email ||
-			!this.registerCredentials.password
+			!this.registerCredentials.password ||
+			!this.registerCredentials.firstName ||
+			!this.registerCredentials.lastName
 		) {
 			this.registerError = 'Please fill out all fields';
 			this.notificationService.showWarning('Please fill out all fields');

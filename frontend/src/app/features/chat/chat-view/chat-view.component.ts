@@ -9,7 +9,6 @@ import {
 import { CommonModule } from '@angular/common';
 import { ChatInputComponent } from '../components/chat-input/chat-input.component';
 import { ChatMessageComponent } from '../components/chat-message/chat-message.component';
-import { ChatSidebarComponent } from '../components/chat-sidebar/chat-sidebar.component';
 import { ChatService, Message, Conversation } from '../../../core/services/chat.service';
 import { NotificationService } from '../../../core/services/notification.service';
 import { Subscription } from 'rxjs';
@@ -22,7 +21,7 @@ import { Subscription } from 'rxjs';
 @Component({
 	selector: 'app-chat-view',
 	standalone: true,
-	imports: [CommonModule, ChatInputComponent, ChatMessageComponent, ChatSidebarComponent],
+	imports: [CommonModule, ChatInputComponent, ChatMessageComponent],
 	templateUrl: './chat-view.component.html',
 	styleUrls: ['./chat-view.component.scss'],
 })

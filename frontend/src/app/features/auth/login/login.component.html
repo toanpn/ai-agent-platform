@@ -33,6 +33,31 @@
 
 						<div class="form-field">
 							<mat-form-field appearance="outline" class="full-width">
+								<mat-label>Email</mat-label>
+								<input
+									matInput
+									type="email"
+									name="login-email"
+									[(ngModel)]="loginCredentials.email"
+									required
+									placeholder="Enter your email"
+									email
+									#loginEmail="ngModel"
+								/>
+								<mat-icon matPrefix>email</mat-icon>
+								<mat-error *ngIf="loginEmail.invalid && (loginEmail.dirty || loginEmail.touched)">
+									<span *ngIf="loginEmail.errors?.['required']"
+										>Email is required</span
+									>
+									<span *ngIf="loginEmail.errors?.['email']"
+										>Please enter a valid email</span
+									>
+								</mat-error>
+							</mat-form-field>
+						</div>
+
+						<div class="form-field">
+							<mat-form-field appearance="outline" class="full-width">
 								<mat-label>Password</mat-label>
 								<input
 									matInput
@@ -111,6 +136,48 @@
 									"
 								>
 									Username is required
+								</mat-error>
+							</mat-form-field>
+						</div>
+
+						<div class="form-field">
+							<mat-form-field appearance="outline" class="full-width">
+								<mat-label>First Name</mat-label>
+								<input
+									matInput
+									type="text"
+									name="firstName"
+									[(ngModel)]="registerCredentials.firstName"
+									required
+									placeholder="Enter your first name"
+									#firstName="ngModel"
+								/>
+								<mat-icon matPrefix>person_outline</mat-icon>
+								<mat-error
+									*ngIf="firstName.invalid && (firstName.dirty || firstName.touched)"
+								>
+									First name is required
+								</mat-error>
+							</mat-form-field>
+						</div>
+
+						<div class="form-field">
+							<mat-form-field appearance="outline" class="full-width">
+								<mat-label>Last Name</mat-label>
+								<input
+									matInput
+									type="text"
+									name="lastName"
+									[(ngModel)]="registerCredentials.lastName"
+									required
+									placeholder="Enter your last name"
+									#lastName="ngModel"
+								/>
+								<mat-icon matPrefix>person_outline</mat-icon>
+								<mat-error
+									*ngIf="lastName.invalid && (lastName.dirty || lastName.touched)"
+								>
+									Last name is required
 								</mat-error>
 							</mat-form-field>
 						</div>
