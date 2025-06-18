@@ -25,7 +25,8 @@ namespace AgentPlatform.API.Services
                 new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
                 new Claim(ClaimTypes.Email, user.Email),
                 new Claim(ClaimTypes.Name, $"{user.FirstName} {user.LastName}".Trim()),
-                new Claim("department", user.Department ?? "")
+                new Claim("department", user.Department ?? ""),
+                new Claim("security_stamp", user.SecurityStamp.ToString())
             };
 
             var token = new JwtSecurityToken(

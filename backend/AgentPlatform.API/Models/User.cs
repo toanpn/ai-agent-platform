@@ -24,5 +24,7 @@ namespace AgentPlatform.API.Models
         public DateTime CreatedAt { get; set; }
         
         public DateTime? UpdatedAt { get; set; }
+
+        public Guid SecurityStamp { get; set; } = Guid.NewGuid();
     }
 } 

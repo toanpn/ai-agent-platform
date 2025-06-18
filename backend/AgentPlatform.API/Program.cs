@@ -123,6 +123,8 @@ app.UseCors();
 app.UseAuthentication();
 app.UseAuthorization();
 
+app.UseMiddleware<SecurityStampValidatorMiddleware>();
+
 app.MapControllers();
 
 // Ensure database is migrated

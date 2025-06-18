@@ -83,5 +83,15 @@ namespace AgentPlatform.API.Services
             return await _context.Users
                 .FirstOrDefaultAsync(u => u.Email == email && u.IsActive);
         }
+
+        public async Task LogoutAsync(int userId)
+        {
+            var user = await _context.Users.FindAsync(userId);
+            if (user != null)
+            {
+                user.SecurityStamp = Guid.NewGuid();
+                await _context.SaveChangesAsync();
+            }
+        }
     }
 } 

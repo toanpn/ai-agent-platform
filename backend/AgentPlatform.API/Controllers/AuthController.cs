@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using AgentPlatform.API.DTOs;
 using AgentPlatform.API.Services;
+using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 
 namespace AgentPlatform.API.Controllers
 {
@@ -39,6 +41,20 @@ namespace AgentPlatform.API.Controllers
             }
 
             return CreatedAtAction(nameof(Register), response);
+        }
+
+        [Authorize]
+        [HttpPost("logout")]
+        public async Task<IActionResult> Logout()
+        {
+            var userIdStr = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userIdStr) || !int.TryParse(userIdStr, out var userId))
+            {
+                return Unauthorized();
+            }
+
+            await _userService.LogoutAsync(userId);
+            return Ok(new { message = "Logged out successfully" });
         }
     }
 } 

@@ -9,5 +9,6 @@ namespace AgentPlatform.API.Services
         Task<AuthResponseDto?> RegisterAsync(RegisterRequestDto registerRequest);
         Task<User?> GetUserByIdAsync(int userId);
         Task<User?> GetUserByEmailAsync(string email);
+        Task LogoutAsync(int userId);
     }
 } 
