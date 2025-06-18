@@ -1,0 +1,49 @@
+<div class="sidebar-container">
+	<div class="sidebar-header">
+		<div class="user-info" *ngIf="authService.currentUser$ | async as user">
+			<div class="username">{{ user.username }}</div>
+			<div class="email">{{ user.email }}</div>
+		</div>
+		<button mat-raised-button color="primary" (click)="startNewChat()">
+			<mat-icon>add</mat-icon>
+			New Chat
+		</button>
+	</div>
+
+	<mat-divider></mat-divider>
+
+	<div class="conversations-list">
+		<mat-nav-list>
+			<a
+				mat-list-item
+				*ngFor="let conversation of conversations"
+				(click)="selectChat(conversation.id)"
+			>
+				<div class="conversation-item">
+					<mat-icon>chat</mat-icon>
+					<div class="conversation-details">
+						<div class="conversation-title">{{ conversation.title }}</div>
+						<div class="conversation-time">
+							{{ conversation.timestamp | date: 'short' }}
+						</div>
+					</div>
+				</div>
+			</a>
+		</mat-nav-list>
+
+		<div class="empty-state" *ngIf="conversations.length === 0">
+			<p>No previous conversations</p>
+		</div>
+	</div>
+
+	<div class="sidebar-footer">
+		<a mat-button routerLink="/agents">
+			<mat-icon>people</mat-icon>
+			Manage Agents
+		</a>
+		<button mat-button (click)="logout()">
+			<mat-icon>exit_to_app</mat-icon>
+			Logout
+		</button>
+	</div>
+</div>

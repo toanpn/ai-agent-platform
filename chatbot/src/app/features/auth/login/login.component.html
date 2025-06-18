@@ -1,0 +1,211 @@
+<div class="login-container">
+	<mat-card class="login-card">
+		<mat-card-header>
+			<mat-card-title>Welcome to AI Agent Platform</mat-card-title>
+			<mat-card-subtitle>Sign in or create a new account</mat-card-subtitle>
+		</mat-card-header>
+
+		<mat-card-content>
+			<mat-tab-group [(selectedIndex)]="selectedTabIndex">
+				<!-- Login Tab -->
+				<mat-tab label="Login">
+					<form (ngSubmit)="login()" #loginForm="ngForm" class="auth-form">
+						<div class="form-field">
+							<mat-form-field appearance="outline" class="full-width">
+								<mat-label>Username</mat-label>
+								<input
+									matInput
+									type="text"
+									name="username"
+									[(ngModel)]="loginCredentials.username"
+									required
+									placeholder="Enter your username"
+									#username="ngModel"
+								/>
+								<mat-icon matPrefix>person</mat-icon>
+								<mat-error
+									*ngIf="username.invalid && (username.dirty || username.touched)"
+								>
+									Username is required
+								</mat-error>
+							</mat-form-field>
+						</div>
+
+						<div class="form-field">
+							<mat-form-field appearance="outline" class="full-width">
+								<mat-label>Password</mat-label>
+								<input
+									matInput
+									[type]="hidePassword ? 'password' : 'text'"
+									name="password"
+									[(ngModel)]="loginCredentials.password"
+									required
+									placeholder="Enter your password"
+									#password="ngModel"
+								/>
+								<mat-icon matPrefix>lock</mat-icon>
+								<button
+									mat-icon-button
+									matSuffix
+									(click)="hidePassword = !hidePassword"
+									[attr.aria-label]="'Hide password'"
+									[attr.aria-pressed]="hidePassword"
+									type="button"
+								>
+									<mat-icon>{{
+										hidePassword ? 'visibility_off' : 'visibility'
+									}}</mat-icon>
+								</button>
+								<mat-error
+									*ngIf="password.invalid && (password.dirty || password.touched)"
+								>
+									Password is required
+								</mat-error>
+							</mat-form-field>
+						</div>
+
+						<div *ngIf="loginError" class="error-message">
+							<mat-icon>error</mat-icon>
+							<span>{{ loginError }}</span>
+						</div>
+
+						<div class="form-actions">
+							<button
+								mat-raised-button
+								color="primary"
+								type="submit"
+								[disabled]="loginForm.invalid || loading"
+								class="login-button"
+							>
+								<mat-spinner
+									*ngIf="loading"
+									diameter="20"
+									class="spinner"
+								></mat-spinner>
+								<span *ngIf="!loading">Login</span>
+							</button>
+						</div>
+					</form>
+				</mat-tab>
+
+				<!-- Register Tab -->
+				<mat-tab label="Register">
+					<form (ngSubmit)="register()" #registerForm="ngForm" class="auth-form">
+						<div class="form-field">
+							<mat-form-field appearance="outline" class="full-width">
+								<mat-label>Username</mat-label>
+								<input
+									matInput
+									type="text"
+									name="register-username"
+									[(ngModel)]="registerCredentials.username"
+									required
+									placeholder="Choose a username"
+									#registerUsername="ngModel"
+								/>
+								<mat-icon matPrefix>person</mat-icon>
+								<mat-error
+									*ngIf="
+										registerUsername.invalid &&
+										(registerUsername.dirty || registerUsername.touched)
+									"
+								>
+									Username is required
+								</mat-error>
+							</mat-form-field>
+						</div>
+
+						<div class="form-field">
+							<mat-form-field appearance="outline" class="full-width">
+								<mat-label>Email</mat-label>
+								<input
+									matInput
+									type="email"
+									name="email"
+									[(ngModel)]="registerCredentials.email"
+									required
+									placeholder="Enter your email"
+									email
+									#email="ngModel"
+								/>
+								<mat-icon matPrefix>email</mat-icon>
+								<mat-error *ngIf="email.invalid && (email.dirty || email.touched)">
+									<span *ngIf="email.errors?.['required']"
+										>Email is required</span
+									>
+									<span *ngIf="email.errors?.['email']"
+										>Please enter a valid email</span
+									>
+								</mat-error>
+							</mat-form-field>
+						</div>
+
+						<div class="form-field">
+							<mat-form-field appearance="outline" class="full-width">
+								<mat-label>Password</mat-label>
+								<input
+									matInput
+									[type]="hideRegisterPassword ? 'password' : 'text'"
+									name="register-password"
+									[(ngModel)]="registerCredentials.password"
+									required
+									placeholder="Create a password"
+									#registerPassword="ngModel"
+									minlength="6"
+								/>
+								<mat-icon matPrefix>lock</mat-icon>
+								<button
+									mat-icon-button
+									matSuffix
+									(click)="hideRegisterPassword = !hideRegisterPassword"
+									[attr.aria-label]="'Hide password'"
+									[attr.aria-pressed]="hideRegisterPassword"
+									type="button"
+								>
+									<mat-icon>{{
+										hideRegisterPassword ? 'visibility_off' : 'visibility'
+									}}</mat-icon>
+								</button>
+								<mat-error
+									*ngIf="
+										registerPassword.invalid &&
+										(registerPassword.dirty || registerPassword.touched)
+									"
+								>
+									<span *ngIf="registerPassword.errors?.['required']"
+										>Password is required</span
+									>
+									<span *ngIf="registerPassword.errors?.['minlength']"
+										>Password must be at least 6 characters</span
+									>
+								</mat-error>
+							</mat-form-field>
+						</div>
+
+						<div *ngIf="registerError" class="error-message">
+							<mat-icon>error</mat-icon>
+							<span>{{ registerError }}</span>
+						</div>
+
+						<div class="form-actions">
+							<button
+								mat-raised-button
+								color="primary"
+								type="submit"
+								[disabled]="registerForm.invalid || loading"
+								class="register-button"
+							>
+								<mat-spinner
+									*ngIf="loading"
+									diameter="20"
+									class="spinner"
+								></mat-spinner>
+								<span *ngIf="!loading">Register</span>
+							</button>
+						</div>
+					</form>
+				</mat-tab>
+			</mat-tab-group>
+		</mat-card-content>
+	</mat-card>
+</div>

@@ -1,0 +1,54 @@
+.app-container {
+	display: flex;
+	flex-direction: column;
+	height: 100vh;
+	width: 100%;
+}
+
+.app-toolbar {
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	z-index: 2;
+}
+
+.spacer {
+	flex: 1 1 auto;
+}
+
+.app-content {
+	flex: 1;
+	margin-top: 64px; /* Toolbar height */
+	display: flex;
+}
+
+.sidenav-container {
+	flex: 1;
+	height: calc(100vh - 64px);
+}
+
+.app-sidebar {
+	width: 250px;
+	padding: 16px 0;
+}
+
+.sidebar-header {
+	padding: 0 16px 16px;
+	display: flex;
+	align-items: center;
+}
+
+.sidebar-header h3 {
+	margin: 0;
+	font-weight: 500;
+}
+
+.sidebar-content {
+	padding: 16px;
+}
+
+.main-content {
+	padding: 16px;
+	overflow-y: auto;
+}

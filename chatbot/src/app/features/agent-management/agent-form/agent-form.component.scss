@@ -1,0 +1,127 @@
+@use 'sass:color';
+
+.agent-form-container {
+	max-width: 800px;
+	margin: 0 auto;
+	padding: 20px;
+
+	.header {
+		margin-bottom: 30px;
+
+		h1 {
+			font-size: 24px;
+			font-weight: 500;
+			margin: 0;
+		}
+	}
+
+	.loading-indicator {
+		text-align: center;
+		padding: 40px 0;
+		color: #666;
+	}
+
+	.error-message {
+		background-color: #fff3f3;
+		border-left: 4px solid #d32f2f;
+		color: #d32f2f;
+		padding: 12px 16px;
+		margin-bottom: 20px;
+		border-radius: 4px;
+
+		p {
+			margin: 0;
+		}
+	}
+
+	form {
+		.form-group {
+			margin-bottom: 24px;
+
+			label {
+				display: block;
+				font-weight: 500;
+				margin-bottom: 8px;
+			}
+
+			input,
+			textarea {
+				width: 100%;
+				padding: 12px;
+				border: 1px solid #e0e0e0;
+				border-radius: 4px;
+				font-size: 14px;
+				transition: border-color 0.3s;
+
+				&:focus {
+					outline: none;
+					border-color: #4a86e8;
+				}
+			}
+
+			textarea {
+				resize: vertical;
+			}
+
+			.validation-error {
+				color: #d32f2f;
+				font-size: 12px;
+				margin-top: 5px;
+
+				p {
+					margin: 2px 0;
+				}
+			}
+
+			.helper-text {
+				color: #666;
+				font-size: 12px;
+				margin-top: 5px;
+
+				p {
+					margin: 2px 0;
+				}
+			}
+		}
+
+		.form-actions {
+			display: flex;
+			justify-content: flex-end;
+			gap: 16px;
+			margin-top: 40px;
+
+			button {
+				padding: 10px 20px;
+				border-radius: 4px;
+				font-size: 14px;
+				cursor: pointer;
+				transition: background-color 0.3s;
+			}
+
+			.cancel-button {
+				background-color: #f5f5f5;
+				border: 1px solid #e0e0e0;
+				color: #333;
+
+				&:hover {
+					background-color: color.adjust(#f5f5f5, $lightness: -10%);
+				}
+			}
+
+			.save-button {
+				background-color: #4a86e8;
+				border: none;
+				color: white;
+
+				&:hover {
+					background-color: color.adjust(#4a86e8, $lightness: -10%);
+				}
+
+				&:disabled {
+					background-color: #a9c4f1;
+					cursor: not-allowed;
+				}
+			}
+		}
+	}
+}

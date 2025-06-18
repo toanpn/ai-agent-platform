@@ -1,0 +1,49 @@
+<div class="agent-list-container">
+	<div class="header">
+		<h1>Manage Agents</h1>
+		<button class="create-button" routerLink="/agents/new">Create New Agent</button>
+	</div>
+
+	<div class="loading-indicator" *ngIf="loading">
+		<p>Loading agents...</p>
+	</div>
+
+	<div class="empty-state" *ngIf="(agents$ | async)?.length === 0 && !loading">
+		<p>No agents found. Create your first agent to get started!</p>
+		<button routerLink="/agents/new">Create New Agent</button>
+	</div>
+
+	<div class="agent-grid" *ngIf="(agents$ | async)?.length !== 0">
+		<div
+			class="agent-card"
+			*ngFor="let agent of agents$ | async"
+			[routerLink]="['/agents', agent.id]"
+		>
+			<div class="agent-header">
+				<h2>{{ agent.name }}</h2>
+				<div class="actions">
+					<button
+						class="edit-button"
+						[routerLink]="['/agents/edit', agent.id]"
+						(click)="$event.stopPropagation()"
+					>
+						Edit
+					</button>
+					<button class="delete-button" (click)="deleteAgent(agent.id, $event)">
+						Delete
+					</button>
+				</div>
+			</div>
+			<p class="description">{{ agent.description }}</p>
+			<div class="capabilities">
+				<span class="capability-tag" *ngFor="let capability of agent.capabilities">
+					{{ capability }}
+				</span>
+			</div>
+			<div class="metadata">
+				<span class="created-date">Created: {{ agent.createdAt | date: 'short' }}</span>
+				<span class="updated-date">Updated: {{ agent.updatedAt | date: 'short' }}</span>
+			</div>
+		</div>
+	</div>
+</div>
