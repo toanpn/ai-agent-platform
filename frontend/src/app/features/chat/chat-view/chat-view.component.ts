@@ -7,9 +7,9 @@ import {
 	OnDestroy,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ChatInputComponent } from '../../chat/components/chat-input/chat-input.component';
-import { ChatMessageComponent } from '../../chat/components/chat-message/chat-message.component';
-import { ChatSidebarComponent } from '../../chat/components/chat-sidebar/chat-sidebar.component';
+import { ChatInputComponent } from '../components/chat-input/chat-input.component';
+import { ChatMessageComponent } from '../components/chat-message/chat-message.component';
+import { ChatSidebarComponent } from '../components/chat-sidebar/chat-sidebar.component';
 import { ChatService, Message, Conversation } from '../../../core/services/chat.service';
 import { NotificationService } from '../../../core/services/notification.service';
 import { Subscription } from 'rxjs';
