@@ -20,7 +20,7 @@ import { switchMap, of, catchError } from 'rxjs';
 export class AgentFormComponent implements OnInit {
 	agentForm!: FormGroup;
 	isEditMode = false;
-	agentId: string | null = null;
+	agentId: number | null = null;
 	loading = false;
 	saveError = '';
 
@@ -35,49 +35,46 @@ export class AgentFormComponent implements OnInit {
 		this.initForm();
 
 		// Check if we're in edit mode based on the URL
-		this.agentId = this.route.snapshot.paramMap.get('id');
-		this.isEditMode = !!this.agentId;
-
-		if (this.isEditMode && this.agentId) {
-			this.loading = true;
-			this.agentService.getAgent(this.agentId).subscribe({
-				next: (agent) => {
-					this.agentForm.patchValue({
-						name: agent.name,
-						description: agent.description,
-						capabilities: agent.capabilities.join(', '),
-						configuration: JSON.stringify(agent.configuration, null, 2),
-					});
-					this.loading = false;
-				},
-				error: (error) => {
-					console.error('Error loading agent:', error);
-					this.saveError = 'Failed to load agent details. Please try again.';
-					this.loading = false;
-				},
-			});
+		const idParam = this.route.snapshot.paramMap.get('id');
+		if (idParam) {
+			const agentId = parseInt(idParam, 10);
+			if (!isNaN(agentId)) {
+				this.agentId = agentId;
+				this.isEditMode = true;
+				this.loadAgent(agentId);
+			} else {
+				this.saveError = 'Invalid agent ID';
+			}
 		}
+	}
+
+	loadAgent(agentId: number): void {
+		this.loading = true;
+		this.agentService.getAgent(agentId).subscribe({
+			next: (agent) => {
+				this.agentForm.patchValue({
+					name: agent.name,
+					department: agent.department,
+					description: agent.description || '',
+					instructions: agent.instructions || '',
+				});
+				this.loading = false;
+			},
+			error: (error) => {
+				console.error('Error loading agent:', error);
+				this.saveError = 'Failed to load agent details. Please try again.';
+				this.loading = false;
+			},
+		});
 	}
 
 	initForm(): void {
 		this.agentForm = this.fb.group({
 			name: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(50)]],
-			description: [
-				'',
-				[Validators.required, Validators.minLength(10), Validators.maxLength(500)],
-			],
-			capabilities: [''],
-			configuration: ['{}', this.validateJson],
+			department: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(50)]],
+			description: ['', [Validators.maxLength(500)]],
+			instructions: ['', [Validators.maxLength(1000)]],
 		});
-	}
-
-	validateJson(control: any) {
-		try {
-			JSON.parse(control.value);
-			return null;
-		} catch (e) {
-			return { invalidJson: true };
-		}
 	}
 
 	onSubmit(): void {
@@ -90,31 +87,13 @@ export class AgentFormComponent implements OnInit {
 
 		const formValue = this.agentForm.value;
 
-		// Parse capabilities string into array
-		const capabilities = formValue.capabilities
-			? formValue.capabilities
-					.split(',')
-					.map((cap: string) => cap.trim())
-					.filter((cap: string) => cap)
-			: [];
-
-		// Parse configuration JSON
-		let configuration;
-		try {
-			configuration = JSON.parse(formValue.configuration || '{}');
-		} catch (e) {
-			this.saveError = 'Invalid JSON in configuration field';
-			this.loading = false;
-			return;
-		}
-
 		if (this.isEditMode && this.agentId) {
 			// Update existing agent
 			const updateRequest: UpdateAgentRequest = {
 				name: formValue.name,
-				description: formValue.description,
-				capabilities,
-				configuration,
+				department: formValue.department,
+				description: formValue.description || undefined,
+				instructions: formValue.instructions || undefined,
 			};
 
 			this.agentService.updateAgent(this.agentId, updateRequest).subscribe({
@@ -132,9 +111,9 @@ export class AgentFormComponent implements OnInit {
 			// Create new agent
 			const createRequest: CreateAgentRequest = {
 				name: formValue.name,
-				description: formValue.description,
-				capabilities,
-				configuration,
+				department: formValue.department,
+				description: formValue.description || undefined,
+				instructions: formValue.instructions || undefined,
 			};
 
 			this.agentService.createAgent(createRequest).subscribe({

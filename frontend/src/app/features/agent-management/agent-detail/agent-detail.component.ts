@@ -24,16 +24,22 @@ export class AgentDetailComponent implements OnInit {
 	) {}
 
 	ngOnInit(): void {
-		const agentId = this.route.snapshot.paramMap.get('id');
-		if (agentId) {
-			this.loadAgent(agentId);
+		const idParam = this.route.snapshot.paramMap.get('id');
+		if (idParam) {
+			const agentId = parseInt(idParam, 10);
+			if (!isNaN(agentId)) {
+				this.loadAgent(agentId);
+			} else {
+				this.errorMessage = 'Invalid agent ID';
+				this.loading = false;
+			}
 		} else {
 			this.errorMessage = 'Agent ID not provided';
 			this.loading = false;
 		}
 	}
 
-	loadAgent(id: string): void {
+	loadAgent(id: number): void {
 		this.agentService.getAgent(id).subscribe({
 			next: (agent) => {
 				this.agent = agent;
@@ -49,13 +55,7 @@ export class AgentDetailComponent implements OnInit {
 
 	startChat(): void {
 		if (this.agent) {
-			// Set the selected agent in the chat service
-			this.chatService.selectAgent(this.agent.id);
-
-			// Start a new chat
-			this.chatService.startNewChat();
-
-			// Navigate to the chat view
+			this.chatService.selectAgent(this.agent.id.toString());
 			this.router.navigate(['/chat']);
 		}
 	}
@@ -67,20 +67,14 @@ export class AgentDetailComponent implements OnInit {
 	}
 
 	deleteAgent(): void {
-		if (!this.agent) return;
-
-		if (
-			confirm(
-				`Are you sure you want to delete "${this.agent.name}"? This action cannot be undone.`,
-			)
-		) {
+		if (this.agent && confirm('Are you sure you want to delete this agent?')) {
 			this.agentService.deleteAgent(this.agent.id).subscribe({
 				next: () => {
 					this.router.navigate(['/agents']);
 				},
 				error: (error) => {
 					console.error('Error deleting agent:', error);
-					this.errorMessage = 'Failed to delete agent. Please try again.';
+					alert('Failed to delete agent. Please try again.');
 				},
 			});
 		}

@@ -30,7 +30,24 @@
 		</div>
 
 		<div class="form-group">
-			<label for="description">Description</label>
+			<label for="department">Department</label>
+			<input type="text" id="department" formControlName="department" placeholder="Enter department name" />
+			<div
+				class="validation-error"
+				*ngIf="agentForm.get('department')?.invalid && agentForm.get('department')?.touched"
+			>
+				<p *ngIf="agentForm.get('department')?.errors?.['required']">Department is required</p>
+				<p *ngIf="agentForm.get('department')?.errors?.['minlength']">
+					Department must be at least 2 characters
+				</p>
+				<p *ngIf="agentForm.get('department')?.errors?.['maxlength']">
+					Department cannot exceed 50 characters
+				</p>
+			</div>
+		</div>
+
+		<div class="form-group">
+			<label for="description">Description (Optional)</label>
 			<textarea
 				id="description"
 				formControlName="description"
@@ -43,12 +60,6 @@
 					agentForm.get('description')?.invalid && agentForm.get('description')?.touched
 				"
 			>
-				<p *ngIf="agentForm.get('description')?.errors?.['required']">
-					Description is required
-				</p>
-				<p *ngIf="agentForm.get('description')?.errors?.['minlength']">
-					Description must be at least 10 characters
-				</p>
 				<p *ngIf="agentForm.get('description')?.errors?.['maxlength']">
 					Description cannot exceed 500 characters
 				</p>
@@ -56,39 +67,25 @@
 		</div>
 
 		<div class="form-group">
-			<label for="capabilities">Capabilities</label>
-			<input
-				type="text"
-				id="capabilities"
-				formControlName="capabilities"
-				placeholder="Enter capabilities, separated by commas"
-			/>
-			<div class="helper-text">
-				<p>Examples: text-generation, image-generation, search, weather</p>
-			</div>
-		</div>
-
-		<div class="form-group">
-			<label for="configuration">Configuration (JSON)</label>
+			<label for="instructions">Instructions (Optional)</label>
 			<textarea
-				id="configuration"
-				formControlName="configuration"
-				placeholder="Enter agent configuration in JSON format"
-				rows="8"
+				id="instructions"
+				formControlName="instructions"
+				placeholder="Enter specific instructions for the agent"
+				rows="6"
 			></textarea>
 			<div
 				class="validation-error"
 				*ngIf="
-					agentForm.get('configuration')?.invalid &&
-					agentForm.get('configuration')?.touched
+					agentForm.get('instructions')?.invalid && agentForm.get('instructions')?.touched
 				"
 			>
-				<p *ngIf="agentForm.get('configuration')?.errors?.['invalidJson']">
-					Invalid JSON format
+				<p *ngIf="agentForm.get('instructions')?.errors?.['maxlength']">
+					Instructions cannot exceed 1000 characters
 				</p>
 			</div>
 			<div class="helper-text">
-				<p>Enter configuration parameters for the agent in valid JSON format.</p>
+				<p>Provide detailed instructions on how this agent should behave and respond.</p>
 			</div>
 		</div>
 
