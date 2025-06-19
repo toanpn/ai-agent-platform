@@ -2,6 +2,10 @@
 	<div class="header">
 		<h1>Manage Agents</h1>
 		<div class="header-actions">
+			<button class="back-button" (click)="goBackToChat()">
+				<span class="icon">←</span>
+				Back to Chat
+			</button>
 			<button class="refresh-button" (click)="refreshAgents()" [disabled]="loading$ | async">
 				🔄 Refresh
 			</button>

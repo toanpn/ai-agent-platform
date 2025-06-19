@@ -1,7 +1,7 @@
 import { Component, OnInit, DestroyRef, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { AgentService, Agent } from '../../../core/services/agent.service';
 import { BehaviorSubject, Subject, EMPTY, merge } from 'rxjs';
 import { switchMap, tap, catchError, exhaustMap } from 'rxjs/operators';
@@ -20,6 +20,7 @@ interface AgentListAction {
 })
 export class AgentListComponent implements OnInit {
 	private agentService = inject(AgentService);
+	private router = inject(Router);
 	private destroyRef = inject(DestroyRef);
 
 	// Action subjects
@@ -100,6 +101,13 @@ export class AgentListComponent implements OnInit {
 				this.deleteAgentAction$.next(action.payload);
 				break;
 		}
+	}
+
+	/**
+	 * Navigate back to the chat page
+	 */
+	goBackToChat(): void {
+		this.router.navigate(['/chat']);
 	}
 
 	/**
