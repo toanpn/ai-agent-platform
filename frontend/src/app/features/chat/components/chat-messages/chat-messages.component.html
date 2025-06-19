@@ -1,0 +1,8 @@
+<div class="messages-container" #messagesContainer>
+	<div *ngFor="let message of messages">
+		<app-chat-message [message]="message"></app-chat-message>
+	</div>
+	<div *ngIf="isLoading" class="loading-indicator">
+		<p>Assistant is thinking...</p>
+	</div>
+</div> 

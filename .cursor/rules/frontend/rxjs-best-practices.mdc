@@ -1,0 +1,101 @@
+---
+description: RxJS Best Practices
+globs:
+alwaysApply: false
+---
+# RxJS Best Practices
+
+This guide provides best practices for using RxJS in our Angular application to ensure our code is robust, maintainable, and free of memory leaks.
+
+## 1. Subscription Management
+
+**Always clean up subscriptions.** Un-destroyed subscriptions are a common source of memory leaks.
+
+-   **`takeUntil` for Components/Services**: For observables that live as long as a component or service, use the `takeUntil` operator with a `destroy$` subject. The subject should emit in the `ngOnDestroy` lifecycle hook.
+
+    ```typescript
+    private destroy$ = new Subject<void>();
+
+    ngOnInit(): void {
+      this.someObservable$
+        .pipe(takeUntil(this.destroy$))
+        .subscribe(...);
+    }
+
+    ngOnDestroy(): void {
+      this.destroy$.next();
+      this.destroy$.complete();
+    }
+    ```
+
+-   **`async` Pipe in Templates**: The `async` pipe is the safest and easiest way to manage subscriptions. It automatically subscribes and unsubscribes. Prefer it whenever possible.
+
+    ```html
+    <div *ngIf="data$ | async as data">{{ data.name }}</div>
+    ```
+
+-   **`take(1)` or `first()` for Single Emissions**: If you only need the first value from an observable (e.g., an HTTP call), use `take(1)` or `first()`. The observable will automatically complete, so no manual un-subscription is needed.
+
+## 2. Avoid Nested Subscriptions
+
+**Never subscribe within a subscribe.** This is an anti-pattern that leads to "callback hell," makes code hard to read, and complicates error handling and cancellation. Instead, use higher-order mapping operators to chain observables.
+
+-   **`switchMap`**: When you only care about the value from the most recent inner observable. It cancels previous pending inner observables. Ideal for search-as-you-type scenarios.
+-   **`concatMap`**: When you need to process observables sequentially and preserve order. It waits for the previous inner observable to complete before subscribing to the next one. Use for orderly operations like sequential API writes.
+-   **`mergeMap` (or `flatMap`)**: When you need to process observables in parallel and order does not matter. Use for concurrent operations.
+-   **`exhaustMap`**: When you want to ignore new outer emissions while an inner observable is still active. Ideal for preventing multiple submissions, like clicking a login button repeatedly.
+
+**Example Refactor:**
+```typescript
+// ANTI-PATTERN
+this.api.getData(id).subscribe(data => {
+  this.api.getMoreData(data.id).subscribe(moreData => {
+    // ...
+  });
+});
+
+// BEST PRACTICE
+this.api.getData(id).pipe(
+  switchMap(data => this.api.getMoreData(data.id))
+).subscribe(moreData => {
+  // ...
+});
+```
+
+## 3. Use `tap` for Side-Effects Only
+
+The `tap` operator is for performing side-effects that don't modify the value passed through the stream (e.g., logging, updating a variable, debugging).
+
+-   **DO**: `tap(value => console.log(value))`
+-   **DO NOT**: Put asynchronous operations (like another `subscribe` or Promise) inside a `tap`. This breaks the observable chain. Use a higher-order mapping operator instead.
+
+## 4. Handle Errors Gracefully
+
+Use the `catchError` operator within an observable's `pipe` to handle errors. This prevents an error from destroying the outer stream.
+
+```typescript
+this.data$.pipe(
+  switchMap(id => this.api.getData(id).pipe(
+    catchError(error => {
+      console.error(error);
+      this.notificationService.showError('Failed to load data.');
+      return of(null); // Return a new observable to keep the stream alive
+    })
+  ))
+).subscribe();
+```
+
+## 5. State Management with Subjects
+
+-   Use a `BehaviorSubject` when you need to store and multicast the "current value" to new subscribers.
+-   In services, expose subjects as observables (`.asObservable()`) to prevent consumers from directly calling `.next()` on the subject, which would violate encapsulation.
+
+```typescript
+// In service
+private readonly myState = new BehaviorSubject<string>('initial state');
+public readonly myState$ = this.myState.asObservable();
+
+public updateState(newState: string) {
+  this.myState.next(newState);
+}
+```

@@ -30,7 +30,7 @@ export interface ChatRequest {
 	providedIn: 'root',
 })
 export class HashbrownService {
-	private readonly baseUrl = environment.hashbrown?.config?.baseUrl || '/api/hashbrown';
+	private readonly baseUrl = environment.hashbrown?.config?.baseUrl || '/api';
 
 	constructor(private http: HttpClient) {}
 

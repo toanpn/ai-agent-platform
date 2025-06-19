@@ -1,8 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { AgentService, Agent } from '../../../core/services/agent.service';
-import { ChatService } from '../../../core/services/chat.service';
+import { ChatStateService } from '../../chat/chat-state.service';
 
 @Component({
 	selector: 'app-agent-detail',
@@ -16,12 +16,10 @@ export class AgentDetailComponent implements OnInit {
 	loading = true;
 	errorMessage = '';
 
-	constructor(
-		private agentService: AgentService,
-		private chatService: ChatService,
-		private route: ActivatedRoute,
-		private router: Router,
-	) {}
+	private agentService = inject(AgentService);
+	private chatStateService = inject(ChatStateService);
+	private route = inject(ActivatedRoute);
+	private router = inject(Router);
 
 	ngOnInit(): void {
 		const idParam = this.route.snapshot.paramMap.get('id');
@@ -55,7 +53,7 @@ export class AgentDetailComponent implements OnInit {
 
 	startChat(): void {
 		if (this.agent) {
-			this.chatService.selectAgent(this.agent.id.toString());
+			this.chatStateService.selectAgent(this.agent);
 			this.router.navigate(['/chat']);
 		}
 	}

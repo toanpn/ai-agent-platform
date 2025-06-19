@@ -1,0 +1,51 @@
+---
+description: Frontend Architecture Guide
+globs:
+alwaysApply: false
+---
+# Frontend Architecture Guide
+
+This guide outlines the architectural patterns for the frontend application, covering services and components.
+
+## Service Architecture
+
+There are two types of services in this application:
+
+1.  **Stateless Services**: These services act as a direct gateway to the backend API.
+    -   **Responsibility**: To make HTTP requests and return raw data from the server.
+    -   **Characteristics**:
+        -   They are **stateless** and should not hold application state.
+        -   They should **not** use `BehaviorSubject` or any caching mechanisms.
+        -   Methods return "cold" `Observable`s directly from the `ApiService`.
+    -   **Example**: [frontend/src/app/core/services/agent.service.ts](mdc:frontend/src/app/core/services/agent.service.ts)
+
+2.  **Stateful Services (State Services)**: These services manage the state for a specific feature or module.
+    -   **Responsibility**: To hold and manage application state, handle business logic, and interact with stateless services.
+    -   **Characteristics**:
+        -   They use `BehaviorSubject` to store state and expose it as `Observable`s.
+        -   They provide public methods to modify the state.
+        -   Components should interact with state services, not directly with stateless API services.
+        -   Logic should **not** be triggered in the constructor. The service should be initialized by the component that owns it.
+        -   For services provided at the component level, they must implement `OnDestroy`. All internal subscriptions must be cleaned up using a `destroy$` subject and the `takeUntil` operator to prevent memory leaks.
+    -   **Example**: [frontend/src/app/features/chat/chat-state.service.ts](mdc:frontend/src/app/features/chat/chat-state.service.ts)
+
+## Component Architecture
+
+Components are divided into two categories:
+
+1.  **Smart Components (Container Components)**:
+    -   **Responsibility**: To connect the view to the application logic. They orchestrate the flow of data and manage state by interacting with stateful services.
+    -   **Characteristics**:
+        -   Inject stateful services.
+        -   They are responsible for triggering the initial data loading or any other actions in the state service (e.g., in `ngOnInit`).
+        -   Pass data down to dumb components via `@Input` by binding to the state service's `Observable`s.
+        -   Handle events from dumb components via `@Output` and call methods on stateful services.
+    -   **Example**: [frontend/src/app/features/chat/chat-page/chat-page.component.ts](mdc:frontend/src/app/features/chat/chat-page/chat-page.component.ts)
+
+2.  **Dumb Components (Presentational Components)**:
+    -   **Responsibility**: To display data and emit user-initiated events.
+    -   **Characteristics**:
+        -   They are unaware of the application's state or business logic.
+        -   They receive data through `@Input` and communicate with their parent via `@Output` event emitters.
+        -   They do not inject services (except for routing or very specific cases).
+    -   **Example**: [frontend/src/app/features/chat/components/chat-sidebar/chat-sidebar.component.ts](mdc:frontend/src/app/features/chat/components/chat-sidebar/chat-sidebar.component.ts)

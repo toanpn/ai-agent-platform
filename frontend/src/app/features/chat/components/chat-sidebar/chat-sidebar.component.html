@@ -1,13 +1,22 @@
 <div class="sidebar-container">
 	<div class="sidebar-header">
-		<div class="user-info" *ngIf="authService.currentUser$ | async as user">
-			<div class="username">{{ user.username }}</div>
-			<div class="email">{{ user.email }}</div>
-		</div>
-		<button mat-raised-button color="primary" (click)="startNewChat()">
+		<button mat-raised-button color="primary" (click)="onStartNewChat()">
 			<mat-icon>add</mat-icon>
 			New Chat
 		</button>
+	</div>
+
+	<div class="agent-selector">
+		<button mat-button [matMenuTriggerFor]="agentMenu" class="agent-selector-button">
+			<mat-icon>person</mat-icon>
+			<span>{{ selectedAgent?.name || 'Select Agent' }}</span>
+			<mat-icon>expand_more</mat-icon>
+		</button>
+		<mat-menu #agentMenu="matMenu">
+			<button *ngFor="let agent of agents" mat-menu-item (click)="onSelectAgent(agent)">
+				{{ agent.name }}
+			</button>
+		</mat-menu>
 	</div>
 
 	<mat-divider></mat-divider>
@@ -17,7 +26,7 @@
 			<a
 				mat-list-item
 				*ngFor="let conversation of conversations"
-				(click)="selectChat(conversation.id)"
+				(click)="onSelectConversation(conversation)"
 			>
 				<div class="conversation-item">
 					<mat-icon>chat</mat-icon>
@@ -31,19 +40,21 @@
 			</a>
 		</mat-nav-list>
 
-		<div class="empty-state" *ngIf="conversations.length === 0">
+		<div class="empty-state" *ngIf="conversations?.length === 0">
 			<p>No previous conversations</p>
 		</div>
 	</div>
 
 	<div class="sidebar-footer">
-		<a mat-button routerLink="/agents">
-			<mat-icon>people</mat-icon>
-			Manage Agents
-		</a>
-		<button mat-button (click)="logout()">
+		<div class="user-info" *ngIf="authService.currentUser$ | async as user">
+			<mat-icon>account_circle</mat-icon>
+			<div class="user-details">
+				<div class="username">{{ user.username }}</div>
+				<div class="email">{{ user.email }}</div>
+			</div>
+		</div>
+		<button mat-icon-button (click)="logout()" matTooltip="Logout">
 			<mat-icon>exit_to_app</mat-icon>
-			Logout
 		</button>
 	</div>
 </div>

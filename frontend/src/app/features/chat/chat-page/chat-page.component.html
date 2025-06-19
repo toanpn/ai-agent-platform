@@ -1,0 +1,24 @@
+<div class="chat-container">
+	<app-chat-sidebar
+		class="chat-sidebar"
+		[conversations]="chatState.conversations$ | async"
+		(conversationSelected)="onConversationSelected($event)"
+		(startNewChat)="onStartNewChat()"
+		(agentSelected)="onAgentSelected($event)"
+		[agents]="chatState.agents$ | async"
+		[selectedAgent]="chatState.selectedAgent$ | async"
+	></app-chat-sidebar>
+
+	<div class="chat-main">
+		<app-chat-messages
+			class="chat-messages"
+			[messages]="chatState.messages$ | async"
+			[isLoading]="chatState.isLoading$ | async"
+		></app-chat-messages>
+		<app-chat-input
+			class="chat-input"
+			(sendMessage)="onSendMessage($event)"
+			[disabled]="(chatState.isLoading$ | async)!"
+		></app-chat-input>
+	</div>
+</div> 
