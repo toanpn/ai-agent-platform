@@ -10,7 +10,7 @@
 	top: 0;
 	left: 0;
 	right: 0;
-	z-index: 2;
+	z-index: 1000;
 }
 
 .spacer {
@@ -19,8 +19,8 @@
 
 .app-content {
 	flex: 1;
-	margin-top: 64px; /* Toolbar height */
-	display: flex;
+	overflow-y: auto;
+	padding-top: 64px; /* Adjust based on toolbar height */
 }
 
 .sidenav-container {

@@ -1,9 +1,23 @@
-<mat-toolbar color="primary">
-	<span>{{ title }}</span>
-</mat-toolbar>
-
-<div class="main-container">
-	<div class="content">
+<div class="app-container">
+	<mat-toolbar color="primary" class="app-toolbar">
+		<span>{{ title }}</span>
+		<span class="spacer"></span>
+		<button mat-button routerLink="/agents">Agents</button>
+		<button mat-button routerLink="/chat">Chat</button>
+		<button mat-icon-button [matMenuTriggerFor]="menu">
+			<mat-icon>person</mat-icon>
+		</button>
+		<mat-menu #menu="matMenu">
+			<button mat-menu-item>
+				<span>Welcome, {{ (user$ | async)?.email }}</span>
+			</button>
+			<button mat-menu-item (click)="logout()">
+				<mat-icon>exit_to_app</mat-icon>
+				<span>Logout</span>
+			</button>
+		</mat-menu>
+	</mat-toolbar>
+	<div class="app-content">
 		<router-outlet></router-outlet>
 	</div>
 </div>

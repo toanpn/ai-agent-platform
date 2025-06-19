@@ -1,6 +1,6 @@
 :host {
 	display: flex;
-	height: 100vh;
+	height: 100%;
 	overflow: hidden;
 }
 
@@ -18,9 +18,9 @@
 
 .chat-main {
 	flex: 1;
-	display: flex;
-	flex-direction: column;
-	height: 100%;
+	display: grid;
+	grid-template-rows: 1fr auto;
+	overflow: hidden;
 }
 
 .chat-messages {

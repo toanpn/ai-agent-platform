@@ -3,7 +3,17 @@ import { ApiService } from './api.service';
 import { HttpParams } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
 import { NotificationService } from './notification.service';
-import { HashbrownService, StreamResponse } from './hashbrown.service';
+import { HashbrownService } from './hashbrown.service';
+
+/**
+ * Interface for chat stream response
+ */
+export interface StreamResponse {
+	chunk?: string;
+	sessionId?: string;
+	done?: boolean;
+	error?: string;
+}
 
 /**
  * Represents a chat message between the user and assistant
