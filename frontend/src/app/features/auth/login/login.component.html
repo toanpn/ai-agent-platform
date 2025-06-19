@@ -12,27 +12,6 @@
 					<form (ngSubmit)="login()" #loginForm="ngForm" class="auth-form">
 						<div class="form-field">
 							<mat-form-field appearance="outline" class="full-width">
-								<mat-label>Username</mat-label>
-								<input
-									matInput
-									type="text"
-									name="username"
-									[(ngModel)]="loginCredentials.username"
-									required
-									placeholder="Enter your username"
-									#username="ngModel"
-								/>
-								<mat-icon matPrefix>person</mat-icon>
-								<mat-error
-									*ngIf="username.invalid && (username.dirty || username.touched)"
-								>
-									Username is required
-								</mat-error>
-							</mat-form-field>
-						</div>
-
-						<div class="form-field">
-							<mat-form-field appearance="outline" class="full-width">
 								<mat-label>Email</mat-label>
 								<input
 									matInput

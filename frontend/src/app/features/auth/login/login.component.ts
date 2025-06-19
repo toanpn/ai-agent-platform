@@ -38,7 +38,6 @@ import { finalize, Subscription } from 'rxjs';
 export class LoginComponent implements OnDestroy {
 	/** User credentials from the login form */
 	loginCredentials: LoginRequest = {
-		username: '',
 		email: '',
 		password: '',
 	};
@@ -137,7 +136,7 @@ export class LoginComponent implements OnDestroy {
 	 * @returns true if form is valid, false otherwise
 	 */
 	private validateLoginForm(): boolean {
-		if (!this.loginCredentials.username || !this.loginCredentials.email || !this.loginCredentials.password) {
+		if (!this.loginCredentials.email || !this.loginCredentials.password) {
 			this.loginError = 'Please fill out all fields';
 			this.notificationService.showWarning('Please fill out all fields');
 			return false;
