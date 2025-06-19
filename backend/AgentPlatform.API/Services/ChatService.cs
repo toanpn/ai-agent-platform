@@ -26,10 +26,12 @@ namespace AgentPlatform.API.Services
             ChatSession session;
             if (request.SessionId.HasValue)
             {
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
                 session = await _context.ChatSessions
                     .Include(s => s.Messages)
                     .FirstOrDefaultAsync(s => s.Id == request.SessionId.Value && s.UserId == userId);
-                
+#pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
+
                 if (session == null)
                 {
                     throw new KeyNotFoundException("Chat session not found");

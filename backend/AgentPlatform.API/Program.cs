@@ -11,6 +11,7 @@ using FluentValidation;
 using System.Text;
 using Serilog;
 using AspNetCoreRateLimit;
+using Amazon.S3;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -29,6 +30,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
+#pragma warning disable CS8604 // Possible null reference argument.
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuer = true,
@@ -40,6 +42,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             IssuerSigningKey = new SymmetricSecurityKey(
                 Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
         };
+#pragma warning restore CS8604 // Possible null reference argument.
     });
 
 // Add Rate Limiting
@@ -66,6 +69,9 @@ builder.Services.AddScoped<IChatService, ChatService>();
 builder.Services.AddScoped<IAgentService, AgentService>();
 builder.Services.AddScoped<IFileService, FileService>();
 builder.Services.AddScoped<IJwtService, JwtService>();
+builder.Services.AddScoped<IFileStorageService, S3FileStorageService>();
+
+builder.Services.AddAWSService<IAmazonS3>();
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();

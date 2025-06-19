@@ -14,6 +14,8 @@ namespace AgentPlatform.API.Models
         
         [Required]
         public string FileName { get; set; } = string.Empty;
+
+        public Guid FileId { get; set; }
         
         [Required]
         public string FilePath { get; set; } = string.Empty;
