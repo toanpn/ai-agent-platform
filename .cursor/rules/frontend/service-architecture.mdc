@@ -1,0 +1,27 @@
+---
+description: Service Architecture Guide
+globs:
+alwaysApply: false
+---
+# Service Architecture Guide
+
+This guide outlines the architectural patterns for Angular services in this project.
+
+## Service Responsibilities
+
+Services in this application are designed to be lean and stateless. Their primary responsibility is to interact with the backend API.
+
+-   **No Caching**: Services should **not** implement any caching logic. Caching and state management are handled at the component level.
+-   **Direct API Calls**: Each method in a service should correspond to a specific API endpoint and return a "cold" `Observable` directly from the `ApiService`.
+-   **Stateless**: Services should not hold application state. They should not use `BehaviorSubject` or other stateful subjects.
+
+## Example Service
+
+The [frontend/src/app/core/services/agent.service.ts](mdc:frontend/src/app/core/services/agent.service.ts) serves as a blueprint for other services.
+
+Key characteristics:
+
+-   It injects the `ApiService`.
+-   Each method (e.g., `getAgents()`, `deleteAgent(id)`) returns an `Observable` from an `apiService` call.
+-   It does not contain any `tap`, `shareReplay`, or caching operators.
+-   It defines the data interfaces (e.g., `Agent`, `CreateAgentRequest`) related to its domain.

@@ -1,0 +1,53 @@
+---
+description: Component Architecture Guide
+globs:
+alwaysApply: false
+---
+# Component Architecture Guide
+
+This guide outlines the architectural patterns for Angular components in this project.
+
+## State Management and Data Flow
+
+Components should manage their own state using `BehaviorSubject` and `Subject`. We use a subject dispatch pattern to handle user actions and data fetching.
+
+-   **Action Subjects**: For each user action (e.g., load data, delete item), create a `Subject`.
+    -   Example: `private deleteAgentAction$ = new Subject<number>();`
+-   **State Subjects**: Use `BehaviorSubject` to hold the component's state, such as data lists and loading flags.
+    -   Example: `agents$ = new BehaviorSubject<Agent[]>([]);`
+-   **Dispatch Method**: A central `dispatch` method is used to trigger actions.
+-   **Action Handlers**: In `ngOnInit`, set up handlers for each action subject. These handlers contain the logic for API calls and state updates.
+
+See [frontend/src/app/features/agent-management/agent-list/agent-list.component.ts](mdc:frontend/src/app/features/agent-management/agent-list/agent-list.component.ts) for a reference implementation.
+
+## Subscription Management
+
+To prevent memory leaks, all subscriptions must be automatically unsubscribed when the component is destroyed.
+
+-   Use Angular's `DestroyRef` and the `takeUntilDestroyed` operator from `@angular/core/rxjs-interop`.
+-   Inject `DestroyRef`: `private destroyRef = inject(DestroyRef);`
+-   Pipe `takeUntilDestroyed(this.destroyRef)` onto your observable streams before subscribing.
+
+Example from [frontend/src/app/features/agent-management/agent-list/agent-list.component.ts](mdc:frontend/src/app/features/agent-management/agent-list/agent-list.component.ts):
+
+```typescript
+this.agentService
+	.getAgents()
+	.pipe(takeUntilDestroyed(this.destroyRef))
+	.subscribe(...);
+```
+
+## Template Syntax
+
+Use Angular's new built-in control flow syntax in templates.
+
+-   Use `@if` for conditional rendering instead of `*ngIf`.
+-   Use `@for` for loops instead of `*ngFor`. Remember to use `track` for performance.
+-   Use `@let` to create local variables within the template to avoid multiple async pipe evaluations.
+
+Example from [frontend/src/app/features/agent-management/agent-list/agent-list.component.html](mdc:frontend/src/app/features/agent-management/agent-list/agent-list.component.html):
+
+```html
+@let agents = agents$ | async; @if (agents && agents.length > 0) { @for (agent
+of agents; track agent.id) { ... } }
+```
