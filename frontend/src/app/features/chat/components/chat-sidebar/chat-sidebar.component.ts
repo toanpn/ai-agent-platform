@@ -5,7 +5,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatListModule } from '@angular/material/list';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { MatMenuModule } from '@angular/material/menu';
 import { AuthService } from '../../../../core/services/auth.service';
 import { Conversation } from '../../../../core/services/chat.service';
@@ -36,6 +36,7 @@ export class ChatSidebarComponent {
 	@Output() agentSelected = new EventEmitter<Agent>();
 
 	authService = inject(AuthService);
+	private router = inject(Router);
 
 	onSelectConversation(conversation: Conversation): void {
 		this.conversationSelected.emit(conversation);
@@ -51,5 +52,6 @@ export class ChatSidebarComponent {
 
 	logout(): void {
 		this.authService.logout();
+		this.router.navigate(['/auth/login']);
 	}
 }
