@@ -10,7 +10,7 @@ This platform consists of multiple specialized AI agents that can handle differe
 
 | Service | Port | Technology | Description |
 |---------|------|------------|-------------|
-| Frontend | 3000 | Next.js + React | Modern web interface |
+| Frontend | 4200 | Angular + TypeScript | Modern web interface |
 | Backend API | 5000 | .NET 8 | REST API and business logic |
 | Database | 1433 | SQL Server | Data persistence |
 | Agent Core | 8000 | Python FastAPI | AI agent runtime |
@@ -25,7 +25,7 @@ This platform consists of multiple specialized AI agents that can handle differe
 - **Real-time Chat**: WebSocket-based real-time messaging
 - **File Management**: Upload and process documents for agent knowledge
 - **User Management**: Secure authentication and user profiles
-- **Modern UI**: Clean, responsive interface built with React/Next.js
+- **Modern UI**: Clean, responsive interface built with Angular Material
 
 ## 🚀 Quick Start
 
@@ -33,6 +33,7 @@ This platform consists of multiple specialized AI agents that can handle differe
 
 - [Docker Desktop](https://www.docker.com/products/docker-desktop)
 - [Node.js 18+](https://nodejs.org/) (for frontend development)
+- [Angular CLI](https://angular.io/cli) (for Angular development)
 - [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0) (for backend development)
 
 ### Running with Docker
@@ -57,25 +58,26 @@ This platform consists of multiple specialized AI agents that can handle differe
 
 4. **Start the frontend:**
    ```bash
-   cd chatbot-ui
+   cd frontend
    npm install
-   npm run dev
+   ng serve
    ```
 
 5. **Access the applications:**
-   - Frontend: http://localhost:3000
+   - Frontend: http://localhost:4200
    - Backend API: http://localhost:5000
    - API Documentation: http://localhost:5000/swagger
 
 ## 🛠️ Technology Stack
 
 ### Frontend
-- **Framework**: Next.js 14 with React 18
-- **Styling**: Tailwind CSS
-- **UI Components**: Radix UI
-- **State Management**: Zustand
-- **Database**: Supabase (PostgreSQL)
-- **Authentication**: Supabase Auth
+- **Framework**: Angular 20+ with TypeScript
+- **Styling**: SCSS with Angular Material Design
+- **UI Components**: Angular Material 20.0.3
+- **State Management**: RxJS 7.8.0 (built-in with Angular)
+- **HTTP Client**: Angular HttpClient with custom interceptors
+- **Authentication**: JWT Bearer tokens with custom interceptor
+- **AI Integration**: HashbrownAI packages for AI functionality
 
 ### Backend
 - **API**: .NET 8 Web API with Entity Framework Core
@@ -85,6 +87,13 @@ This platform consists of multiple specialized AI agents that can handle differe
 - **Logging**: Serilog
 - **Rate Limiting**: AspNetCoreRateLimit
 - **Agent Runtime**: Python FastAPI with Google ADK integration
+
+### Frontend Development Tools
+- **Build System**: Angular CLI with esbuild
+- **Testing**: Jasmine & Karma
+- **Linting**: ESLint with TypeScript support
+- **Formatting**: Prettier
+- **Type Checking**: TypeScript with strict mode
 
 ### Infrastructure
 - **Containerization**: Docker & Docker Compose
@@ -147,11 +156,14 @@ ai-agent-platform/
 │   ├── ADKAgentCore/          # Python Agent Runtime
 │   ├── shared/                # Shared models
 │   └── docker-compose.yml     # Backend services
-├── chatbot-ui/                # Next.js Frontend
-│   ├── components/            # React components
-│   ├── app/                   # Next.js app directory
-│   ├── lib/                   # Utilities and helpers
-│   └── supabase/             # Database migrations
+├── frontend/                  # Angular Frontend
+│   ├── src/app/               # Angular application
+│   │   ├── features/          # Feature modules (auth, chat, agent-management)
+│   │   ├── core/              # Core services, guards, interceptors
+│   │   └── shared/            # Shared components, models, pipes
+│   ├── angular.json           # Angular CLI configuration
+│   ├── package.json           # NPM dependencies
+│   └── tsconfig.json          # TypeScript configuration
 └── docs/                      # Documentation
 ```
 
@@ -170,9 +182,9 @@ dotnet run                     # Start API
 ### Frontend Development
 
 ```bash
-cd chatbot-ui
+cd frontend
 npm install
-npm run dev
+ng serve
 ```
 
 ### Agent Development
@@ -314,11 +326,6 @@ POST /api/agent
 ConnectionStrings__DefaultConnection=<sql-server-connection>
 Jwt__Key=<secure-jwt-key>
 ASPNETCORE_ENVIRONMENT=Production
-
-# Frontend
-NEXT_PUBLIC_API_URL=<backend-api-url>
-NEXT_PUBLIC_SUPABASE_URL=<supabase-url>
-NEXT_PUBLIC_SUPABASE_ANON_KEY=<supabase-key>
 ```
 
 ### Database Migrations
@@ -355,4 +362,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-**Built with ❤️ using Next.js, .NET 8, SQL Server, and Google ADK**
+**Built with ❤️ using Angular, .NET 8, SQL Server, and Google ADK**

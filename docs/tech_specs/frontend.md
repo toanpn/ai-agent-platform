@@ -16,20 +16,26 @@ This document outlines the technical architecture and development plan for the n
 -   **UI Components:**
     -   **Hashbrown:** The primary component library for UI elements (buttons, inputs, cards, etc.).
     -   **Angular Material:** For more complex components like tables or dialogs if not available in Hashbrown.
--   **Styling:** Tailwind CSS for utility-first styling, with SCSS for component-level style organization.
+-   **Styling:** SCSS with Angular Material Design system for consistent theming and component styling.
 -   **State Management:** Angular Services with RxJS `BehaviorSubject` for reactive state management.
 -   **API Communication:** Angular's `HttpClient` module.
+-   **Testing:** Jasmine and Karma for unit testing.
+-   **Code Quality:** ESLint with TypeScript support and Prettier for code formatting.
 
 ## 3. Proposed Project Structure
 
 The project will be organized into feature modules to ensure a clean and scalable architecture.
 
 ```
-/chatbot
+/frontend
 ├── angular.json
 ├── package.json
-├── tailwind.config.js
 ├── tsconfig.json
+├── tsconfig.app.json
+├── tsconfig.spec.json
+├── .eslintrc.json
+├── .prettierrc
+├── public/
 ├── src/
 │   ├── main.ts
 │   ├── styles.scss
@@ -37,7 +43,9 @@ The project will be organized into feature modules to ensure a clean and scalabl
 │   ├── app/
 │   │   ├── app.config.ts
 │   │   ├── app.routes.ts
-│   │   ├── app.component.ts
+│   │   ├── app.ts (component)
+│   │   ├── app.html
+│   │   ├── app.scss
 │   │   │
 │   │   ├── core/
 │   │   │   ├── guards/
@@ -47,27 +55,37 @@ The project will be organized into feature modules to ensure a clean and scalabl
 │   │   │   └── services/
 │   │   │       ├── api.service.ts
 │   │   │       ├── auth.service.ts
+│   │   │       ├── chat.service.ts
+│   │   │       ├── agent.service.ts
+│   │   │       ├── hashbrown.service.ts
+│   │   │       ├── notification.service.ts
 │   │   │       └── storage.service.ts
 │   │   │
 │   │   ├── features/
 │   │   │   ├── auth/
 │   │   │   │   └── login/
-│   │   │   │       └── login.component.ts
+│   │   │   │       ├── login.component.ts
+│   │   │   │       ├── login.component.html
+│   │   │   │       └── login.component.scss
 │   │   │   ├── chat/
-│   │   │   │   ├── components/
-│   │   │   │   │   ├── chat-input/
-│   │   │   │   │   ├── chat-message/
-│   │   │   │   │   └── chat-sidebar/
-│   │   │   │   └── chat-view/
-│   │   │   │       └── chat-view.component.ts
+│   │   │   │   ├── chat-page/
+│   │   │   │   │   ├── chat-page.component.ts
+│   │   │   │   │   ├── chat-page.component.html
+│   │   │   │   │   └── chat-page.component.scss
+│   │   │   │   ├── chat-state.service.ts
+│   │   │   │   └── components/
+│   │   │   │       ├── chat-input/
+│   │   │   │       ├── chat-message/
+│   │   │   │       ├── chat-messages/
+│   │   │   │       └── chat-sidebar/
 │   │   │   └── agent-management/
 │   │   │       ├── agent-list/
 │   │   │       ├── agent-form/
 │   │   │       └── agent-detail/
 │   │   │
 │   │   └── shared/
-│   │       ├── components/  (e.g., loading spinner, confirm dialog)
-│   │       ├── models/       (TypeScript interfaces for API objects)
+│   │       ├── components/
+│   │       ├── models/
 │   │       └── pipes/
 │   │
 │   └── environments/
@@ -138,11 +156,11 @@ All communication with the backend will be centralized through the `AgentPlatfor
     -   JWT-based authentication flow.
     -   Token stored securely in `localStorage` via a `StorageService`.
     -   `AuthGuard` will protect all feature routes (e.g., `/chat`, `/agents`).
--   **Responsive Design:** Tailwind CSS's responsive breakpoint utilities (`sm:`, `md:`, `lg:`) will be used to ensure the layout adapts correctly to different screen sizes, matching the experience of the `chatbot-ui-ng` implementation.
+-   **Responsive Design:** Angular Flex Layout and Angular Material's responsive utilities will be used to ensure the layout adapts correctly to different screen sizes across desktop and mobile devices.
 -   **Integration of Technologies:**
-    -   **Angular:** Standalone components will be used for better encapsulation.
-    -   **Hashbrown/Angular Material:** Components will be imported into a `SharedModule` and reused throughout the application.
-    -   **Tailwind CSS:** Integrated into the build process via PostCSS as is standard for Angular projects.
-    -   **SCSS:** Will be used for component-specific styles that are more complex than utility classes can handle, scoped to each component.
+    -   **Angular:** Standalone components will be used for better encapsulation and modern Angular patterns.
+    -   **Hashbrown/Angular Material:** HashbrownAI components serve as the primary UI library, with Angular Material providing additional complex components like dialogs and tables.
+    -   **SCSS:** Used for component-specific styling with Angular Material's theming system for consistent design patterns.
+    -   **TypeScript:** Strict mode enabled for enhanced type safety and code quality.
 
 This specification provides a comprehensive blueprint for the development team. It aligns with the business requirements for a simplified, backend-driven application while leveraging a modern and scalable Angular architecture.

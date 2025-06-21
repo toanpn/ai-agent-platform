@@ -2,15 +2,15 @@
 
 ## 1. Overview
 
-This document provides a detailed technical specification for the integration between the `chatbot-ui-ng` (Angular) frontend and the `AgentPlatform.API` backend. It outlines the API endpoints, data models, and communication flows required to connect the two systems. This specification is based on the analysis of `backend_architecture.md`, `angular_chatbot_tech_spec.md`, and the backend source code.
+This document provides a detailed technical specification for the integration between the `frontend` (Angular) application and the `AgentPlatform.API` backend. It outlines the API endpoints, data models, and communication flows required to connect the two systems. This specification is based on the analysis of `backend_architecture.md`, `angular_chatbot_tech_spec.md`, and the backend source code.
 
 ## 2. Target Audience
 
-This document is intended for frontend and backend developers who are responsible for implementing the integration between the `chatbot-ui-ng` and the `AgentPlatform.API`.
+This document is intended for frontend and backend developers who are responsible for implementing the integration between the `frontend` Angular application and the `AgentPlatform.API`.
 
 ## 3. Core Architectural Principles
 
-- **Client-Server Model**: The `chatbot-ui-ng` application acts as the client, making HTTP requests to the `AgentPlatform.API` server.
+- **Client-Server Model**: The `frontend` Angular application acts as the client, making HTTP requests to the `AgentPlatform.API` server.
 - **Stateless Authentication**: Authentication is handled via JSON Web Tokens (JWT), which are sent with each API request.
 - **RESTful API**: The `AgentPlatform.API` exposes a set of RESTful endpoints for resource management.
 
@@ -132,7 +132,7 @@ This document is intended for frontend and backend developers who are responsibl
 
 ## 6. Frontend Implementation Guide
 
-This section provides guidance on where and how the API calls should be implemented within the `chatbot-ui-ng` Angular application, based on its existing architecture.
+This section provides guidance on where and how the API calls should be implemented within the `frontend` Angular application, based on its existing architecture.
 
 ### 6.1. Authentication (`/api/auth`)
 
