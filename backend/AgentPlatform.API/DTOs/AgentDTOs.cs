@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace AgentPlatform.API.DTOs
 {
@@ -13,6 +14,10 @@ namespace AgentPlatform.API.DTOs
         public string? Description { get; set; }
         
         public string? Instructions { get; set; }
+        
+        public string[]? Tools { get; set; }
+        
+        public LlmConfigDto? LlmConfig { get; set; }
     }
 
     public class UpdateAgentRequestDto
@@ -25,6 +30,10 @@ namespace AgentPlatform.API.DTOs
         
         public string? Instructions { get; set; }
         
+        public string[]? Tools { get; set; }
+        
+        public LlmConfigDto? LlmConfig { get; set; }
+        
         public bool? IsActive { get; set; }
     }
 
@@ -35,6 +44,8 @@ namespace AgentPlatform.API.DTOs
         public string Department { get; set; } = string.Empty;
         public string? Description { get; set; }
         public string? Instructions { get; set; }
+        public string[]? Tools { get; set; }
+        public LlmConfigDto? LlmConfig { get; set; }
         public bool IsActive { get; set; }
         public bool IsMainRouter { get; set; }
         public UserDto CreatedBy { get; set; } = null!;
@@ -42,6 +53,31 @@ namespace AgentPlatform.API.DTOs
         public DateTime? UpdatedAt { get; set; }
         public List<AgentFileDto> Files { get; set; } = new();
         public List<AgentFunctionDto> Functions { get; set; } = new();
+    }
+
+    public class LlmConfigDto
+    {
+        [JsonPropertyName("model_name")]
+        public string? ModelName { get; set; }
+        
+        [JsonPropertyName("temperature")]
+        public double? Temperature { get; set; }
+    }
+
+    // Agent JSON representation for agents.json file synchronization
+    public class AgentJsonDto
+    {
+        [JsonPropertyName("agent_name")]
+        public string AgentName { get; set; } = string.Empty;
+        
+        [JsonPropertyName("description")]
+        public string? Description { get; set; }
+        
+        [JsonPropertyName("tools")]
+        public string[]? Tools { get; set; }
+        
+        [JsonPropertyName("llm_config")]
+        public LlmConfigDto? LlmConfig { get; set; }
     }
 
     public class AgentFileDto

@@ -90,6 +90,13 @@ namespace AgentPlatform.API.Controllers
             return Ok();
         }
 
+        [HttpPost("sync-json")]
+        public async Task<ActionResult> SyncAgentsJson()
+        {
+            await _agentService.SyncAgentsJsonAsync();
+            return Ok(new { message = "Agents JSON synchronized successfully" });
+        }
+
         private int GetUserId()
         {
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);

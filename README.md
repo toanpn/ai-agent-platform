@@ -1,10 +1,10 @@
 # 🤖 AI Agent Platform
 
-A comprehensive platform for creating, managing, and interacting with specialized AI agents. Built with modern web technologies and a microservices architecture.
+A comprehensive platform for creating, managing, and interacting with specialized AI agents. Built with modern web technologies and a microservices architecture with intelligent agent routing and JSON-based configuration.
 
 ## 🏗️ Architecture Overview
 
-This platform consists of multiple specialized AI agents that can handle different domains (HR, IT, General Support) through a central routing system.
+This platform consists of multiple specialized AI agents that can handle different domains (HR, IT, General Support, Search, Personal Assistant) through a central routing system with automatic JSON synchronization.
 
 ### Services Overview
 
@@ -17,8 +17,11 @@ This platform consists of multiple specialized AI agents that can handle differe
 
 ### 🎯 Key Features
 
-- **Multi-Agent System**: Specialized agents for different departments
+- **Multi-Agent System**: Specialized agents for different departments with tool integration
 - **Intelligent Routing**: Automatic message routing to appropriate agents
+- **Agent-Database Sync**: Bidirectional synchronization between database and `agents.json`
+- **Tool Integration**: Each agent can have multiple tools (Jira, Google Search, Calendar, etc.)
+- **LLM Configuration**: Configurable model and temperature per agent
 - **Real-time Chat**: WebSocket-based real-time messaging
 - **File Management**: Upload and process documents for agent knowledge
 - **User Management**: Secure authentication and user profiles
@@ -46,14 +49,20 @@ This platform consists of multiple specialized AI agents that can handle differe
    docker-compose up -d
    ```
 
-3. **Start the frontend:**
+3. **Apply database migrations:**
+   ```bash
+   cd AgentPlatform.API
+   dotnet ef database update
+   ```
+
+4. **Start the frontend:**
    ```bash
    cd chatbot-ui
    npm install
    npm run dev
    ```
 
-4. **Access the applications:**
+5. **Access the applications:**
    - Frontend: http://localhost:3000
    - Backend API: http://localhost:5000
    - API Documentation: http://localhost:5000/swagger
@@ -69,31 +78,57 @@ This platform consists of multiple specialized AI agents that can handle differe
 - **Authentication**: Supabase Auth
 
 ### Backend
-- **API**: .NET 8 Web API
-- **Database**: SQL Server with Entity Framework Core
+- **API**: .NET 8 Web API with Entity Framework Core
+- **Database**: SQL Server with automatic migrations
 - **Authentication**: JWT Bearer tokens
+- **Agent Configuration**: JSON-based with database synchronization
 - **Logging**: Serilog
 - **Rate Limiting**: AspNetCoreRateLimit
-- **Agent Runtime**: Python FastAPI
+- **Agent Runtime**: Python FastAPI with Google ADK integration
 
 ### Infrastructure
 - **Containerization**: Docker & Docker Compose
 - **Database**: SQL Server
 - **File Storage**: Local file system (configurable)
+- **Configuration**: Environment-based with JSON sync
 
 ## 🤖 Available Agents
 
-### 🎯 Router Agent (Main)
-- **Purpose**: Analyzes incoming messages and routes to appropriate specialized agents
-- **Capabilities**: Intent detection, department routing, general assistance
+### 🎯 General Utility Agent (Main Router)
+- **Department**: General
+- **Tools**: `google_search`, `check_calendar`, `check_weather`
+- **LLM Config**: Gemini 2.0 Flash (temp: 0.4)
+- **Purpose**: Versatile fallback agent for various utility tasks
+
+### 🛠️ IT Support Agent
+- **Department**: IT
+- **Tools**: `jira_ticket_creator`, `it_knowledge_base_search`
+- **LLM Config**: Gemini 2.0 Flash (temp: 0.0)
+- **Expertise**: Technical support, troubleshooting, Jira ticket management
 
 ### 👥 HR Agent
-- **Department**: Human Resources
-- **Expertise**: PTO requests, benefits, payroll, company policies, employee handbook
+- **Department**: HR
+- **Tools**: `policy_document_search`, `leave_request_tool`
+- **LLM Config**: Gemini 2.0 Flash (temp: 0.7)
+- **Expertise**: HR policies, leave procedures, recruitment information
 
-### 🖥️ IT Agent  
-- **Department**: Information Technology
-- **Expertise**: Password resets, email issues, hardware troubleshooting, software installation
+### 🔍 Search Agent
+- **Department**: General
+- **Tools**: `google_search`
+- **LLM Config**: Gemini 2.0 Flash (temp: 0.5)
+- **Purpose**: Internet search for current information, news, guides
+
+### 📅 Personal Assistant Agent
+- **Department**: General
+- **Tools**: `check_calendar`, `check_weather`
+- **LLM Config**: Gemini 2.0 Flash (temp: 0.3)
+- **Purpose**: Calendar management, weather updates, daily planning
+
+### 🚀 ADK Assistant (Advanced)
+- **Department**: AI Research
+- **Tools**: `adk_search`, `adk_http_request`, `adk_workflow`
+- **LLM Config**: Gemini 2.0 Flash (temp: 0.2)
+- **Purpose**: Advanced AI operations with Google ADK integration
 
 ## 📁 Project Structure
 
@@ -101,9 +136,17 @@ This platform consists of multiple specialized AI agents that can handle differe
 ai-agent-platform/
 ├── backend/                    # .NET 8 Backend
 │   ├── AgentPlatform.API/     # Main REST API
+│   │   ├── Models/            # Entity models with Tools & LLM config
+│   │   ├── DTOs/              # Data transfer objects
+│   │   ├── Services/          # Business logic with JSON sync
+│   │   ├── Controllers/       # API endpoints
+│   │   ├── Data/              # Database context & seeding
+│   │   └── Migrations/        # EF Core migrations
+│   ├── AgentPlatform.Core/    # Agent configuration
+│   │   └── agents.json        # Agent definitions (auto-synced)
 │   ├── ADKAgentCore/          # Python Agent Runtime
 │   ├── shared/                # Shared models
-│   └── docker-compose.yml    # Backend services
+│   └── docker-compose.yml     # Backend services
 ├── chatbot-ui/                # Next.js Frontend
 │   ├── components/            # React components
 │   ├── app/                   # Next.js app directory
@@ -120,7 +163,8 @@ ai-agent-platform/
 cd backend
 docker-compose up -d sqlserver  # Start database
 cd AgentPlatform.API
-dotnet run                      # Start API
+dotnet ef database update      # Apply migrations
+dotnet run                     # Start API
 ```
 
 ### Frontend Development
@@ -141,17 +185,94 @@ pip install -r requirements.txt
 python main.py
 ```
 
+## 🔄 Agent Configuration & Synchronization
+
+### Agent Schema
+Each agent has the following configuration:
+```json
+{
+  "agent_name": "IT_Support_Agent",
+  "description": "Handles technical support requests...",
+  "tools": ["jira_ticket_creator", "it_knowledge_base_search"],
+  "llm_config": {
+    "model_name": "gemini-2.0-flash",
+    "temperature": 0.0
+  }
+}
+```
+
+### Database Schema
+```sql
+-- Agent table includes:
+- Tools (pipe-separated: "tool1|tool2|tool3")
+- LlmModelName (string)
+- LlmTemperature (double)
+```
+
+### Automatic Synchronization
+- **Database → JSON**: Changes via API automatically update `agents.json`
+- **Consistency**: Database and JSON file stay synchronized
+- **Manual Sync**: `POST /api/agent/sync-json` endpoint available
+
+## 🌟 API Endpoints
+
+### Agent Management
+- `GET /api/agent` - List all agents
+- `GET /api/agent/{id}` - Get specific agent
+- `POST /api/agent` - Create new agent
+- `PUT /api/agent/{id}` - Update agent
+- `DELETE /api/agent/{id}` - Delete agent (soft delete)
+- `POST /api/agent/{id}/functions` - Add function to agent
+- `POST /api/agent/sync-json` - Manual JSON synchronization
+
+### Request/Response Examples
+
+#### Create Agent
+```json
+POST /api/agent
+{
+  "name": "Custom_Agent",
+  "department": "Sales",
+  "description": "Sales support agent",
+  "tools": ["crm_search", "lead_tracker"],
+  "llmConfig": {
+    "modelName": "gemini-2.0-flash",
+    "temperature": 0.3
+  }
+}
+```
+
+#### Response
+```json
+{
+  "id": 7,
+  "name": "Custom_Agent",
+  "department": "Sales",
+  "tools": ["crm_search", "lead_tracker"],
+  "llmConfig": {
+    "modelName": "gemini-2.0-flash",
+    "temperature": 0.3
+  },
+  "isActive": true,
+  "createdAt": "2024-12-21T10:30:00Z"
+}
+```
+
 ## 🌟 Features
 
 ### For End Users
 - **Multi-Agent Chat**: Seamless conversation with specialized AI agents
-- **Department Routing**: Automatic routing to HR, IT, or general support
+- **Smart Routing**: Automatic routing based on agent capabilities
+- **Tool Integration**: Agents can use external tools (Jira, Google, Calendar)
 - **File Upload**: Share documents for agent analysis
 - **Chat History**: Access previous conversations
 - **Responsive Design**: Works on desktop and mobile
 
 ### For Administrators
-- **Agent Management**: Create and configure custom agents
+- **Agent Management**: Create and configure custom agents with tools
+- **JSON Synchronization**: Automatic sync between database and configuration files
+- **LLM Configuration**: Set model and temperature per agent
+- **Tool Assignment**: Assign specific tools to each agent
 - **User Management**: User registration and authentication
 - **Analytics**: Monitor agent performance and usage
 - **File Management**: Organize and manage agent knowledge files
@@ -164,11 +285,14 @@ python main.py
 - Secure file upload handling
 - CORS configuration
 - Environment-based configuration
+- Soft delete for data retention
 
 ## 📈 Monitoring & Logging
 
 - Structured logging with Serilog
 - Request/response logging
+- Agent operation tracking
+- JSON sync error handling
 - Error tracking and reporting
 - Health check endpoints
 - Docker container logging
@@ -180,7 +304,8 @@ python main.py
 1. **Configure environment variables**
 2. **Set up SSL certificates**
 3. **Configure production database**
-4. **Deploy with Docker Compose**
+4. **Apply database migrations**
+5. **Deploy with Docker Compose**
 
 ### Environment Variables
 
@@ -196,6 +321,14 @@ NEXT_PUBLIC_SUPABASE_URL=<supabase-url>
 NEXT_PUBLIC_SUPABASE_ANON_KEY=<supabase-key>
 ```
 
+### Database Migrations
+
+```bash
+# Apply migrations in production
+cd backend/AgentPlatform.API
+dotnet ef database update --configuration Release
+```
+
 ## 🤝 Contributing
 
 1. Fork the repository
@@ -203,6 +336,12 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=<supabase-key>
 3. Commit your changes (`git commit -m 'Add some amazing feature'`)
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
+
+### Development Guidelines
+- Follow the existing agent schema when adding new agents
+- Ensure database changes include proper migrations
+- Test JSON synchronization after agent modifications
+- Update documentation for new tools or agents
 
 ## 📄 License
 
@@ -216,4 +355,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-**Built with ❤️ using Next.js, .NET 8, and SQL Server**
+**Built with ❤️ using Next.js, .NET 8, SQL Server, and Google ADK**

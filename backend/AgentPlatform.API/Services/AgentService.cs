@@ -3,6 +3,7 @@ using AutoMapper;
 using AgentPlatform.API.Data;
 using AgentPlatform.API.DTOs;
 using AgentPlatform.API.Models;
+using System.Text.Json;
 
 namespace AgentPlatform.API.Services
 {
@@ -10,11 +11,17 @@ namespace AgentPlatform.API.Services
     {
         private readonly ApplicationDbContext _context;
         private readonly IMapper _mapper;
+        private readonly IWebHostEnvironment _environment;
+        private readonly string _agentsJsonPath;
 
-        public AgentService(ApplicationDbContext context, IMapper mapper)
+        public AgentService(ApplicationDbContext context, IMapper mapper, IWebHostEnvironment environment)
         {
             _context = context;
             _mapper = mapper;
+            _environment = environment;
+            
+            // Path to agents.json in AgentPlatform.Core project
+            _agentsJsonPath = Path.Combine(_environment.ContentRootPath, "..", "AgentPlatform.Core", "agents.json");
         }
 
         public async Task<List<AgentDto>> GetAgentsAsync(int userId)
@@ -48,6 +55,9 @@ namespace AgentPlatform.API.Services
                 Department = request.Department,
                 Description = request.Description,
                 Instructions = request.Instructions,
+                ToolsArray = request.Tools ?? Array.Empty<string>(),
+                LlmModelName = request.LlmConfig?.ModelName,
+                LlmTemperature = request.LlmConfig?.Temperature,
                 CreatedById = userId,
                 CreatedAt = DateTime.UtcNow
             };
@@ -61,6 +71,9 @@ namespace AgentPlatform.API.Services
                 .Include(a => a.Files)
                 .Include(a => a.Functions)
                 .FirstAsync(a => a.Id == agent.Id);
+
+            // Sync with agents.json
+            await SyncAgentsJsonAsync();
 
             return _mapper.Map<AgentDto>(agent);
         }
@@ -86,6 +99,15 @@ namespace AgentPlatform.API.Services
             
             if (request.Instructions != null)
                 agent.Instructions = request.Instructions;
+                
+            if (request.Tools != null)
+                agent.ToolsArray = request.Tools;
+                
+            if (request.LlmConfig != null)
+            {
+                agent.LlmModelName = request.LlmConfig.ModelName;
+                agent.LlmTemperature = request.LlmConfig.Temperature;
+            }
             
             if (request.IsActive.HasValue)
                 agent.IsActive = request.IsActive.Value;
@@ -100,6 +122,9 @@ namespace AgentPlatform.API.Services
                 .Include(a => a.Files)
                 .Include(a => a.Functions)
                 .FirstAsync(a => a.Id == agent.Id);
+
+            // Sync with agents.json
+            await SyncAgentsJsonAsync();
 
             return _mapper.Map<AgentDto>(agent);
         }
@@ -119,6 +144,10 @@ namespace AgentPlatform.API.Services
             agent.UpdatedAt = DateTime.UtcNow;
 
             await _context.SaveChangesAsync();
+            
+            // Sync with agents.json
+            await SyncAgentsJsonAsync();
+            
             return true;
         }
 
@@ -148,6 +177,43 @@ namespace AgentPlatform.API.Services
             await _context.SaveChangesAsync();
 
             return true;
+        }
+
+        public async Task SyncAgentsJsonAsync()
+        {
+            try
+            {
+                // Get all active agents from database
+                var activeAgents = await _context.Agents
+                    .Where(a => a.IsActive)
+                    .ToListAsync();
+
+                // Convert to JSON format
+                var agentJsonList = _mapper.Map<List<AgentJsonDto>>(activeAgents);
+
+                // Serialize with proper formatting
+                var jsonOptions = new JsonSerializerOptions
+                {
+                    WriteIndented = true
+                };
+
+                var jsonContent = JsonSerializer.Serialize(agentJsonList, jsonOptions);
+
+                // Ensure directory exists
+                var directory = Path.GetDirectoryName(_agentsJsonPath);
+                if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory))
+                {
+                    Directory.CreateDirectory(directory);
+                }
+
+                // Write to file
+                await File.WriteAllTextAsync(_agentsJsonPath, jsonContent);
+            }
+            catch (Exception ex)
+            {
+                // Log the error but don't throw - JSON sync shouldn't break the main operations
+                Console.WriteLine($"Failed to sync agents.json: {ex.Message}");
+            }
         }
     }
 } 
