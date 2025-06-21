@@ -1,161 +1,267 @@
-# **AgentPlatform.Core - Google ADK Runtime**
+# Dynamic Multi-Agent System
 
-🚀 **Production-Ready AI Agent Platform with Google ADK**
+A flexible and extensible multi-agent system that can dynamically load and manage specialized agents based on JSON configuration. The system features a Master Agent that intelligently routes user requests to appropriate Sub-Agents based on their capabilities.
 
-A modern, scalable AI agent runtime service built with [Google ADK (Agent Development Kit)](https://google.github.io/adk-docs/). This service processes chat interactions with AI agents by loading configurations from a shared database and executing AI-powered conversations with integrated tools.
+## 🏗️ Architecture Overview
 
-## 🌟 **Key Features**
+The system follows a hierarchical agent model:
 
-- ✅ **Google ADK Integration** - Production-ready agent framework v1.0.0
-- ✅ **Multi-Agent Workflows** - Sequential, Parallel, and Loop orchestration
-- ✅ **Database Integration** - Shared SQL Server with AgentPlatform.API
-- ✅ **Tool Ecosystem** - Jira, Calendar, Confluence + ADK built-in tools
-- ✅ **Deployment Ready** - Docker, Cloud Run, Vertex AI support
+- **Master Agent (Coordinator)**: Routes user requests to appropriate sub-agents
+- **Sub-Agents**: Specialized agents for different domains (IT, HR, Search, Personal Assistant, etc.)
+- **Agent Manager**: Dynamically loads and manages agents from JSON configuration
+- **Tool Kit**: Reusable tools that agents can use to perform specific tasks
+- **File Monitoring**: Automatically reloads configuration when `agents.json` changes
 
-## 🏗️ **Architecture**
-
-```
-┌─────────────────────────────────────────────┐
-│            AgentPlatform.Core               │
-│         (Google ADK Runtime)                │
-├─────────────────────────────────────────────┤
-│  FastAPI Web Layer                         │
-│  ├── Chat API (/api/v1/chat/)               │
-│  ├── Multi-Agent (/agents/{id}/multi-agent) │
-│  └── Tool Management                       │
-├─────────────────────────────────────────────┤
-│  Google ADK Agents                         │
-│  ├── LlmAgent (Individual agents)          │
-│  ├── SequentialAgent (Workflows)           │
-│  ├── ParallelAgent (Concurrent)            │
-│  └── LoopAgent (Iterative)                 │
-├─────────────────────────────────────────────┤
-│  Tools & Integrations                      │
-│  ├── ADK Built-in (Search, HTTP, File)     │
-│  ├── Custom Tools (Jira, Calendar, etc.)   │
-│  └── Google Cloud Tools                    │
-├─────────────────────────────────────────────┤
-│  Data Layer                                │
-│  ├── SQL Server (Shared with .NET API)     │
-│  ├── Agent Configurations                  │
-│  └── Chat Sessions & History               │
-└─────────────────────────────────────────────┘
-```
-
-## 📋 **Prerequisites**
-
-- **Python 3.10+** (required for Google ADK)
-- **Google API Key** for Gemini
-- **SQL Server** (shared with AgentPlatform.API)
-- **Docker** (optional)
-
-## 🚀 **Quick Start**
-
-### **1. Setup Environment**
-```bash
-# Navigate to project
-cd backend/AgentPlatform.Core
-
-# Run ADK setup
-python setup_adk.py
-```
-
-### **2. Configure Credentials**
-Edit `.env` file:
-```bash
-GOOGLE_API_KEY=your_google_api_key
-DATABASE_URL=mssql+pyodbc://sa:password@localhost:1433/agentplatform?driver=ODBC+Driver+18+for+SQL+Server&TrustServerCertificate=yes
-```
-
-### **3. Start Application**
-```bash
-# Development
-python -m uvicorn agent_platform_core.main:app --reload
-
-# Docker
-docker-compose up --build
-```
-
-### **4. Test Integration**
-Visit: `http://localhost:8000/docs`
-
-## 🛠️ **Project Structure**
+## 📁 Project Structure
 
 ```
 AgentPlatform.Core/
-├── src/agent_platform_core/
-│   ├── agents/
-│   │   ├── adk_agents.py          # ADK agent factory & runtime
-│   │   └── __init__.py            # Clean exports
-│   ├── tools/
-│   │   ├── adk_tools.py           # ADK tools adapter
-│   │   ├── registry.py            # Tool registry
-│   │   ├── jira.py                # Jira integration
-│   │   ├── google_calendar.py     # Calendar integration
-│   │   └── confluence.py          # Confluence integration
-│   ├── api/endpoints/
-│   │   ├── chat.py                # ADK-powered chat API
-│   │   └── agents.py              # Agent management
-│   ├── database/                  # SQL Server integration
-│   ├── models/                    # Pydantic models
-│   └── main.py                    # FastAPI application
-├── adk_config.py                  # ADK configuration
-├── setup_adk.py                   # Setup script
-├── requirements.txt               # Dependencies
-├── Dockerfile                     # Container config
-├── docker-compose.yml             # Local development
-└── README_ADK.md                  # Detailed ADK guide
+├── main.py                 # Entry point and main application logic
+├── agents.json             # Dynamic agent configuration file
+├── requirements.txt        # Python dependencies
+├── run.sh                  # Easy startup script
+├── README.md              # This file
+├── core/
+│   ├── __init__.py
+│   ├── agent_manager.py   # Agent loading and management logic
+│   └── master_agent.py    # Master agent implementation
+└── toolkit/
+    ├── __init__.py
+    ├── jira_tool.py       # Jira-related tools
+    ├── search_tool.py     # Search and HR-related tools
+    └── utility_tools.py   # Google search, calendar, weather tools
 ```
 
-## 🌐 **API Endpoints**
+## 🚀 Quick Start
 
-### **Core Chat API**
-- `POST /api/v1/chat/` - Chat with ADK agents
-- `GET /api/v1/chat/sessions/{id}/history` - Chat history
+### 1. Environment Setup
 
-### **Multi-Agent Workflows**
-- `POST /api/v1/chat/agents/{id}/multi-agent` - Multi-agent orchestration
-
-### **Agent Management**
-- `GET /api/v1/agents/{id}` - Get agent configuration
-- `GET /api/v1/chat/agents/{id}/tools` - Get agent tools
-
-## 🚢 **Deployment Options**
-
-### **Local Development**
 ```bash
-docker-compose up --build
+# Navigate to project directory
+cd backend/AgentPlatform.Core
+
+# Create and activate virtual environment (if not done already)
+python3 -m venv venv
+source venv/bin/activate
+
+# Install dependencies
+pip install -r requirements.txt
 ```
 
-### **Cloud Deployment**
+### 2. Running the Application
+
+**Option A: Use the startup script (recommended)**
 ```bash
-# Vertex AI Agent Engine
-gcloud ai agents deploy --config=adk_config.py
+# Make script executable (first time only)
+chmod +x run.sh
 
-# Cloud Run
-gcloud run deploy agent-platform-core --source .
+# Run the system
+./run.sh
 ```
 
-## 📊 **Monitoring**
+**Option B: Manual setup**
+```bash
+# Activate virtual environment
+source venv/bin/activate
 
-- **Health**: `GET /health`
-- **Database**: `GET /health/db`
-- **Logs**: Comprehensive ADK logging
+# Set Google API key
+export GOOGLE_API_KEY=AIzaSyAS9BiTbdCqlAZNfNtxMzuGvmOAEZlVqFE
 
-## 📚 **Documentation**
+# Run the application
+python3 main.py
+```
 
-- **ADK Integration Guide**: `README_ADK.md`
-- **Google ADK Docs**: https://google.github.io/adk-docs/
-- **API Reference**: `http://localhost:8000/docs`
+**Option C: One-line command**
+```bash
+source venv/bin/activate && export GOOGLE_API_KEY=AIzaSyAS9BiTbdCqlAZNfNtxMzuGvmOAEZlVqFE && python3 main.py
+```
 
-## 🔧 **Configuration**
+### 3. Troubleshooting Common Issues
 
-Key configuration in `adk_config.py`:
-- ADK Runtime settings
-- Multi-agent workflows
-- Tool configurations
-- Deployment options
+**Error: "ModuleNotFoundError: No module named 'watchdog'"**
+- Solution: Make sure the virtual environment is activated with `source venv/bin/activate`
 
----
+**Error: "GOOGLE_API_KEY not found"**
+- Solution: Set the API key with `export GOOGLE_API_KEY=AIzaSyAS9BiTbdCqlAZNfNtxMzuGvmOAEZlVqFE`
 
-**🎉 Powered by Google ADK for production-ready AI agents!** 
+**The system loads but agents don't work properly**
+- Solution: Ensure both the virtual environment is active AND the API key is set
+
+## 🤖 Available Agents
+
+The system comes pre-configured with five agents:
+
+### IT Support Agent
+- **Purpose**: Technical support, troubleshooting, Jira ticket creation
+- **Tools**: `jira_ticket_creator`, `it_knowledge_base_search`
+- **Example queries**: 
+  - "My computer is running slowly, please create a ticket"
+  - "How do I fix printer connection issues?"
+
+### HR Agent  
+- **Purpose**: HR policies, leave requests, recruitment information
+- **Tools**: `policy_document_search`, `leave_request_tool`
+- **Example queries**:
+  - "What's the company policy on remote work?"
+  - "I need to request 3 days of annual leave"
+
+### Search Agent
+- **Purpose**: Internet search using Google search
+- **Tools**: `google_search`
+- **Example queries**:
+  - "Search for latest AI technology trends"
+  - "Find information about Python programming"
+
+### Personal Assistant Agent
+- **Purpose**: Calendar and weather assistance
+- **Tools**: `check_calendar`, `check_weather`
+- **Example queries**:
+  - "What's on my calendar today?"
+  - "What's the weather like in New York?"
+
+### General Utility Agent
+- **Purpose**: Versatile agent for various tasks
+- **Tools**: `google_search`, `check_calendar`, `check_weather`
+- **Example queries**:
+  - "Check weather and my schedule for today"
+  - "Search for meeting room booking system"
+
+## 🛠️ Available Tools
+
+### Jira Tools (`jira_tool.py`)
+- `jira_ticket_creator`: Creates new Jira tickets
+- `it_knowledge_base_search`: Searches IT knowledge base
+
+### Search Tools (`search_tool.py`)
+- `internet_search`: Performs internet searches (legacy)
+- `policy_document_search`: Searches company policies
+- `leave_request_tool`: Submits leave requests
+
+### Utility Tools (`utility_tools.py`)
+- `google_search`: Google web search with real API support
+- `check_calendar`: Calendar event checking
+- `check_weather`: Weather information and forecasts
+
+## ⚙️ Configuration
+
+### Adding New Agents
+
+Edit `agents.json` to add new agents:
+
+```json
+{
+  "agent_name": "New_Agent",
+  "description": "Description of what this agent does...",
+  "tools": ["tool1", "tool2"],
+  "llm_config": {
+    "model_name": "gemini-2.0-flash",
+    "temperature": 0.5
+  }
+}
+```
+
+### Adding New Tools
+
+1. Create a new Python file in the `toolkit/` directory
+2. Define tools using the `@tool` decorator:
+
+```python
+from langchain.tools import tool
+
+@tool
+def my_new_tool(param: str) -> str:
+    """
+    Description of what this tool does.
+    Use this tool when...
+    """
+    # Implementation here
+    return "Tool result"
+```
+
+3. Register the tool in `agent_manager.py`:
+
+```python
+tools_registry["my_new_tool"] = my_module.my_new_tool
+```
+
+## 🔄 Dynamic Configuration
+
+The system automatically reloads when `agents.json` is modified:
+
+1. Edit `agents.json` while the system is running
+2. Save the file
+3. The system automatically detects changes and reloads
+4. New configuration takes effect immediately
+
+## 💬 Interactive Commands
+
+While running, the system supports these commands:
+
+- `help` - Show available commands
+- `info` - Display current system configuration
+- `reload` - Manually reload agent configuration
+- `quit`/`exit`/`q` - Exit the application
+
+## 🔧 Development
+
+### Adding Custom LLM Providers
+
+Extend the system to support other LLM providers by modifying the agent creation logic in `agent_manager.py`.
+
+### Error Handling
+
+The system includes comprehensive error handling:
+- Graceful degradation when tools fail
+- Automatic fallback to mock responses for some tools
+- Detailed error logging and user feedback
+
+### Monitoring and Logging
+
+All agent interactions are logged to the console with detailed information about:
+- Request routing decisions
+- Tool usage
+- Error conditions
+- System reloads
+
+## 🚨 Troubleshooting
+
+### Common Issues
+
+1. **"ModuleNotFoundError: No module named 'watchdog'"**
+   - Activate the virtual environment: `source venv/bin/activate`
+
+2. **"GOOGLE_API_KEY not found"**
+   - Set your Google API key: `export GOOGLE_API_KEY=your_key_here`
+
+3. **System starts but agents don't work**
+   - Ensure both virtual environment is active AND API key is set
+   - Use the `run.sh` script for automated setup
+
+4. **Agent not responding correctly**
+   - Check agent descriptions in `agents.json`
+   - Verify tool implementations
+   - Review console logs for errors
+
+### Debug Mode
+
+For more detailed logging, the system runs in verbose mode by default. Check console output for:
+- Agent loading status
+- Request routing decisions  
+- Tool execution results
+- Error messages
+
+## 📝 License
+
+This project is open source and available under the MIT License.
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Add your changes
+4. Test thoroughly
+5. Submit a pull request
+
+## 📧 Support
+
+For questions or issues, please create an issue in the project repository. 

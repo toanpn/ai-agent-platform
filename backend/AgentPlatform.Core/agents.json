@@ -1,0 +1,62 @@
+[
+  {
+    "agent_name": "IT_Support_Agent",
+    "description": "Useful for resolving technical support requests, troubleshooting software and hardware issues, and handling Jira-related problems. The input must be a complete question.",
+    "tools": [
+      "jira_ticket_creator",
+      "it_knowledge_base_search"
+    ],
+    "llm_config": {
+      "model_name": "gemini-2.0-flash",
+      "temperature": 0.0
+    }
+  },
+  {
+    "agent_name": "HR_Agent",
+    "description": "Useful for questions about HR policies, leave procedures, and recruitment information. The input must be a complete question.",
+    "tools": [
+      "policy_document_search",
+      "leave_request_tool"
+    ],
+    "llm_config": {
+      "model_name": "gemini-2.0-flash",
+      "temperature": 0.7
+    }
+  },
+  {
+    "agent_name": "Search_Agent",
+    "description": "Useful for searching for general information on the Internet using Google search. Use this agent when you need to find current information, news, guides, or answers to general questions that require web search.",
+    "tools": [
+      "google_search"
+    ],
+    "llm_config": {
+      "model_name": "gemini-2.0-flash",
+      "temperature": 0.5
+    }
+  },
+  {
+    "agent_name": "Personal_Assistant_Agent",
+    "description": "Useful for personal assistance tasks like checking calendar events, weather information, and scheduling. Use this agent when users need help with daily planning, meeting schedules, or weather updates.",
+    "tools": [
+      "check_calendar",
+      "check_weather"
+    ],
+    "llm_config": {
+      "model_name": "gemini-2.0-flash",
+      "temperature": 0.3
+    }
+  },
+  {
+    "agent_name": "General_Utility_Agent",
+    "description": "A versatile agent that can handle various utility tasks including web searches, calendar checks, and weather information. Use this as a fallback when other agents don't match the request.",
+    "tools": [
+      "google_search",
+      "check_calendar",
+      "check_weather"
+    ],
+    "llm_config": {
+      "model_name": "gemini-2.0-flash",
+      "temperature": 0.4
+    }
+  }
+] 
