@@ -50,7 +50,7 @@ This platform consists of multiple specialized AI agents that can handle differe
    cp env.template .env
    
    # Edit .env and set your Google API key (required for AgentPlatform.Core)
-   # Get your API key from: https://console.cloud.google.com/apis/credentials
+   # Get your API key from: https://aistudio.google.com/apikey
    ```
 
 3. **Start all services (Full Stack):**
