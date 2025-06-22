@@ -4,9 +4,9 @@ services:
     image: mcr.microsoft.com/mssql/server:2022-latest
     container_name: agentplatform-sqlserver
     environment:
-      SA_PASSWORD: "YourStrong@Passw0rd"
-      ACCEPT_EULA: "Y"
-      MSSQL_PID: "Express"
+      SA_PASSWORD: "${SA_PASSWORD}"
+      ACCEPT_EULA: "${ACCEPT_EULA}"
+      MSSQL_PID: "${MSSQL_PID}"
     ports:
       - "1433:1433"
     volumes:
@@ -14,10 +14,11 @@ services:
     networks:
       - agentplatform-network
     healthcheck:
-      test: ["CMD-SHELL", "/opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P YourStrong@Passw0rd -Q 'SELECT 1'"]
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P ${SA_PASSWORD} -C -Q 'SELECT 1'"]
       interval: 30s
       timeout: 10s
       retries: 5
+      start_period: 60s
 
   # Backend API
   api:
@@ -26,36 +27,33 @@ services:
       dockerfile: ./AgentPlatform.API/Dockerfile
     container_name: agentplatform-api
     environment:
-      - ASPNETCORE_ENVIRONMENT=Production
-      - ConnectionStrings__DefaultConnection=Server=sqlserver,1433;Database=agentplatform;User Id=sa;Password=YourStrong@Passw0rd;TrustServerCertificate=true;MultipleActiveResultSets=true
-      - AgentRuntime__BaseUrl=http://adk-agent:8000
-      - ASPNETCORE_URLS=http://+:80
+      - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT}
+      - ConnectionStrings__DefaultConnection=${ConnectionStrings__DefaultConnection}
+      - AgentRuntime__BaseUrl=${AgentRuntime__BaseUrl}
+      - ASPNETCORE_URLS=${ASPNETCORE_URLS}
     ports:
       - "5000:80"
     depends_on:
       sqlserver:
         condition: service_healthy
-      adk-agent:
+      agent-core:
         condition: service_started
     volumes:
       - ./backend/uploads:/app/uploads
     networks:
       - agentplatform-network
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:80/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
 
-  # ADK Agent Core (Python)
-  adk-agent:
+  # Agent Core (Python)
+  agent-core:
     build:
       context: ./backend/AgentPlatform.Core
       dockerfile: Dockerfile
-    container_name: agentplatform-adk
+    container_name: agentplatform-agent-core
     environment:
-      - PYTHONPATH=/app
-      - FLASK_ENV=production
+      - PYTHONPATH=${PYTHONPATH}
+      - FLASK_ENV=${FLASK_ENV}
+      - PORT=${PORT}
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY}
     ports:
       - "8000:8000"
     volumes:
@@ -78,10 +76,10 @@ services:
     ports:
       - "4200:80"
     environment:
-      - NODE_ENV=production
+      - NODE_ENV=${NODE_ENV}
     depends_on:
       api:
-        condition: service_healthy
+        condition: service_started
     networks:
       - agentplatform-network
     healthcheck:
