@@ -1,0 +1,77 @@
+/**
+ * Utility Classes
+ *
+ * This file contains reusable utility classes.
+ */
+
+.text-center {
+	text-align: center;
+}
+.text-left {
+	text-align: left;
+}
+.text-right {
+	text-align: right;
+}
+
+.font-bold {
+	font-weight: 700;
+}
+.font-medium {
+	font-weight: 500;
+}
+.font-normal {
+	font-weight: 400;
+}
+
+.text-primary {
+	color: var(--color-primary);
+}
+.text-success {
+	color: var(--color-success);
+}
+.text-error {
+	color: var(--color-error);
+}
+.text-warning {
+	color: var(--color-warning);
+}
+.text-info {
+	color: var(--color-info);
+}
+.text-secondary {
+	color: var(--color-text-secondary);
+}
+
+.mt-0 {
+	margin-top: 0;
+}
+.mb-0 {
+	margin-bottom: 0;
+}
+.m-0 {
+	margin: 0;
+}
+.p-0 {
+	padding: 0;
+}
+
+.hidden {
+	display: none;
+}
+.invisible {
+	visibility: hidden;
+}
+
+/* Accessibility helpers */
+.sr-only {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	padding: 0;
+	margin: -1px;
+	overflow: hidden;
+	clip: rect(0, 0, 0, 0);
+	white-space: nowrap;
+	border: 0;
+} 

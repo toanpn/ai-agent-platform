@@ -1,0 +1,37 @@
+---
+description: Angular Material Theming Guide
+globs:
+alwaysApply: false
+---
+# Angular Material Theming Guide
+
+Angular Material components in this project **must be themed only through CSS custom properties** – direct style overrides or `!important` rarely work because the library applies styles with higher specificity at runtime.
+
+## Theming Strategy
+
+1. **Palette Variables**: Light theme variables are defined under `:root` in [`src/styles/_variables.scss`](mdc:frontend/src/styles/_variables.scss).
+
+2. **Dark Theme**: Dark theme variables are defined within a `@media (prefers-color-scheme: dark)` media query in the same file, which allows the theme to adapt automatically to the user's system preference.
+
+3. **System Tokens**: Map `--mat-sys-*` variables (`primary`, `on-primary`, `background`, `surface`, etc.) to your custom palette variables for both light and dark themes. Angular Material reads these tokens automatically for most components.
+
+4. **Component-Specific Tokens**: If a component isn't fully themed by system tokens, add its specific tokens (e.g., `--mat-menu-container-color`, `--mdc-outlined-text-field-input-text-color`) to the variable definitions in `_variables.scss` for both light and dark modes.
+
+5. **Use `::ng-deep` When Necessary**: For Material components that don't expose CSS tokens, use `::ng-deep` to pierce component encapsulation. This is acceptable as a last resort when no tokens are available.
+
+   ```scss
+   ::ng-deep .my-component {
+     .mat-mdc-tab-body-content {
+       padding: var(--spacing-md) 0;
+     }
+   }
+   ```
+
+6. **Avoid Direct Overrides**: Never use direct CSS selectors like `.mat-mdc-button` in component styles without `::ng-deep` - they will be ignored due to Angular's view encapsulation.
+
+## Implementation Order
+1. First, try CSS tokens in `_variables.scss`
+2. If tokens don't exist, use `::ng-deep` in component styles
+3. Never use `!important` unless absolutely necessary
+
+Follow this guide whenever you introduce new Angular Material components or edit styles to ensure proper light/dark theming throughout the application.

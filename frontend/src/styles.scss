@@ -1,200 +1,26 @@
 /**
  * Global Application Styles
  *
- * This file contains global styles and variables for the chatbot application.
- * It defines theme colors, typography, and reusable utility classes.
+ * This file imports all the SCSS partials that make up the global styles.
+ * The structure is modular to improve maintainability and themeability.
+ *
+ * Order of imports is important.
  */
 
-/* ----- Variables ----- */
-:root {
-	/* Color palette */
-	--color-primary: #2196f3;
-	--color-primary-light: #64b5f6;
-	--color-primary-dark: #1976d2;
+// 1. Variables - Available to all other files.
+@use './styles/variables';
 
-	--color-success: #4caf50;
-	--color-success-light: #81c784;
-	--color-success-dark: #388e3c;
+// 2. Mixins - Reusable mixins.
+@use './styles/mixins';
 
-	--color-error: #f44336;
-	--color-error-light: #e57373;
-	--color-error-dark: #d32f2f;
+// 3. Base - Base element styles.
+@use './styles/base';
 
-	--color-warning: #ff9800;
-	--color-warning-light: #ffb74d;
-	--color-warning-dark: #f57c00;
+// 4. Components - Styles for third-party components (e.g., Angular Material).
+@use './styles/material';
 
-	--color-info: #2196f3;
-	--color-info-light: #64b5f6;
-	--color-info-dark: #1976d2;
+// 5. Layout - Scrollbar styles.
+@use './styles/scrollbar';
 
-	/* Neutral colors */
-	--color-text: #212121;
-	--color-text-secondary: #757575;
-	--color-border: #e0e0e0;
-	--color-background: #ffffff;
-	--color-background-alt: #f5f5f5;
-
-	/* Spacing */
-	--spacing-xs: 4px;
-	--spacing-sm: 8px;
-	--spacing-md: 16px;
-	--spacing-lg: 24px;
-	--spacing-xl: 32px;
-
-	/* Typography */
-	--font-size-xs: 12px;
-	--font-size-sm: 14px;
-	--font-size-md: 16px;
-	--font-size-lg: 18px;
-	--font-size-xl: 24px;
-}
-
-/* ----- Base Styles ----- */
-html,
-body {
-	height: 100%;
-	margin: 0;
-	padding: 0;
-	font-family: Roboto, 'Helvetica Neue', sans-serif;
-	font-size: var(--font-size-md);
-	color: var(--color-text);
-	line-height: 1.5;
-	box-sizing: border-box;
-}
-
-*,
-*:before,
-*:after {
-	box-sizing: inherit;
-}
-
-/* Focus styles for accessibility */
-:focus {
-	outline: 2px solid var(--color-primary);
-	outline-offset: 2px;
-}
-
-/* ----- Notification Styles ----- */
-/* Custom snackbar styles for the notification service */
-.success-snackbar {
-	background: var(--color-success);
-	color: white;
-}
-
-.error-snackbar {
-	background: var(--color-error);
-	color: white;
-}
-
-.warning-snackbar {
-	background: var(--color-warning);
-	color: white;
-}
-
-.info-snackbar {
-	background: var(--color-info);
-	color: white;
-}
-
-/* Style for the snackbar close button */
-.mat-mdc-snack-bar-action {
-	color: white !important;
-}
-
-/* Remove the margin when using the close button */
-.mat-mdc-button.mat-mdc-snack-bar-action:not(:disabled) {
-	color: white;
-}
-
-/* ----- Utility Classes ----- */
-.text-center {
-	text-align: center;
-}
-.text-left {
-	text-align: left;
-}
-.text-right {
-	text-align: right;
-}
-
-.font-bold {
-	font-weight: 700;
-}
-.font-medium {
-	font-weight: 500;
-}
-.font-normal {
-	font-weight: 400;
-}
-
-.text-primary {
-	color: var(--color-primary);
-}
-.text-success {
-	color: var(--color-success);
-}
-.text-error {
-	color: var(--color-error);
-}
-.text-warning {
-	color: var(--color-warning);
-}
-.text-info {
-	color: var(--color-info);
-}
-.text-secondary {
-	color: var(--color-text-secondary);
-}
-
-.mt-0 {
-	margin-top: 0;
-}
-.mb-0 {
-	margin-bottom: 0;
-}
-.m-0 {
-	margin: 0;
-}
-.p-0 {
-	padding: 0;
-}
-
-.hidden {
-	display: none;
-}
-.invisible {
-	visibility: hidden;
-}
-
-/* Accessibility helpers */
-.sr-only {
-	position: absolute;
-	width: 1px;
-	height: 1px;
-	padding: 0;
-	margin: -1px;
-	overflow: hidden;
-	clip: rect(0, 0, 0, 0);
-	white-space: nowrap;
-	border: 0;
-}
-
-/* Scrollbar styling */
-::-webkit-scrollbar {
-	width: 8px;
-	height: 8px;
-}
-
-::-webkit-scrollbar-track {
-	background: var(--color-background-alt);
-}
-
-::-webkit-scrollbar-thumb {
-	background-color: #bdbdbd;
-	border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-	background-color: #9e9e9e;
-}
+// 6. Utilities - Utility classes.
+@use './styles/utilities';

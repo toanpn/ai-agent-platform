@@ -1,0 +1,54 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+# Frontend Styling Guide
+
+This document outlines the structure and best practices for styling the frontend application.
+
+## SCSS Structure
+
+The global styles are organized in a modular structure under `frontend/src/styles`. The main entry point is `[frontend/src/styles.scss](mdc:frontend/src/styles.scss)`, which imports all the necessary partial files.
+
+### Partials
+
+-   `[_variables.scss](mdc:frontend/src/styles/_variables.scss)`: Contains all global CSS custom properties (variables) for colors, spacing, typography, etc. This is the single source of truth for all styling constants.
+
+-   `[_base.scss](mdc:frontend/src/styles/_base.scss)`: Defines base styles for fundamental HTML elements like `<html>`, `<body>`, and resets.
+
+-   `[_material.scss](mdc:frontend/src/styles/_material.scss)`: Includes styles and overrides for third-party libraries, specifically Angular Material components.
+
+-   `[_mixins.scss](mdc:frontend/src/styles/_mixins.scss)`: A place for reusable SCSS mixins.
+
+-   `[_scrollbar.scss](mdc:frontend/src/styles/_scrollbar.scss)`: Contains styles for the browser scrollbar.
+
+-   `[_utilities.scss](mdc:frontend/src/styles/_utilities.scss)`: Holds a collection of helper/utility classes that can be applied for quick styling (e.g., `.text-center`, `.font-bold`).
+
+## Component Styling
+
+Component-specific styles should be co-located with the component files (e.g., `my-component.component.scss`).
+
+### Best Practices
+
+1.  **Use Variables**: ALWAYS use the CSS variables defined in `_variables.scss` for colors, fonts, and spacing. Avoid hardcoding values.
+    
+    ```scss
+    // Good
+    .my-component {
+      padding: var(--spacing-md);
+      color: var(--color-primary);
+    }
+
+    // Bad
+    .my-component {
+      padding: 16px;
+      color: #2196f3;
+    }
+    ```
+
+2.  **Keep it Scoped**: Component styles are encapsulated by Angular by default. Leverage this to write simple, specific selectors without worrying about them leaking out.
+
+3.  **Use Utilities for Common Patterns**: If you find yourself repeating the same small set of styles across many components, consider if a utility class from `_utilities.scss` could be used instead. If a suitable one doesn't exist, consider adding one.
+
+4.  **No `@import` in Components**: Do not import global style partials into component SCSS files. The global styles are loaded via `styles.scss` in `angular.json` and are available everywhere. The variables are CSS custom properties on `:root` and are inherently available.

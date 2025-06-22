@@ -2,20 +2,55 @@
 	<mat-toolbar color="primary" class="app-toolbar">
 		<span>{{ title }}</span>
 		<span class="spacer"></span>
-		<button mat-button routerLink="/agents">Agents</button>
-		<button mat-button routerLink="/chat">Chat</button>
+		@if(user$ | async; as user) {
+		<button mat-button (click)="navigateTo('/agents')">Agents</button>
+		<button mat-button (click)="navigateTo('/chat')">Chat</button>
+		
+		<!-- Theme Toggle Button -->
+		<button 
+			mat-icon-button 
+			(click)="toggleTheme()" 
+			[attr.aria-label]="'Switch to ' + (isDarkMode ? 'light' : 'dark') + ' theme'"
+			[title]="'Current theme: ' + getThemeDisplayName() + '. Click to toggle.'"
+			class="theme-toggle-btn"
+		>
+			<mat-icon>{{ isDarkMode ? 'light_mode' : 'dark_mode' }}</mat-icon>
+		</button>
+		
 		<button mat-icon-button [matMenuTriggerFor]="menu">
 			<mat-icon>person</mat-icon>
 		</button>
 		<mat-menu #menu="matMenu">
 			<button mat-menu-item>
-				<span>Welcome, {{ (user$ | async)?.email }}</span>
+				<span>Welcome, {{ user.email }}</span>
 			</button>
+			<div class="menu-divider"></div>
+			<button mat-menu-item disabled class="theme-info">
+				<mat-icon>{{ currentTheme === 'auto' ? 'brightness_auto' : (isDarkMode ? 'dark_mode' : 'light_mode') }}</mat-icon>
+				<span>Theme: {{ getThemeDisplayName() }}</span>
+			</button>
+			<button mat-menu-item (click)="toggleTheme()">
+				<mat-icon>{{ isDarkMode ? 'light_mode' : 'dark_mode' }}</mat-icon>
+				<span>Switch to {{ isDarkMode ? 'Light' : 'Dark' }} Theme</span>
+			</button>
+			<div class="menu-divider"></div>
 			<button mat-menu-item (click)="logout()">
 				<mat-icon>exit_to_app</mat-icon>
 				<span>Logout</span>
 			</button>
 		</mat-menu>
+		} @else {
+        <!-- Theme Toggle Button -->
+		<button 
+			mat-icon-button 
+			(click)="toggleTheme()" 
+			[attr.aria-label]="'Switch to ' + (isDarkMode ? 'light' : 'dark') + ' theme'"
+			[title]="'Current theme: ' + getThemeDisplayName() + '. Click to toggle.'"
+			class="theme-toggle-btn"
+		>
+			<mat-icon>{{ isDarkMode ? 'light_mode' : 'dark_mode' }}</mat-icon>
+		</button>
+        }
 	</mat-toolbar>
 	<div class="app-content">
 		<router-outlet></router-outlet>
