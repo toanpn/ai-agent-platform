@@ -19,21 +19,26 @@ namespace AgentPlatform.API.DTOs
         
         public LlmConfigDto? LlmConfig { get; set; }
     }
+    
+    public class SetToolsRequestDto
+    {
+        public List<string> Tools { get; set; } = [];
+    }
 
     public class UpdateAgentRequestDto
     {
         public string? Name { get; set; }
-        
+
         public string? Department { get; set; }
-        
+
         public string? Description { get; set; }
-        
+
         public string? Instructions { get; set; }
-        
+
         public string[]? Tools { get; set; }
-        
+
         public LlmConfigDto? LlmConfig { get; set; }
-        
+
         public bool? IsActive { get; set; }
     }
 

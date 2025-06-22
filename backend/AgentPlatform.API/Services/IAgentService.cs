@@ -11,5 +11,6 @@ namespace AgentPlatform.API.Services
         Task<bool> DeleteAgentAsync(int agentId, int userId);
         Task<bool> AddFunctionToAgentAsync(int agentId, CreateAgentFunctionRequestDto request, int userId);
         Task SyncAgentsJsonAsync();
+        Task<bool> SetAgentToolsAsync(int agentId, List<string> tools, int userId);
     }
 }

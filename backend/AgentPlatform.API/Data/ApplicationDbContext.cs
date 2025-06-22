@@ -16,6 +16,7 @@ namespace AgentPlatform.API.Data
         public DbSet<ChatSession> ChatSessions { get; set; }
         public DbSet<AgentFile> AgentFiles { get; set; }
         public DbSet<AgentFunction> AgentFunctions { get; set; }
+        public DbSet<Tool> Tools { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -89,6 +90,15 @@ namespace AgentPlatform.API.Data
                 entity.Property(e => e.EndpointUrl).HasMaxLength(500);
                 entity.Property(e => e.CreatedAt).HasDefaultValueSql("GETDATE()");
                 entity.HasOne(e => e.Agent).WithMany(a => a.Functions).HasForeignKey(e => e.AgentId);
+            });
+
+            // Tool entity configuration
+            modelBuilder.Entity<Tool>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.HasIndex(e => e.Name).IsUnique();
+                entity.Property(e => e.Name).IsRequired().HasMaxLength(200);
+                entity.Property(e => e.Description).HasColumnType("nvarchar(max)");
             });
         }
     }

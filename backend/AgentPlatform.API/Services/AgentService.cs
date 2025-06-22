@@ -179,6 +179,45 @@ namespace AgentPlatform.API.Services
             return true;
         }
 
+        public async Task<bool> SetAgentToolsAsync(int agentId, List<string> tools, int userId)
+        {
+            var agent = await _context.Agents
+                .FirstOrDefaultAsync(a => a.Id == agentId && a.CreatedById == userId);
+
+            if (agent == null)
+            {
+                return false;
+            }
+
+            // get tool names and descriptions from database
+            var toolsFromDb = await _context.Tools
+                .Where(t => tools.Contains(t.Name))
+                .ToDictionaryAsync(t => t.Name, t => t.Description);
+
+            if (toolsFromDb == null)
+            {
+                return false;
+            }
+
+            // check tools exist in database
+            foreach (var tool in tools)
+            {
+                if (!toolsFromDb.ContainsKey(tool))
+                {
+                    return false;
+                }
+            }
+
+            agent.ToolsArray = [.. tools];
+            agent.UpdatedAt = DateTime.UtcNow;
+
+            await _context.SaveChangesAsync();
+            
+            await SyncAgentsJsonAsync();
+
+            return true;
+        }
+
         public async Task SyncAgentsJsonAsync()
         {
             try

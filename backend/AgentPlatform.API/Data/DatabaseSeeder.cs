@@ -138,6 +138,30 @@ You can break down complex requests into multiple tool calls and synthesize resu
 
             // Add ADK functions for the ADK agent
             await AddAdkFunctions(context, adkAgent.Id);
+
+            // Seed available tools
+            await AddTools(context);
+        }
+
+        private static async Task AddTools(ApplicationDbContext context)
+        {
+            var toolNames = new Dictionary<string, string>
+                {
+                    { "jira_ticket_creator", "Creates a Jira ticket for technical support issues." },
+                    { "it_knowledge_base_search", "Searches the IT knowledge base for solutions." },
+                    { "policy_document_search", "Searches for HR policy documents." },
+                    { "leave_request_tool", "Handles leave requests and procedures." },
+                    { "google_search", "Performs a Google search for general information." },
+                    { "check_calendar", "Checks for calendar events and schedules." },
+                    { "check_weather", "Checks the current weather information." },
+                    { "adk_search", "Advanced web search using Google ADK." },
+                    { "adk_http_request", "Makes HTTP requests to external APIs." },
+                    { "adk_workflow", "Executes multi-agent workflows." }
+                };
+
+            var tools = toolNames.Select(t => new Tool { Name = t.Key, Description = t.Value }).ToList();
+            context.Tools.AddRange(tools);
+            await context.SaveChangesAsync();
         }
 
         private static async Task AddAdkFunctions(ApplicationDbContext context, int agentId)

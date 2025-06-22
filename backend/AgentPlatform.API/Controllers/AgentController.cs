@@ -31,7 +31,7 @@ namespace AgentPlatform.API.Controllers
         {
             var userId = GetUserId();
             var agent = await _agentService.GetAgentByIdAsync(id, userId);
-            
+
             if (agent == null)
             {
                 return NotFound();
@@ -53,7 +53,7 @@ namespace AgentPlatform.API.Controllers
         {
             var userId = GetUserId();
             var agent = await _agentService.UpdateAgentAsync(id, request, userId);
-            
+
             if (agent == null)
             {
                 return NotFound();
@@ -67,7 +67,7 @@ namespace AgentPlatform.API.Controllers
         {
             var userId = GetUserId();
             var success = await _agentService.DeleteAgentAsync(id, userId);
-            
+
             if (!success)
             {
                 return NotFound();
@@ -81,7 +81,7 @@ namespace AgentPlatform.API.Controllers
         {
             var userId = GetUserId();
             var success = await _agentService.AddFunctionToAgentAsync(id, request, userId);
-            
+
             if (!success)
             {
                 return NotFound();
@@ -105,6 +105,19 @@ namespace AgentPlatform.API.Controllers
                 throw new UnauthorizedAccessException("Invalid user ID");
             }
             return userId;
+        }
+        
+        [HttpPost("{id}/tools")]
+        public async Task<ActionResult> SetTools(int id, [FromBody] SetToolsRequestDto request)
+        {
+            var userId = GetUserId();
+            var success = await _agentService.SetAgentToolsAsync(id, request.Tools, userId);
+            if (!success)
+            {
+                return NotFound();
+            }
+
+            return Ok(new { message = "Tools have been set successfully" });
         }
     }
 } 
