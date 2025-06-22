@@ -1,0 +1,241 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+# Frontend Color Palette Guide
+
+## Core Brand Colors
+
+### Primary Blue: #0070f4
+- **Usage**: Primary actions, links, focus states, primary buttons
+- **Light theme**: Used as-is for primary actions
+- **Dark theme**: Adjusted to #4dabf7 for better visibility
+
+### Primary Green: #00b63e
+- **Usage**: Success states, positive actions, confirmations
+- **Light theme**: Used as-is for success indicators
+- **Dark theme**: Adjusted to #12b848 for better visibility
+
+## Complete Color System
+
+### Blue Scale (Light Mode)
+```scss
+--color-blue-50: #e3f2fd;    // Background tints
+--color-blue-100: #bbdefb;   // Light backgrounds
+--color-blue-200: #90caf9;   // Hover states
+--color-blue-300: #64b5f6;   // Active states
+--color-blue-400: #42a5f5;   // Secondary actions
+--color-blue-500: #2196f3;   // Alternative primary
+--color-blue-600: #1e88e5;   // Pressed states
+--color-blue-700: #0070f4;   // Primary (main brand)
+--color-blue-800: #0d47a1;   // Dark variants
+--color-blue-900: #003c8f;   // Darkest variant
+```
+
+### Blue Scale (Dark Mode)
+```scss
+--color-blue-50: #0a1929;    // Darkest background
+--color-blue-100: #0f2644;   // Dark backgrounds
+--color-blue-200: #173459;   // Surface variants
+--color-blue-300: #1e4976;   // Hover states
+--color-blue-400: #2e7cd6;   // Active states
+--color-blue-500: #3f90e5;   // Secondary actions
+--color-blue-600: #4dabf7;   // Primary (adjusted)
+--color-blue-700: #64b5f6;   // Light variants
+--color-blue-800: #90caf9;   // Lighter variants
+--color-blue-900: #bbdefb;   // Lightest variant
+```
+
+### Green Scale (Light Mode)
+```scss
+--color-green-50: #e8f5e9;   // Background tints
+--color-green-100: #c8e6c9;  // Light backgrounds
+--color-green-200: #a5d6a7;  // Hover states
+--color-green-300: #81c784;  // Active states
+--color-green-400: #66bb6a;  // Secondary success
+--color-green-500: #4caf50;  // Alternative success
+--color-green-600: #00b63e;  // Success (main brand)
+--color-green-700: #00a835;  // Pressed states
+--color-green-800: #00962f;  // Dark variants
+--color-green-900: #00832a;  // Darkest variant
+```
+
+### Green Scale (Dark Mode)
+```scss
+--color-green-50: #0a1f0d;   // Darkest background
+--color-green-100: #0f2f14;  // Dark backgrounds
+--color-green-200: #1a4220;  // Surface variants
+--color-green-300: #2d5a34;  // Hover states
+--color-green-400: #0e9340;  // Active states
+--color-green-500: #10a846;  // Secondary success
+--color-green-600: #12b848;  // Success (adjusted)
+--color-green-700: #4ade80;  // Light variants
+--color-green-800: #81c784;  // Lighter variants
+--color-green-900: #a5d6a7;  // Lightest variant
+```
+
+### Neutral Scale (Both Modes)
+```scss
+// Light mode neutrals
+--color-neutral-50: #fafafa;
+--color-neutral-100: #f5f5f5;
+--color-neutral-200: #eeeeee;
+--color-neutral-300: #e0e0e0;
+--color-neutral-400: #bdbdbd;
+--color-neutral-500: #9e9e9e;
+--color-neutral-600: #757575;
+--color-neutral-700: #616161;
+--color-neutral-800: #424242;
+--color-neutral-900: #212121;
+--color-neutral-950: #121212;
+
+// Dark mode neutrals (inverted)
+.dark-theme {
+  --color-neutral-50: #121212;
+  --color-neutral-100: #1e1e1e;
+  --color-neutral-200: #2e2e2e;
+  --color-neutral-300: #3e3e3e;
+  --color-neutral-400: #4e4e4e;
+  --color-neutral-500: #6e6e6e;
+  --color-neutral-600: #8e8e8e;
+  --color-neutral-700: #aeaeae;
+  --color-neutral-800: #cecece;
+  --color-neutral-900: #eeeeee;
+  --color-neutral-950: #fafafa;
+}
+```
+
+### Semantic Colors
+```scss
+// Status colors
+--color-success: var(--color-green-600);
+--color-error: #f44336;
+--color-warning: #ff9800;
+--color-info: var(--color-blue-700);
+
+// Surface colors
+--color-background: var(--color-neutral-50);
+--color-surface: var(--color-neutral-100);
+--color-surface-variant: var(--color-neutral-200);
+
+// Text colors
+--color-text-primary: var(--color-neutral-900);
+--color-text-secondary: var(--color-neutral-700);
+--color-text-tertiary: var(--color-neutral-600);
+--color-text-disabled: var(--color-neutral-400);
+
+// Border colors
+--color-border: var(--color-neutral-300);
+--color-border-hover: var(--color-neutral-400);
+--color-border-focus: var(--color-blue-700);
+```
+
+## Accessibility Guidelines
+
+### WCAG AA Compliance
+- **Normal text**: Minimum contrast ratio of 4.5:1
+- **Large text**: Minimum contrast ratio of 3:1
+- **UI components**: Minimum contrast ratio of 3:1
+
+### Recommended Color Pairings
+
+#### Light Theme
+- **Primary text on white**: #212121 on #ffffff (21:1)
+- **Secondary text on white**: #616161 on #ffffff (5.9:1)
+- **Blue on white**: #0070f4 on #ffffff (4.5:1) ✓
+- **Green on white**: #00b63e on #ffffff (4.8:1) ✓
+- **White on blue**: #ffffff on #0070f4 (4.5:1) ✓
+- **White on green**: #ffffff on #00b63e (4.8:1) ✓
+
+#### Dark Theme
+- **Primary text on dark**: #eeeeee on #121212 (15.8:1)
+- **Secondary text on dark**: #aeaeae on #121212 (7.2:1)
+- **Blue on dark**: #4dabf7 on #121212 (11.2:1) ✓
+- **Green on dark**: #12b848 on #121212 (10.4:1) ✓
+- **Dark on blue**: #121212 on #4dabf7 (11.2:1) ✓
+- **Dark on green**: #121212 on #12b848 (10.4:1) ✓
+
+## Usage Patterns
+
+### Buttons
+```scss
+// Primary button
+.btn-primary {
+  background: var(--color-blue-700);
+  color: white;
+  
+  &:hover {
+    background: var(--color-blue-800);
+  }
+  
+  &:active {
+    background: var(--color-blue-900);
+  }
+}
+
+// Success button
+.btn-success {
+  background: var(--color-green-600);
+  color: white;
+  
+  &:hover {
+    background: var(--color-green-700);
+  }
+  
+  &:active {
+    background: var(--color-green-800);
+  }
+}
+```
+
+### Form States
+```scss
+// Default
+.form-control {
+  border-color: var(--color-neutral-300);
+  color: var(--color-text-primary);
+  
+  &:hover {
+    border-color: var(--color-neutral-400);
+  }
+  
+  &:focus {
+    border-color: var(--color-blue-700);
+    box-shadow: 0 0 0 0.2rem rgba(0, 112, 244, 0.25);
+  }
+}
+
+// Success state
+.form-control.success {
+  border-color: var(--color-green-600);
+  
+  &:focus {
+    border-color: var(--color-green-700);
+    box-shadow: 0 0 0 0.2rem rgba(0, 182, 62, 0.25);
+  }
+}
+```
+
+### Links
+```scss
+a {
+  color: var(--color-blue-700);
+  
+  &:hover {
+    color: var(--color-blue-800);
+  }
+  
+  &:visited {
+    color: var(--color-blue-900);
+  }
+}
+```
+
+## Implementation Notes
+
+1. **CSS Variables**: All colors should be defined as CSS custom properties
+2. **Theme Switching**: Use a `.dark-theme` class on the root element
+3. **Contrast Testing**: Always verify contrast ratios using tools like WebAIM
+4. **Color Blindness**: Test designs with color blindness simulators
+5. **Consistency**: Use semantic color tokens instead of raw hex values

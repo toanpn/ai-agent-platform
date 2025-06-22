@@ -1,0 +1,549 @@
+/**
+ * SCSS Variables
+ *
+ * This file contains all the SCSS variables for the application.
+ * We use CSS custom properties to make them available in the browser
+ * and allow for dynamic theme switching.
+ */
+
+:root {
+	/* Core Brand Colors */
+	--color-primary-brand: #0070f4;
+	--color-success-brand: #00b63e;
+
+	/* Blue Color Scale - Light Mode */
+	--color-blue-50: #e3f2fd;
+	--color-blue-100: #bbdefb;
+	--color-blue-200: #90caf9;
+	--color-blue-300: #64b5f6;
+	--color-blue-400: #42a5f5;
+	--color-blue-500: #2196f3;
+	--color-blue-600: #1e88e5;
+	--color-blue-700: #0070f4; /* Primary brand blue */
+	--color-blue-800: #0d47a1;
+	--color-blue-900: #003c8f;
+
+	/* Green Color Scale - Light Mode */
+	--color-green-50: #e8f5e9;
+	--color-green-100: #c8e6c9;
+	--color-green-200: #a5d6a7;
+	--color-green-300: #81c784;
+	--color-green-400: #66bb6a;
+	--color-green-500: #4caf50;
+	--color-green-600: #00b63e; /* Primary brand green */
+	--color-green-700: #00a835;
+	--color-green-800: #00962f;
+	--color-green-900: #00832a;
+
+	/* Neutral Scale - Light Mode */
+	--color-neutral-50: #fafafa;
+	--color-neutral-100: #f5f5f5;
+	--color-neutral-200: #eeeeee;
+	--color-neutral-300: #e0e0e0;
+	--color-neutral-400: #bdbdbd;
+	--color-neutral-500: #9e9e9e;
+	--color-neutral-600: #757575;
+	--color-neutral-700: #616161;
+	--color-neutral-800: #424242;
+	--color-neutral-900: #212121;
+	--color-neutral-950: #121212;
+
+	/* Semantic Colors */
+	--color-primary: var(--color-blue-700);
+	--color-primary-light: var(--color-blue-300);
+	--color-primary-dark: var(--color-blue-800);
+	--color-primary-extralight: var(--color-blue-50);
+	--color-primary-tag-bg: var(--color-blue-100);
+	--color-primary-tag-text: var(--color-blue-800);
+	--color-primary-disabled: var(--color-blue-200);
+
+	--color-success: var(--color-green-600);
+	--color-success-light: var(--color-green-300);
+	--color-success-dark: var(--color-green-800);
+	--color-success-background: var(--color-green-50);
+	--color-success-text: var(--color-green-700);
+
+	--color-error: #f44336;
+	--color-error-light: #e57373;
+	--color-error-dark: #d32f2f;
+	--color-error-extralight: #ffebee;
+	--color-error-light-hover: #ef9a9a;
+	--color-error-background: #ffcdd2;
+	--color-error-background-hover: #ef9a9a;
+
+	--color-warning: #ff9800;
+	--color-warning-light: #ffb74d;
+	--color-warning-dark: #f57c00;
+
+	--color-info: var(--color-blue-700);
+	--color-info-light: var(--color-blue-300);
+	--color-info-dark: var(--color-blue-800);
+
+	/* Surface & Background Colors */
+	--color-background: var(--color-neutral-50);
+	--color-surface: #ffffff;
+	--color-surface-variant: var(--color-neutral-100);
+	--color-background-alt: var(--color-neutral-100);
+	--color-background-alt-hover: var(--color-neutral-200);
+	--color-background-light: var(--color-neutral-50);
+	--color-background-light-alt: #ffffff;
+
+	/* Text Colors */
+	--color-text: var(--color-neutral-900);
+	--color-text-light: var(--color-neutral-900);
+	--color-text-secondary: var(--color-neutral-700);
+	--color-text-secondary-light: var(--color-neutral-600);
+	--color-text-tertiary: var(--color-neutral-600);
+	--color-text-tertiary-light: var(--color-neutral-500);
+	--color-text-quaternary: var(--color-neutral-500);
+	--color-text-disabled: var(--color-neutral-400);
+	--color-text-on-primary: #ffffff;
+
+	/* Border Colors */
+	--color-border: var(--color-neutral-300);
+	--color-border-hover: var(--color-neutral-400);
+	--color-border-focus: var(--color-blue-700);
+
+	/* Other UI Elements */
+	--color-gradient-start: var(--color-blue-400);
+	--color-gradient-end: var(--color-blue-700);
+	--shadow-color-primary: rgba(0, 112, 244, 0.3);
+	--shadow-color-primary-hover: rgba(0, 112, 244, 0.4);
+	--shadow-color-primary-focus: rgba(0, 112, 244, 0.2);
+	--shadow-color-card-hover: rgba(0, 0, 0, 0.1);
+
+	/* Spacing */
+	--spacing-xs: 4px;
+	--spacing-sm: 8px;
+	--spacing-smd: 12px;
+	--spacing-md: 16px;
+	--spacing-lg: 24px;
+	--spacing-xl: 32px;
+	--spacing-xxl: 64px;
+
+	/* Typography */
+	--font-size-xs: 12px;
+	--font-size-sm: 14px;
+	--font-size-md: 16px;
+	--font-size-lg: 18px;
+	--font-size-xl: 24px;
+
+	/* Layout */
+	--sidebar-width: 250px;
+	--chat-sidebar-width: 280px;
+
+	/* Angular Material system color tokens */
+	--mat-sys-primary: var(--color-primary);
+	--mat-sys-on-primary: var(--color-text-on-primary);
+	--mat-sys-surface: var(--color-surface);
+	--mat-sys-on-surface: var(--color-text);
+	--mat-sys-background: var(--color-background);
+	--mat-sys-on-background: var(--color-text);
+	--mat-sys-error: var(--color-error);
+	--mat-sys-on-error: var(--color-text-on-primary);
+	--mat-sys-outline: var(--color-border);
+	--mat-sys-outline-variant: var(--color-border);
+
+	--mat-menu-container-color: var(--color-surface);
+	--mat-menu-item-label-text-color: var(--color-text);
+	--mat-menu-item-icon-color: var(--color-text-secondary);
+
+	/* Form field tokens */
+	--mdc-outlined-text-field-input-text-color: var(--color-text);
+	--mdc-outlined-text-field-label-text-color: var(--color-text-secondary);
+	--mdc-outlined-text-field-outline-color: var(--color-border);
+	--mdc-outlined-text-field-focus-outline-color: var(--color-primary);
+	--mdc-outlined-text-field-focus-label-text-color: var(--color-primary);
+	--mdc-outlined-text-field-hover-outline-color: var(--color-primary-light);
+	--mdc-outlined-text-field-caret-color: var(--color-primary);
+}
+
+/* Dark theme variables - applied via both system preference and programmatic class */
+@media (prefers-color-scheme: dark) {
+	:root:not(.light-theme) {
+		/* Blue Color Scale - Dark Mode (inverted for proper contrast) */
+		--color-blue-50: #0a1929;
+		--color-blue-100: #0f2644;
+		--color-blue-200: #173459;
+		--color-blue-300: #1e4976;
+		--color-blue-400: #2e7cd6;
+		--color-blue-500: #3f90e5;
+		--color-blue-600: #4dabf7; /* Adjusted primary for dark mode */
+		--color-blue-700: #64b5f6;
+		--color-blue-800: #90caf9;
+		--color-blue-900: #bbdefb;
+
+		/* Green Color Scale - Dark Mode (inverted for proper contrast) */
+		--color-green-50: #0a1f0d;
+		--color-green-100: #0f2f14;
+		--color-green-200: #1a4220;
+		--color-green-300: #2d5a34;
+		--color-green-400: #0e9340;
+		--color-green-500: #10a846;
+		--color-green-600: #12b848; /* Adjusted success for dark mode */
+		--color-green-700: #4ade80;
+		--color-green-800: #81c784;
+		--color-green-900: #a5d6a7;
+
+		/* Neutral Scale - Dark Mode (inverted) */
+		--color-neutral-50: #121212;
+		--color-neutral-100: #1e1e1e;
+		--color-neutral-200: #2e2e2e;
+		--color-neutral-300: #3e3e3e;
+		--color-neutral-400: #4e4e4e;
+		--color-neutral-500: #6e6e6e;
+		--color-neutral-600: #8e8e8e;
+		--color-neutral-700: #aeaeae;
+		--color-neutral-800: #cecece;
+		--color-neutral-900: #eeeeee;
+		--color-neutral-950: #fafafa;
+
+		/* Semantic Colors - Dark Mode */
+		--color-primary: var(--color-blue-600); /* Use adjusted blue */
+		--color-primary-light: var(--color-blue-700);
+		--color-primary-dark: var(--color-blue-400);
+		--color-primary-extralight: var(--color-blue-100);
+		--color-primary-tag-bg: var(--color-blue-200);
+		--color-primary-tag-text: var(--color-blue-800);
+		--color-primary-disabled: var(--color-blue-300);
+
+		--color-success: var(--color-green-600); /* Use adjusted green */
+		--color-success-light: var(--color-green-700);
+		--color-success-dark: var(--color-green-400);
+		--color-success-background: var(--color-green-100);
+		--color-success-text: var(--color-green-800);
+
+		--color-error: #cf6679;
+		--color-error-light: #ff94a2;
+		--color-error-dark: #9b374d;
+		--color-error-extralight: #3e272a;
+		--color-error-light-hover: #5a3c42;
+		--color-error-background: #5a3c42;
+		--color-error-background-hover: #7a525d;
+
+		--color-warning: #ffb74d;
+		--color-warning-light: #ffe97d;
+		--color-warning-dark: #c88719;
+
+		--color-info: var(--color-blue-600);
+		--color-info-light: var(--color-blue-700);
+		--color-info-dark: var(--color-blue-400);
+
+		/* Surface & Background Colors - Dark Mode */
+		--color-background: var(--color-neutral-50);
+		--color-surface: var(--color-neutral-100);
+		--color-surface-variant: var(--color-neutral-200);
+		--color-background-alt: var(--color-neutral-100);
+		--color-background-alt-hover: var(--color-neutral-300);
+		--color-background-light: var(--color-neutral-200);
+		--color-background-light-alt: var(--color-neutral-300);
+
+		/* Text Colors - Dark Mode */
+		--color-text: var(--color-neutral-900);
+		--color-text-light: var(--color-neutral-950);
+		--color-text-secondary: var(--color-neutral-700);
+		--color-text-secondary-light: var(--color-neutral-800);
+		--color-text-tertiary: var(--color-neutral-600);
+		--color-text-tertiary-light: var(--color-neutral-700);
+		--color-text-quaternary: var(--color-neutral-600);
+		--color-text-disabled: var(--color-neutral-400);
+		--color-text-on-primary: #000000;
+
+		/* Border Colors - Dark Mode */
+		--color-border: var(--color-neutral-300);
+		--color-border-hover: var(--color-neutral-400);
+		--color-border-focus: var(--color-blue-600);
+
+		/* Other UI Elements - Dark Mode */
+		--color-gradient-start: var(--color-blue-400);
+		--color-gradient-end: var(--color-blue-600);
+		--shadow-color-primary: rgba(77, 171, 247, 0.3);
+		--shadow-color-primary-hover: rgba(77, 171, 247, 0.4);
+		--shadow-color-primary-focus: rgba(77, 171, 247, 0.2);
+		--shadow-color-card-hover: rgba(255, 255, 255, 0.1);
+
+		/* Angular Material system color tokens (dark) */
+		--mat-sys-primary: var(--color-primary);
+		--mat-sys-on-primary: var(--color-text-on-primary);
+		--mat-sys-surface: var(--color-surface);
+		--mat-sys-on-surface: var(--color-text);
+		--mat-sys-background: var(--color-background);
+		--mat-sys-on-background: var(--color-text);
+		--mat-sys-error: var(--color-error);
+		--mat-sys-on-error: var(--color-text-on-primary);
+		--mat-sys-outline: var(--color-border);
+		--mat-sys-outline-variant: var(--color-border);
+
+		--mat-menu-container-color: var(--color-surface);
+		--mat-menu-item-label-text-color: var(--color-text);
+		--mat-menu-item-icon-color: var(--color-text-secondary);
+
+		/* Form field tokens */
+		--mdc-outlined-text-field-input-text-color: var(--color-text);
+		--mdc-outlined-text-field-label-text-color: var(--color-text-secondary);
+		--mdc-outlined-text-field-outline-color: var(--color-border);
+		--mdc-outlined-text-field-focus-outline-color: var(--color-primary);
+		--mdc-outlined-text-field-focus-label-text-color: var(--color-primary);
+		--mdc-outlined-text-field-hover-outline-color: var(--color-primary-light);
+		--mdc-outlined-text-field-caret-color: var(--color-primary);
+	}
+}
+
+/* Programmatic dark theme - overrides system preference when .dark-theme class is present */
+.dark-theme {
+	/* Blue Color Scale - Dark Mode (inverted for proper contrast) */
+	--color-blue-50: #0a1929;
+	--color-blue-100: #0f2644;
+	--color-blue-200: #173459;
+	--color-blue-300: #1e4976;
+	--color-blue-400: #2e7cd6;
+	--color-blue-500: #3f90e5;
+	--color-blue-600: #4dabf7; /* Adjusted primary for dark mode */
+	--color-blue-700: #64b5f6;
+	--color-blue-800: #90caf9;
+	--color-blue-900: #bbdefb;
+
+	/* Green Color Scale - Dark Mode (inverted for proper contrast) */
+	--color-green-50: #0a1f0d;
+	--color-green-100: #0f2f14;
+	--color-green-200: #1a4220;
+	--color-green-300: #2d5a34;
+	--color-green-400: #0e9340;
+	--color-green-500: #10a846;
+	--color-green-600: #12b848; /* Adjusted success for dark mode */
+	--color-green-700: #4ade80;
+	--color-green-800: #81c784;
+	--color-green-900: #a5d6a7;
+
+	/* Neutral Scale - Dark Mode (inverted) */
+	--color-neutral-50: #121212;
+	--color-neutral-100: #1e1e1e;
+	--color-neutral-200: #2e2e2e;
+	--color-neutral-300: #3e3e3e;
+	--color-neutral-400: #4e4e4e;
+	--color-neutral-500: #6e6e6e;
+	--color-neutral-600: #8e8e8e;
+	--color-neutral-700: #aeaeae;
+	--color-neutral-800: #cecece;
+	--color-neutral-900: #eeeeee;
+	--color-neutral-950: #fafafa;
+
+	/* Semantic Colors - Dark Mode */
+	--color-primary: var(--color-blue-600); /* Use adjusted blue */
+	--color-primary-light: var(--color-blue-700);
+	--color-primary-dark: var(--color-blue-400);
+	--color-primary-extralight: var(--color-blue-100);
+	--color-primary-tag-bg: var(--color-blue-200);
+	--color-primary-tag-text: var(--color-blue-800);
+	--color-primary-disabled: var(--color-blue-300);
+
+	--color-success: var(--color-green-600); /* Use adjusted green */
+	--color-success-light: var(--color-green-700);
+	--color-success-dark: var(--color-green-400);
+	--color-success-background: var(--color-green-100);
+	--color-success-text: var(--color-green-800);
+
+	--color-error: #cf6679;
+	--color-error-light: #ff94a2;
+	--color-error-dark: #9b374d;
+	--color-error-extralight: #3e272a;
+	--color-error-light-hover: #5a3c42;
+	--color-error-background: #5a3c42;
+	--color-error-background-hover: #7a525d;
+
+	--color-warning: #ffb74d;
+	--color-warning-light: #ffe97d;
+	--color-warning-dark: #c88719;
+
+	--color-info: var(--color-blue-600);
+	--color-info-light: var(--color-blue-700);
+	--color-info-dark: var(--color-blue-400);
+
+	/* Surface & Background Colors - Dark Mode */
+	--color-background: var(--color-neutral-50);
+	--color-surface: var(--color-neutral-100);
+	--color-surface-variant: var(--color-neutral-200);
+	--color-background-alt: var(--color-neutral-100);
+	--color-background-alt-hover: var(--color-neutral-300);
+	--color-background-light: var(--color-neutral-200);
+	--color-background-light-alt: var(--color-neutral-300);
+
+	/* Text Colors - Dark Mode */
+	--color-text: var(--color-neutral-900);
+	--color-text-light: var(--color-neutral-950);
+	--color-text-secondary: var(--color-neutral-700);
+	--color-text-secondary-light: var(--color-neutral-800);
+	--color-text-tertiary: var(--color-neutral-600);
+	--color-text-tertiary-light: var(--color-neutral-700);
+	--color-text-quaternary: var(--color-neutral-600);
+	--color-text-disabled: var(--color-neutral-400);
+	--color-text-on-primary: #000000;
+
+	/* Border Colors - Dark Mode */
+	--color-border: var(--color-neutral-300);
+	--color-border-hover: var(--color-neutral-400);
+	--color-border-focus: var(--color-blue-600);
+
+	/* Other UI Elements - Dark Mode */
+	--color-gradient-start: var(--color-blue-400);
+	--color-gradient-end: var(--color-blue-600);
+	--shadow-color-primary: rgba(77, 171, 247, 0.3);
+	--shadow-color-primary-hover: rgba(77, 171, 247, 0.4);
+	--shadow-color-primary-focus: rgba(77, 171, 247, 0.2);
+	--shadow-color-card-hover: rgba(255, 255, 255, 0.1);
+
+	/* Angular Material system color tokens (dark) */
+	--mat-sys-primary: var(--color-primary);
+	--mat-sys-on-primary: var(--color-text-on-primary);
+	--mat-sys-surface: var(--color-surface);
+	--mat-sys-on-surface: var(--color-text);
+	--mat-sys-background: var(--color-background);
+	--mat-sys-on-background: var(--color-text);
+	--mat-sys-error: var(--color-error);
+	--mat-sys-on-error: var(--color-text-on-primary);
+	--mat-sys-outline: var(--color-border);
+	--mat-sys-outline-variant: var(--color-border);
+
+	--mat-menu-container-color: var(--color-surface);
+	--mat-menu-item-label-text-color: var(--color-text);
+	--mat-menu-item-icon-color: var(--color-text-secondary);
+
+	/* Form field tokens */
+	--mdc-outlined-text-field-input-text-color: var(--color-text);
+	--mdc-outlined-text-field-label-text-color: var(--color-text-secondary);
+	--mdc-outlined-text-field-outline-color: var(--color-border);
+	--mdc-outlined-text-field-focus-outline-color: var(--color-primary);
+	--mdc-outlined-text-field-focus-label-text-color: var(--color-primary);
+	--mdc-outlined-text-field-hover-outline-color: var(--color-primary-light);
+	--mdc-outlined-text-field-caret-color: var(--color-primary);
+}
+
+/* Programmatic light theme - ensures light theme when .light-theme class is present */
+.light-theme {
+	/* Force light theme colors even if system prefers dark */
+	/* Blue Color Scale - Light Mode */
+	--color-blue-50: #e3f2fd;
+	--color-blue-100: #bbdefb;
+	--color-blue-200: #90caf9;
+	--color-blue-300: #64b5f6;
+	--color-blue-400: #42a5f5;
+	--color-blue-500: #2196f3;
+	--color-blue-600: #1e88e5;
+	--color-blue-700: #0070f4;
+	--color-blue-800: #0d47a1;
+	--color-blue-900: #003c8f;
+
+	/* Green Color Scale - Light Mode */
+	--color-green-50: #e8f5e9;
+	--color-green-100: #c8e6c9;
+	--color-green-200: #a5d6a7;
+	--color-green-300: #81c784;
+	--color-green-400: #66bb6a;
+	--color-green-500: #4caf50;
+	--color-green-600: #00b63e;
+	--color-green-700: #00a835;
+	--color-green-800: #00962f;
+	--color-green-900: #00832a;
+
+	/* Neutral Scale - Light Mode */
+	--color-neutral-50: #fafafa;
+	--color-neutral-100: #f5f5f5;
+	--color-neutral-200: #eeeeee;
+	--color-neutral-300: #e0e0e0;
+	--color-neutral-400: #bdbdbd;
+	--color-neutral-500: #9e9e9e;
+	--color-neutral-600: #757575;
+	--color-neutral-700: #616161;
+	--color-neutral-800: #424242;
+	--color-neutral-900: #212121;
+	--color-neutral-950: #121212;
+
+	/* Semantic Colors - Light Mode */
+	--color-primary: var(--color-blue-700);
+	--color-primary-light: var(--color-blue-300);
+	--color-primary-dark: var(--color-blue-800);
+	--color-primary-extralight: var(--color-blue-50);
+	--color-primary-tag-bg: var(--color-blue-100);
+	--color-primary-tag-text: var(--color-blue-800);
+	--color-primary-disabled: var(--color-blue-200);
+
+	--color-success: var(--color-green-600);
+	--color-success-light: var(--color-green-300);
+	--color-success-dark: var(--color-green-800);
+	--color-success-background: var(--color-green-50);
+	--color-success-text: var(--color-green-700);
+
+	--color-error: #f44336;
+	--color-error-light: #e57373;
+	--color-error-dark: #d32f2f;
+	--color-error-extralight: #ffebee;
+	--color-error-light-hover: #ef9a9a;
+	--color-error-background: #ffcdd2;
+	--color-error-background-hover: #ef9a9a;
+
+	--color-warning: #ff9800;
+	--color-warning-light: #ffb74d;
+	--color-warning-dark: #f57c00;
+
+	--color-info: var(--color-blue-700);
+	--color-info-light: var(--color-blue-300);
+	--color-info-dark: var(--color-blue-800);
+
+	/* Surface & Background Colors - Light Mode */
+	--color-background: var(--color-neutral-50);
+	--color-surface: #ffffff;
+	--color-surface-variant: var(--color-neutral-100);
+	--color-background-alt: var(--color-neutral-100);
+	--color-background-alt-hover: var(--color-neutral-200);
+	--color-background-light: var(--color-neutral-50);
+	--color-background-light-alt: #ffffff;
+
+	/* Text Colors - Light Mode */
+	--color-text: var(--color-neutral-900);
+	--color-text-light: var(--color-neutral-900);
+	--color-text-secondary: var(--color-neutral-700);
+	--color-text-secondary-light: var(--color-neutral-600);
+	--color-text-tertiary: var(--color-neutral-600);
+	--color-text-tertiary-light: var(--color-neutral-500);
+	--color-text-quaternary: var(--color-neutral-500);
+	--color-text-disabled: var(--color-neutral-400);
+	--color-text-on-primary: #ffffff;
+
+	/* Border Colors - Light Mode */
+	--color-border: var(--color-neutral-300);
+	--color-border-hover: var(--color-neutral-400);
+	--color-border-focus: var(--color-blue-700);
+
+	/* Other UI Elements - Light Mode */
+	--color-gradient-start: var(--color-blue-400);
+	--color-gradient-end: var(--color-blue-700);
+	--shadow-color-primary: rgba(0, 112, 244, 0.3);
+	--shadow-color-primary-hover: rgba(0, 112, 244, 0.4);
+	--shadow-color-primary-focus: rgba(0, 112, 244, 0.2);
+	--shadow-color-card-hover: rgba(0, 0, 0, 0.1);
+
+	/* Angular Material system color tokens (light) */
+	--mat-sys-primary: var(--color-primary);
+	--mat-sys-on-primary: var(--color-text-on-primary);
+	--mat-sys-surface: var(--color-surface);
+	--mat-sys-on-surface: var(--color-text);
+	--mat-sys-background: var(--color-background);
+	--mat-sys-on-background: var(--color-text);
+	--mat-sys-error: var(--color-error);
+	--mat-sys-on-error: var(--color-text-on-primary);
+	--mat-sys-outline: var(--color-border);
+	--mat-sys-outline-variant: var(--color-border);
+
+	--mat-menu-container-color: var(--color-surface);
+	--mat-menu-item-label-text-color: var(--color-text);
+	--mat-menu-item-icon-color: var(--color-text-secondary);
+
+	/* Form field tokens */
+	--mdc-outlined-text-field-input-text-color: var(--color-text);
+	--mdc-outlined-text-field-label-text-color: var(--color-text-secondary);
+	--mdc-outlined-text-field-outline-color: var(--color-border);
+	--mdc-outlined-text-field-focus-outline-color: var(--color-primary);
+	--mdc-outlined-text-field-focus-label-text-color: var(--color-primary);
+	--mdc-outlined-text-field-hover-outline-color: var(--color-primary-light);
+	--mdc-outlined-text-field-caret-color: var(--color-primary);
+} 

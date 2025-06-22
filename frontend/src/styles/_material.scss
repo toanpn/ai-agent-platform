@@ -1,0 +1,48 @@
+/**
+ * Angular Material Overrides
+ *
+ * This file contains style overrides for Angular Material components.
+ */
+
+/* Custom snackbar styles for the notification service */
+.success-snackbar {
+	--mdc-snackbar-container-color: var(--color-success);
+	--mat-mdc-snack-bar-button-color: var(--color-text-on-primary);
+	--mdc-snackbar-supporting-text-color: var(--color-text-on-primary);
+}
+
+.error-snackbar {
+	--mdc-snackbar-container-color: var(--color-error);
+	--mat-mdc-snack-bar-button-color: var(--color-text-on-primary);
+	--mdc-snackbar-supporting-text-color: var(--color-text-on-primary);
+}
+
+.warning-snackbar {
+	--mdc-snackbar-container-color: var(--color-warning);
+	--mat-mdc-snack-bar-button-color: #000000;
+	--mdc-snackbar-supporting-text-color: #000000;
+}
+
+.info-snackbar {
+	--mdc-snackbar-container-color: var(--color-info);
+	--mat-mdc-snack-bar-button-color: var(--color-text-on-primary);
+	--mdc-snackbar-supporting-text-color: var(--color-text-on-primary);
+}
+
+/* Style for the snackbar close button */
+.mat-mdc-snack-bar-action {
+	color: white !important;
+}
+
+/* Remove the margin when using the close button */
+.mat-mdc-button.mat-mdc-snack-bar-action:not(:disabled) {
+	color: white;
+}
+
+/**
+ * Component Overrides for Theming
+ */
+// Overrides removed – Material now themed via CSS variables defined in _variables.scss
+
+// Menu overrides to ensure theming works
+// ... existing code after block ...
