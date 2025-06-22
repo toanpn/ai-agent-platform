@@ -38,12 +38,11 @@ namespace AgentPlatform.API.DTOs
         public DateTime Timestamp { get; set; }
         public bool Success { get; set; } = true;
         public string? Error { get; set; }
+        public string? MasterAgentThinking { get; set; } // Master agent's response when execution steps are available
         
         // Enhanced response fields
         public List<string> AgentsUsed { get; set; } = new();
         public List<string> ToolsUsed { get; set; } = new();
-        public AvailableAgentsDto AvailableAgents { get; set; } = new();
-        public List<AvailableToolDto> AvailableTools { get; set; } = new();
         public ExecutionDetailsDto ExecutionDetails { get; set; } = new();
         public Dictionary<string, object> Metadata { get; set; } = new();
     }

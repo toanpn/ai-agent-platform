@@ -89,13 +89,36 @@ namespace AgentPlatform.API.Services
 
             var runtimeResponse = await _runtimeClient.SendMessageAsync(runtimeRequest);
 
+            // Determine the main response based on execution steps
+            string mainResponse = runtimeResponse.Response;
+            string? masterAgentThinking = null;
+            string agentName = runtimeResponse.AgentName;
+
+            // If there are execution steps, use the observation with the most content as the main response
+            // and treat the Master agent's response as thinking
+            if (runtimeResponse.ExecutionDetails?.ExecutionSteps?.Any() == true)
+            {
+                // Find the execution step with the longest/most complete observation
+                var bestStep = runtimeResponse.ExecutionDetails.ExecutionSteps
+                    .Where(s => !string.IsNullOrEmpty(s.Observation))
+                    .OrderByDescending(s => s.Observation.Length)
+                    .FirstOrDefault();
+
+                if (bestStep != null)
+                {
+                    masterAgentThinking = runtimeResponse.Response; // Master agent's response becomes thinking
+                    mainResponse = bestStep.Observation; // Best execution step observation becomes main response
+                    agentName = bestStep.ToolName; // Use the actual agent name from the execution step
+                }
+            }
+
             // Save agent response
             var agentMessage = new ChatMessage
             {
                 ChatSessionId = session.Id,
-                Content = runtimeResponse.Response,
+                Content = mainResponse, // Use the determined main response
                 Role = "assistant",
-                AgentName = runtimeResponse.AgentName,
+                AgentName = agentName, // Use the determined agent name
                 CreatedAt = DateTime.UtcNow
             };
 
@@ -105,8 +128,8 @@ namespace AgentPlatform.API.Services
             // Map the enhanced runtime response to ChatResponseDto
             return new ChatResponseDto
             {
-                Response = runtimeResponse.Response,
-                AgentName = runtimeResponse.AgentName,
+                Response = mainResponse, // Use the determined main response
+                AgentName = agentName, // Use the determined agent name
                 SessionId = session.Id,
                 Timestamp = DateTime.UtcNow,
                 Success = runtimeResponse.Success,
@@ -115,20 +138,6 @@ namespace AgentPlatform.API.Services
                 // Enhanced fields
                 AgentsUsed = runtimeResponse.AgentsUsed,
                 ToolsUsed = runtimeResponse.ToolsUsed,
-                AvailableAgents = new AvailableAgentsDto
-                {
-                    TotalAgents = runtimeResponse.AvailableAgents.TotalAgents,
-                    Agents = runtimeResponse.AvailableAgents.Agents.Select(a => new AgentInfoDto
-                    {
-                        Name = a.Name,
-                        Description = a.Description
-                    }).ToList()
-                },
-                AvailableTools = runtimeResponse.AvailableTools.Select(t => new AvailableToolDto
-                {
-                    Name = t.Name,
-                    Description = t.Description
-                }).ToList(),
                 ExecutionDetails = new ExecutionDetailsDto
                 {
                     TotalSteps = runtimeResponse.ExecutionDetails.TotalSteps,
@@ -139,7 +148,8 @@ namespace AgentPlatform.API.Services
                         Observation = s.Observation
                     }).ToList()
                 },
-                Metadata = runtimeResponse.Metadata
+                Metadata = runtimeResponse.Metadata,
+                MasterAgentThinking = masterAgentThinking // Add master agent thinking field
             };
         }
 
