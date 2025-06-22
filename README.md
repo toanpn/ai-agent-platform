@@ -13,7 +13,7 @@ This platform consists of multiple specialized AI agents that can handle differe
 | Frontend | 4200 | Angular + TypeScript | Modern web interface |
 | Backend API | 5000 | .NET 8 | REST API and business logic |
 | Database | 1433 | SQL Server | Data persistence |
-| Agent Core | 8000 | Python FastAPI | AI agent runtime |
+| Agent Core | 8000 | Python Flask | AI agent runtime with LangChain |
 
 ### 🎯 Key Features
 
@@ -44,23 +44,33 @@ This platform consists of multiple specialized AI agents that can handle differe
    cd ai-agent-platform
    ```
 
-2. **Start all services (Full Stack):**
+2. **Configure environment variables:**
+   ```bash
+   # Copy the environment template
+   cp env.template .env
+   
+   # Edit .env and set your Google API key (required for AgentPlatform.Core)
+   # Get your API key from: https://console.cloud.google.com/apis/credentials
+   ```
+
+3. **Start all services (Full Stack):**
    ```bash
    docker-compose up -d
    ```
 
-3. **Or start individual services:**
+4. **Or start individual services:**
    ```bash
-   # Backend only
+   # Backend only (includes database and agent core)
    cd backend && docker-compose up -d
    
    # Frontend only
    cd frontend && docker-compose up -d
    ```
 
-4. **Access the applications:**
+5. **Access the applications:**
    - Frontend: http://localhost:4200
    - Backend API: http://localhost:5000
+   - Agent Core API: http://localhost:8000
    - API Documentation: http://localhost:5000/swagger
 
 ## 🛠️ Technology Stack
@@ -139,6 +149,7 @@ This platform consists of multiple specialized AI agents that can handle differe
 ```
 ai-agent-platform/
 ├── docker-compose.yml         # Full stack Docker setup
+├── env.template               # Environment variables template
 ├── backend/                   # .NET 8 Backend
 │   ├── AgentPlatform.API/     # Main REST API
 │   │   ├── Models/            # Entity models with Tools & LLM config
@@ -148,9 +159,16 @@ ai-agent-platform/
 │   │   ├── Data/              # Database context & seeding
 │   │   ├── Migrations/        # EF Core migrations
 │   │   └── Dockerfile         # Backend container
-│   ├── AgentPlatform.Core/    # Agent configuration
-│   │   └── agents.json        # Agent definitions (auto-synced)
-│   ├── ADKAgentCore/          # Python Agent Runtime
+│   ├── AgentPlatform.Core/    # Python Agent Runtime
+│   │   ├── core/              # Agent management modules
+│   │   ├── toolkit/           # Agent tools (Jira, Search, etc.)
+│   │   ├── agents.json        # Agent definitions (auto-synced)
+│   │   ├── requirements.txt   # Python dependencies
+│   │   ├── main.py            # CLI entry point
+│   │   ├── start_api.py       # API server entry point
+│   │   ├── api_server.py      # Flask API server
+│   │   ├── Dockerfile         # Agent Core container
+│   │   └── .dockerignore      # Docker build optimization
 │   ├── shared/                # Shared models
 │   └── docker-compose.yml     # Backend services
 ├── frontend/                  # Angular Frontend

@@ -8,7 +8,7 @@ WORKDIR /app
 COPY package*.json ./
 
 # Install dependencies
-RUN npm ci --only=production
+RUN npm ci
 
 # Copy source code
 COPY . .
@@ -20,7 +20,7 @@ RUN npm run build
 FROM nginx:alpine AS production
 
 # Copy the built Angular application from the build stage
-COPY --from=build /app/dist/chatbot-ui /usr/share/nginx/html
+COPY --from=build /app/dist/chatbot-ui/browser /usr/share/nginx/html
 
 # Copy custom nginx configuration (optional)
 # COPY nginx.conf /etc/nginx/nginx.conf
