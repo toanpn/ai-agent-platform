@@ -102,6 +102,43 @@ class AgentSystemManager:
             logger.error(f"Error processing request: {e}")
             return f"❌ Error processing request: {str(e)}"
     
+    def process_user_request_with_details(self, user_input: str) -> Dict[str, Any]:
+        """Process a user request and return detailed execution information."""
+        if not self.master_agent:
+            return {
+                "response": "❌ System not initialized properly",
+                "agents_used": [],
+                "tools_used": [],
+                "execution_steps": [],
+                "total_steps": 0,
+                "available_agents": {"total_agents": 0, "agents": []},
+                "available_tools": [],
+                "error": "System not initialized"
+            }
+        
+        try:
+            result = self.master_agent.process_request_with_details(user_input)
+            
+            # Add available agents list to the result
+            result["available_agents"] = self.get_agent_info()
+            
+            # Add available tools list to the result (with detailed information)
+            result["available_tools"] = self.agent_manager.get_available_tools_details()
+            
+            return result
+        except Exception as e:
+            logger.error(f"Error processing request: {e}")
+            return {
+                "response": f"❌ Error processing request: {str(e)}",
+                "agents_used": [],
+                "tools_used": [],
+                "execution_steps": [],
+                "total_steps": 0,
+                "available_agents": self.get_agent_info(),
+                "available_tools": self.agent_manager.get_available_tools_details() if self.agent_manager else [],
+                "error": str(e)
+            }
+    
     def get_agent_info(self) -> Dict[str, Any]:
         """Get information about the current agent configuration."""
         if not self.master_agent:
@@ -155,7 +192,45 @@ def debug_info():
 
 @app.route('/api/chat', methods=['POST'])
 def chat():
-    """Main chat endpoint that processes user messages through the agent system."""
+    """
+    Main chat endpoint that processes user messages through the agent system.
+    
+    Enhanced Response Format:
+    {
+        "success": true,
+        "response": "The actual response from the agent",
+        "agentName": "MasterAgent",
+        "sessionId": "session_id_if_provided",
+        "agents_used": ["Agent1", "Agent2"],  // List of sub-agents that were used
+        "tools_used": ["tool1", "tool2"],     // List of tools that were invoked
+        "available_agents": {                 // All available agents in the system
+            "total_agents": 3,
+            "agents": [
+                {"name": "Agent1", "description": "Description of Agent1"},
+                {"name": "Agent2", "description": "Description of Agent2"}
+            ]
+        },
+        "available_tools": [                  // All available tools in the system
+            {"name": "tool1", "description": "Description of tool1"},
+            {"name": "tool2", "description": "Description of tool2"}
+        ],
+        "execution_details": {               // Detailed execution information
+            "execution_steps": [
+                {
+                    "tool_name": "Agent1",
+                    "tool_input": "User query passed to agent",
+                    "observation": "Response from the agent..."
+                }
+            ],
+            "total_steps": 1
+        },
+        "metadata": {
+            "timestamp": "2024-01-01T12:00:00.000Z",
+            "userId": "user123",
+            "error": null
+        }
+    }
+    """
     try:
         # Parse request data
         data = request.get_json()
@@ -185,20 +260,38 @@ def chat():
             return jsonify({
                 "success": False,
                 "error": "Agent system not initialized",
-                "response": error_msg
+                "response": error_msg,
+                "agents_used": [],
+                "tools_used": [],
+                "available_agents": {"total_agents": 0, "agents": []},
+                "available_tools": [],
+                "execution_details": {
+                    "execution_steps": [],
+                    "total_steps": 0
+                }
             }), 500
         
-        response = system_manager.process_user_request(message)
+        # Use the detailed processing method
+        execution_result = system_manager.process_user_request_with_details(message)
         
-        # Return response in expected format
+        # Return enhanced response with detailed information
         return jsonify({
             "success": True,
-            "response": response,
+            "response": execution_result.get("response", "No response generated"),
             "agentName": "MasterAgent",
             "sessionId": session_id,
+            "agents_used": execution_result.get("agents_used", []),
+            "tools_used": execution_result.get("tools_used", []),
+            "available_agents": execution_result.get("available_agents", {"total_agents": 0, "agents": []}),
+            "available_tools": execution_result.get("available_tools", []),
+            "execution_details": {
+                "execution_steps": execution_result.get("execution_steps", []),
+                "total_steps": execution_result.get("total_steps", 0)
+            },
             "metadata": {
                 "timestamp": datetime.utcnow().isoformat(),
-                "userId": user_id
+                "userId": user_id,
+                "error": execution_result.get("error")
             }
         })
         
@@ -207,7 +300,15 @@ def chat():
         return jsonify({
             "success": False,
             "error": str(e),
-            "response": "I apologize, but I'm having trouble processing your request right now. Please try again later."
+            "response": "I apologize, but I'm having trouble processing your request right now. Please try again later.",
+            "agents_used": [],
+            "tools_used": [],
+            "available_agents": {"total_agents": 0, "agents": []},
+            "available_tools": [],
+            "execution_details": {
+                "execution_steps": [],
+                "total_steps": 0
+            }
         }), 500
 
 
@@ -331,6 +432,182 @@ def initialize_system():
         # Don't exit here - let the API server start but return errors for requests
         pass
 
+
+@app.get("/system/graph-visualization")
+async def get_graph_visualization():
+    """Get graph visualization data including structure and execution flow."""
+    try:
+        # Get system information
+        system_info = system_manager.get_system_info()
+        
+        # Get graph structure if master agent exists
+        graph_structure = None
+        mermaid_diagram = None
+        
+        if system_manager.master_agent:
+            try:
+                # Get LangChain graph structure
+                graph = system_manager.master_agent.agent_executor
+                
+                # Get the graph representation
+                if hasattr(graph, 'get_graph'):
+                    graph_obj = graph.get_graph()
+                    
+                    # Get nodes and edges
+                    nodes = []
+                    edges = []
+                    
+                    # Extract nodes
+                    for node_id, node_data in graph_obj.nodes.items():
+                        nodes.append({
+                            "id": node_id,
+                            "label": node_data.get("name", node_id),
+                            "type": node_data.get("type", "node"),
+                            "description": getattr(node_data.get("data", {}), "description", ""),
+                        })
+                    
+                    # Extract edges
+                    for edge in graph_obj.edges:
+                        edges.append({
+                            "from": edge.source,
+                            "to": edge.target,
+                            "label": getattr(edge, "data", {}).get("label", "")
+                        })
+                    
+                    graph_structure = {
+                        "nodes": nodes,
+                        "edges": edges
+                    }
+                    
+                    # Get Mermaid diagram if available
+                    if hasattr(graph_obj, 'draw_mermaid'):
+                        mermaid_diagram = graph_obj.draw_mermaid()
+                        
+            except Exception as e:
+                logger.warning(f"Could not extract graph structure: {e}")
+        
+        # Create agent flow visualization data
+        agent_nodes = []
+        agent_edges = []
+        
+        if system_info.get("available_agents"):
+            agents = system_info["available_agents"]["agents"]
+            
+            # Add master agent node
+            agent_nodes.append({
+                "id": "master_agent",
+                "label": "Master Agent",
+                "type": "master",
+                "description": "Routes requests to appropriate sub-agents",
+                "color": "#4CAF50"
+            })
+            
+            # Add sub-agent nodes
+            for i, agent in enumerate(agents):
+                agent_nodes.append({
+                    "id": f"agent_{i}",
+                    "label": agent["name"],
+                    "type": "sub_agent",
+                    "description": agent["description"],
+                    "color": "#2196F3"
+                })
+                
+                # Add edge from master to sub-agent
+                agent_edges.append({
+                    "from": "master_agent",
+                    "to": f"agent_{i}",
+                    "label": "routes to"
+                })
+        
+        # Add tools visualization
+        tools_data = []
+        if system_info.get("available_tools"):
+            for tool in system_info["available_tools"]:
+                tools_data.append({
+                    "name": tool["name"],
+                    "description": tool["description"],
+                    "type": "tool"
+                })
+                
+                # Add tool nodes to agent flow
+                tool_id = f"tool_{tool['name']}"
+                agent_nodes.append({
+                    "id": tool_id,
+                    "label": tool["name"],
+                    "type": "tool",
+                    "description": tool["description"],
+                    "color": "#FF9800"
+                })
+        
+        return {
+            "success": True,
+            "data": {
+                "langchain_graph": {
+                    "structure": graph_structure,
+                    "mermaid": mermaid_diagram
+                },
+                "agent_flow": {
+                    "nodes": agent_nodes,
+                    "edges": agent_edges
+                },
+                "tools": tools_data,
+                "system_info": system_info
+            }
+        }
+        
+    except Exception as e:
+        logger.error(f"Error getting graph visualization data: {e}")
+        return {
+            "success": False,
+            "error": str(e),
+            "data": None
+        }
+
+@app.get("/system/execution-trace/{session_id}")
+async def get_execution_trace(session_id: str):
+    """Get execution trace for visualization of a specific conversation."""
+    try:
+        # This would integrate with your conversation history
+        # For now, return mock execution trace data
+        return {
+            "success": True,
+            "data": {
+                "session_id": session_id,
+                "execution_steps": [
+                    {
+                        "step": 1,
+                        "node": "master_agent",
+                        "type": "decision",
+                        "input": "User query received",
+                        "output": "Routing to HR_Agent",
+                        "timestamp": "2024-01-01T10:00:00Z"
+                    },
+                    {
+                        "step": 2,
+                        "node": "HR_Agent",
+                        "type": "agent",
+                        "input": "HR query about leave policy",
+                        "output": "Calling policy_document_search tool",
+                        "timestamp": "2024-01-01T10:00:01Z"
+                    },
+                    {
+                        "step": 3,
+                        "node": "policy_document_search",
+                        "type": "tool",
+                        "input": "leave policy search",
+                        "output": "Found relevant policy documents",
+                        "timestamp": "2024-01-01T10:00:02Z"
+                    }
+                ]
+            }
+        }
+        
+    except Exception as e:
+        logger.error(f"Error getting execution trace: {e}")
+        return {
+            "success": False,
+            "error": str(e)
+        }
 
 if __name__ == '__main__':
     # Initialize the system

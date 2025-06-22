@@ -102,12 +102,44 @@ namespace AgentPlatform.API.Services
             _context.ChatMessages.Add(agentMessage);
             await _context.SaveChangesAsync();
 
+            // Map the enhanced runtime response to ChatResponseDto
             return new ChatResponseDto
             {
                 Response = runtimeResponse.Response,
                 AgentName = runtimeResponse.AgentName,
                 SessionId = session.Id,
-                Timestamp = DateTime.UtcNow
+                Timestamp = DateTime.UtcNow,
+                Success = runtimeResponse.Success,
+                Error = runtimeResponse.Error,
+                
+                // Enhanced fields
+                AgentsUsed = runtimeResponse.AgentsUsed,
+                ToolsUsed = runtimeResponse.ToolsUsed,
+                AvailableAgents = new AvailableAgentsDto
+                {
+                    TotalAgents = runtimeResponse.AvailableAgents.TotalAgents,
+                    Agents = runtimeResponse.AvailableAgents.Agents.Select(a => new AgentInfoDto
+                    {
+                        Name = a.Name,
+                        Description = a.Description
+                    }).ToList()
+                },
+                AvailableTools = runtimeResponse.AvailableTools.Select(t => new AvailableToolDto
+                {
+                    Name = t.Name,
+                    Description = t.Description
+                }).ToList(),
+                ExecutionDetails = new ExecutionDetailsDto
+                {
+                    TotalSteps = runtimeResponse.ExecutionDetails.TotalSteps,
+                    ExecutionSteps = runtimeResponse.ExecutionDetails.ExecutionSteps.Select(s => new ExecutionStepDto
+                    {
+                        ToolName = s.ToolName,
+                        ToolInput = s.ToolInput,
+                        Observation = s.Observation
+                    }).ToList()
+                },
+                Metadata = runtimeResponse.Metadata
             };
         }
 

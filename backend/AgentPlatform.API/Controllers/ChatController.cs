@@ -18,6 +18,14 @@ namespace AgentPlatform.API.Controllers
             _chatService = chatService;
         }
 
+        /// <summary>
+        /// Send a message to the agent system and receive an enhanced response
+        /// </summary>
+        /// <param name="request">The message request containing the message text and optional session/agent information</param>
+        /// <returns>Enhanced chat response with agent execution details, available agents, and tools information</returns>
+        /// <response code="200">Returns the enhanced chat response with execution details</response>
+        /// <response code="400">If the request is invalid</response>
+        /// <response code="500">If there's an error processing the message</response>
         [HttpPost("message")]
         public async Task<ActionResult<ChatResponseDto>> SendMessage([FromBody] SendMessageRequestDto request)
         {

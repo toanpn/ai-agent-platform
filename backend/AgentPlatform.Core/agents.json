@@ -8,7 +8,7 @@
     ],
     "llm_config": {
       "model_name": "gemini-2.0-flash",
-      "temperature": 0.0
+      "temperature": 0
     }
   },
   {
@@ -35,20 +35,8 @@
     }
   },
   {
-    "agent_name": "Personal_Assistant_Agent",
-    "description": "Useful for personal assistance tasks like checking calendar events, weather information, and scheduling. Use this agent when users need help with daily planning, meeting schedules, or weather updates.",
-    "tools": [
-      "check_calendar",
-      "check_weather"
-    ],
-    "llm_config": {
-      "model_name": "gemini-2.0-flash",
-      "temperature": 0.3
-    }
-  },
-  {
     "agent_name": "General_Utility_Agent",
-    "description": "A versatile agent that can handle various utility tasks including web searches, calendar checks, and weather information. Use this as a fallback when other agents don't match the request.",
+    "description": "A versatile agent that can handle various utility tasks including web searches, calendar checks, and weather information. Use this as a fallback when other agents don\u0027t match the request.",
     "tools": [
       "google_search",
       "check_calendar",
@@ -58,5 +46,18 @@
       "model_name": "gemini-2.0-flash",
       "temperature": 0.4
     }
+  },
+  {
+    "agent_name": "ADK Assistant",
+    "description": "An advanced AI assistant powered by Google ADK with multi-tool capabilities and workflow orchestration",
+    "tools": [
+      "adk_search",
+      "adk_http_request",
+      "adk_workflow"
+    ],
+    "llm_config": {
+      "model_name": "gemini-2.0-flash",
+      "temperature": 0.2
+    }
   }
-] 
+]

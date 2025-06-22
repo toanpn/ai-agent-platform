@@ -93,7 +93,13 @@ Important guidelines:
 - Always try to use your available tools to provide the best possible assistance
 - If you need clarification on any parameters, ask the user for more details
 - Provide clear, helpful, and professional responses
-- If a task is outside your capabilities, explain what you can help with instead"""),
+- If a task is outside your capabilities, explain what you can help with instead
+
+CRITICAL LANGUAGE REQUIREMENT:
+- You MUST respond to users in Vietnamese (tiếng Việt)
+- All your responses should be in Vietnamese language
+- This is a requirement for the user interface and user experience
+- Even if the user asks in English, respond in Vietnamese"""),
             ("human", "{input}"),
             ("placeholder", "{agent_scratchpad}"),
         ])
@@ -173,6 +179,16 @@ Important guidelines:
     def get_available_tools(self) -> List[str]:
         """Get list of available tool names."""
         return list(self.available_tools.keys())
+    
+    def get_available_tools_details(self) -> List[Dict[str, str]]:
+        """Get detailed information about available tools."""
+        tools_details = []
+        for tool_name, tool_obj in self.available_tools.items():
+            tools_details.append({
+                "name": tool_name,
+                "description": getattr(tool_obj, 'description', 'No description available')
+            })
+        return tools_details
     
     def get_loaded_agents(self) -> List[str]:
         """Get list of loaded agent names."""

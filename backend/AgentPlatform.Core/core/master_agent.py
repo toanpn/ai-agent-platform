@@ -49,6 +49,11 @@ Guidelines for routing requests:
 - If no agent seems appropriate, use the General_Search_Agent as a fallback
 - Pass the complete user question to the selected agent
 
+IMPORTANT LANGUAGE INSTRUCTION: 
+- Always ensure that the final response to the user is provided in Vietnamese
+- When delegating to sub-agents, include an instruction that they must respond in Vietnamese
+- The user interface expects Vietnamese responses, so this is critical
+
 Remember: Your job is to be a smart router, not to provide direct answers. Trust your specialist agents to handle their domains of expertise."""),
             ("human", "{input}"),
             ("placeholder", "{agent_scratchpad}"),
@@ -112,6 +117,79 @@ Remember: Your job is to be a smart router, not to provide direct answers. Trust
             error_msg = f"Master Agent encountered an error: {str(e)}"
             print(f"Error: {error_msg}")
             return error_msg
+    
+    def process_request_with_details(self, user_input: str) -> dict:
+        """
+        Process a user request and return both response and execution details.
+        
+        Args:
+            user_input: The user's query or request
+            
+        Returns:
+            dict: Contains response, agents used, tools used, and execution details
+        """
+        try:
+            # Log the incoming request
+            print(f"Master Agent received request: {user_input}")
+            
+            # Process the request through the agent executor
+            result = self.agent_executor.invoke({"input": user_input})
+            
+            # Extract the output
+            output = result.get("output", "No response generated")
+            
+            # Extract execution details
+            intermediate_steps = result.get("intermediate_steps", [])
+            
+            # Analyze intermediate steps to extract agents and tools used
+            agents_used = set()
+            tools_used = set()
+            execution_steps = []
+            
+            for step in intermediate_steps:
+                if len(step) >= 2:
+                    action, observation = step[0], step[1]
+                    
+                    # Extract tool/agent name from action
+                    if hasattr(action, 'tool'):
+                        tool_name = action.tool
+                        tools_used.add(tool_name)
+                        
+                        # Check if this tool is actually a sub-agent
+                        for agent in self.sub_agents:
+                            if agent.name == tool_name:
+                                agents_used.add(tool_name)
+                                break
+                        else:
+                            # It's a regular tool, not a sub-agent
+                            pass
+                    
+                    # Record execution step
+                    execution_steps.append({
+                        "tool_name": getattr(action, 'tool', 'unknown'),
+                        "tool_input": getattr(action, 'tool_input', ''),
+                        "observation": str(observation)[:200] + "..." if len(str(observation)) > 200 else str(observation)
+                    })
+            
+            return {
+                "response": output,
+                "agents_used": list(agents_used),
+                "tools_used": list(tools_used),
+                "execution_steps": execution_steps,
+                "total_steps": len(intermediate_steps)
+            }
+            
+        except Exception as e:
+            error_msg = f"Master Agent encountered an error: {str(e)}"
+            print(f"Error: {error_msg}")
+            return {
+                "response": error_msg,
+                "agents_used": [],
+                "tools_used": [],
+                "execution_steps": [],
+                "total_steps": 0,
+                "error": str(e)
+            }
     
     def update_sub_agents(self, new_sub_agents: List[BaseTool]):
         """

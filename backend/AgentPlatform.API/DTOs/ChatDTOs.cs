@@ -36,6 +36,47 @@ namespace AgentPlatform.API.DTOs
         public string AgentName { get; set; } = string.Empty;
         public int SessionId { get; set; }
         public DateTime Timestamp { get; set; }
+        public bool Success { get; set; } = true;
+        public string? Error { get; set; }
+        
+        // Enhanced response fields
+        public List<string> AgentsUsed { get; set; } = new();
+        public List<string> ToolsUsed { get; set; } = new();
+        public AvailableAgentsDto AvailableAgents { get; set; } = new();
+        public List<AvailableToolDto> AvailableTools { get; set; } = new();
+        public ExecutionDetailsDto ExecutionDetails { get; set; } = new();
+        public Dictionary<string, object> Metadata { get; set; } = new();
+    }
+
+    public class AvailableAgentsDto
+    {
+        public int TotalAgents { get; set; }
+        public List<AgentInfoDto> Agents { get; set; } = new();
+    }
+
+    public class AgentInfoDto
+    {
+        public string Name { get; set; } = string.Empty;
+        public string Description { get; set; } = string.Empty;
+    }
+
+    public class AvailableToolDto
+    {
+        public string Name { get; set; } = string.Empty;
+        public string Description { get; set; } = string.Empty;
+    }
+
+    public class ExecutionDetailsDto
+    {
+        public List<ExecutionStepDto> ExecutionSteps { get; set; } = new();
+        public int TotalSteps { get; set; }
+    }
+
+    public class ExecutionStepDto
+    {
+        public string ToolName { get; set; } = string.Empty;
+        public string ToolInput { get; set; } = string.Empty;
+        public string Observation { get; set; } = string.Empty;
     }
 
     public class ChatHistoryDto

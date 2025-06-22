@@ -51,7 +51,11 @@ builder.Services.AddSingleton<IRateLimitConfiguration, RateLimitConfiguration>()
 builder.Services.AddSingleton<IProcessingStrategy, AsyncKeyLockProcessingStrategy>();
 
 // Add HttpClient
-builder.Services.AddHttpClient<IAgentRuntimeClient, AgentRuntimeClient>();
+builder.Services.AddHttpClient<IAgentRuntimeClient, AgentRuntimeClient>(client =>
+{
+    // Configure timeout - 30 seconds should be more than enough
+    client.Timeout = TimeSpan.FromSeconds(30);
+});
 
 // Add AutoMapper
 builder.Services.AddAutoMapper(typeof(MappingProfile));
