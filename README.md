@@ -44,26 +44,21 @@ This platform consists of multiple specialized AI agents that can handle differe
    cd ai-agent-platform
    ```
 
-2. **Start the backend services:**
+2. **Start all services (Full Stack):**
    ```bash
-   cd backend
    docker-compose up -d
    ```
 
-3. **Apply database migrations:**
+3. **Or start individual services:**
    ```bash
-   cd AgentPlatform.API
-   dotnet ef database update
+   # Backend only
+   cd backend && docker-compose up -d
+   
+   # Frontend only
+   cd frontend && docker-compose up -d
    ```
 
-4. **Start the frontend:**
-   ```bash
-   cd frontend
-   npm install
-   ng serve
-   ```
-
-5. **Access the applications:**
+4. **Access the applications:**
    - Frontend: http://localhost:4200
    - Backend API: http://localhost:5000
    - API Documentation: http://localhost:5000/swagger
@@ -143,14 +138,16 @@ This platform consists of multiple specialized AI agents that can handle differe
 
 ```
 ai-agent-platform/
-├── backend/                    # .NET 8 Backend
+├── docker-compose.yml         # Full stack Docker setup
+├── backend/                   # .NET 8 Backend
 │   ├── AgentPlatform.API/     # Main REST API
 │   │   ├── Models/            # Entity models with Tools & LLM config
 │   │   ├── DTOs/              # Data transfer objects
 │   │   ├── Services/          # Business logic with JSON sync
 │   │   ├── Controllers/       # API endpoints
 │   │   ├── Data/              # Database context & seeding
-│   │   └── Migrations/        # EF Core migrations
+│   │   ├── Migrations/        # EF Core migrations
+│   │   └── Dockerfile         # Backend container
 │   ├── AgentPlatform.Core/    # Agent configuration
 │   │   └── agents.json        # Agent definitions (auto-synced)
 │   ├── ADKAgentCore/          # Python Agent Runtime
@@ -163,7 +160,10 @@ ai-agent-platform/
 │   │   └── shared/            # Shared components, models, pipes
 │   ├── angular.json           # Angular CLI configuration
 │   ├── package.json           # NPM dependencies
-│   └── tsconfig.json          # TypeScript configuration
+│   ├── tsconfig.json          # TypeScript configuration
+│   ├── Dockerfile             # Frontend container
+│   ├── .dockerignore          # Docker build optimization
+│   └── docker-compose.yml     # Frontend service
 └── docs/                      # Documentation
 ```
 

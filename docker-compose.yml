@@ -1,0 +1,98 @@
+services:
+  # Database
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: agentplatform-sqlserver
+    environment:
+      SA_PASSWORD: "YourStrong@Passw0rd"
+      ACCEPT_EULA: "Y"
+      MSSQL_PID: "Express"
+    ports:
+      - "1433:1433"
+    volumes:
+      - sqlserver_data:/var/opt/mssql
+    networks:
+      - agentplatform-network
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P YourStrong@Passw0rd -Q 'SELECT 1'"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # Backend API
+  api:
+    build:
+      context: ./backend
+      dockerfile: ./AgentPlatform.API/Dockerfile
+    container_name: agentplatform-api
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ConnectionStrings__DefaultConnection=Server=sqlserver,1433;Database=agentplatform;User Id=sa;Password=YourStrong@Passw0rd;TrustServerCertificate=true;MultipleActiveResultSets=true
+      - AgentRuntime__BaseUrl=http://adk-agent:8000
+      - ASPNETCORE_URLS=http://+:80
+    ports:
+      - "5000:80"
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+      adk-agent:
+        condition: service_started
+    volumes:
+      - ./backend/uploads:/app/uploads
+    networks:
+      - agentplatform-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ADK Agent Core (Python)
+  adk-agent:
+    build:
+      context: ./backend/AgentPlatform.Core
+      dockerfile: Dockerfile
+    container_name: agentplatform-adk
+    environment:
+      - PYTHONPATH=/app
+      - FLASK_ENV=production
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend/AgentPlatform.Core/uploads:/app/uploads
+      - ./backend/AgentPlatform.Core/agents.json:/app/agents.json
+    networks:
+      - agentplatform-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Frontend
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: agentplatform-frontend
+    ports:
+      - "4200:80"
+    environment:
+      - NODE_ENV=production
+    depends_on:
+      api:
+        condition: service_healthy
+    networks:
+      - agentplatform-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  sqlserver_data:
+
+networks:
+  agentplatform-network:
+    driver: bridge 
