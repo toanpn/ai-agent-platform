@@ -293,5 +293,39 @@ namespace AgentPlatform.API.Services
                 return false;
             }
         }
+
+        public async Task<string?> EnhancePromptAsync(string query)
+        {
+            try
+            {
+                var coreApiRequest = new { query };
+                var response = await _httpClient.PostAsJsonAsync("/api/enhance-prompt", coreApiRequest);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var responseStream = await response.Content.ReadAsStreamAsync();
+                    using var jsonDocument = await JsonDocument.ParseAsync(responseStream);
+                    var enhancementResponse = jsonDocument.RootElement;
+
+                    if (enhancementResponse.TryGetProperty("enhanced_prompt", out var promptElement))
+                    {
+                        return promptElement.GetRawText();
+                    }
+
+                    _logger.LogWarning("'/api/enhance-prompt' response did not contain 'enhanced_prompt' field.");
+                    return null;
+                }
+
+                var errorContent = await response.Content.ReadAsStringAsync();
+                _logger.LogError("Error from core API service: {StatusCode} - {ErrorContent}", response.StatusCode, errorContent);
+                return null;
+            
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Unexpected error enhancing prompt");
+                return null;
+            }
+        }
     }
 } 

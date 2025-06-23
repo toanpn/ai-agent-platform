@@ -78,6 +78,11 @@ namespace AgentPlatform.API.DTOs
         public string Observation { get; set; } = string.Empty;
     }
 
+    public class EnhancePromptRequestDto
+    {
+        public string Message { get; set; } = string.Empty;
+    }
+
     public class ChatHistoryDto
     {
         public List<ChatSessionDto> Sessions { get; set; } = new();
