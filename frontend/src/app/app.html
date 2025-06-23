@@ -5,7 +5,6 @@
 		@if(user$ | async; as user) {
 		<button mat-button (click)="navigateTo('/agents')">{{ 'COMMON.AGENTS' | translate }}</button>
 		<button mat-button (click)="navigateTo('/chat')">{{ 'COMMON.CHAT' | translate }}</button>
-		<button mat-button (click)="navigateTo('/demo')">Demo</button>
 		
 		<!-- Language Selector -->
 		<app-language-selector></app-language-selector>
