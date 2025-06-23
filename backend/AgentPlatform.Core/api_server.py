@@ -13,10 +13,12 @@ from typing import Dict, Any, List, Optional
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from dotenv import load_dotenv
+import asyncio
 
 # Import our custom modules
 from core.agent_manager import AgentManager
 from core.master_agent import MasterAgent, create_master_agent
+from core.prompt_enhancer import enhance_prompt_async
 
 # Load environment variables
 load_dotenv()
@@ -309,6 +311,38 @@ def chat():
                 "execution_steps": [],
                 "total_steps": 0
             }
+        }), 500
+
+
+@app.route('/api/enhance-prompt', methods=['POST'])
+def enhance_prompt():
+    """
+    Receives a raw user query, enhances it, and returns the structured result.
+    """
+    try:
+        data = request.get_json()
+        if not data or 'query' not in data:
+            return jsonify({"success": False, "error": "Query is required"}), 400
+
+        raw_query = data['query']
+        
+        if not system_manager or not system_manager.master_agent:
+            return jsonify({"success": False, "error": "System not initialized"}), 503
+
+        # Get agent information needed for enhancement
+        agent_info = system_manager.get_agent_info()
+
+        # Run the async enhancement function
+        enhanced_prompt = asyncio.run(enhance_prompt_async(raw_query, agent_info))
+        
+        return jsonify({"success": True, "enhanced_prompt": enhanced_prompt})
+
+    except Exception as e:
+        logger.error(f"Error in /api/enhance-prompt endpoint: {e}", exc_info=True)
+        return jsonify({
+            "success": False,
+            "error": "Internal Server Error",
+            "response": str(e)
         }), 500
 
 
@@ -625,5 +659,6 @@ if __name__ == '__main__':
     logger.info(f"   - Agents info: GET /api/agents")
     logger.info(f"   - Reload: POST /api/reload")
     logger.info(f"   - Manual init: POST /api/initialize")
+    logger.info(f"   - Enhance prompt: POST /api/enhance-prompt")
     
     app.run(host='0.0.0.0', port=port, debug=debug) 

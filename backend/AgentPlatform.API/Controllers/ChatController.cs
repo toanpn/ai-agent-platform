@@ -72,6 +72,18 @@ namespace AgentPlatform.API.Controllers
             return NoContent();
         }
 
+        [HttpPost("enhance-prompt")]
+        public async Task<ActionResult<string>> EnhancePrompt([FromBody] EnhancePromptRequestDto request)
+        {
+            var enhancedPrompt = await _chatService.EnhancePromptAsync(request.Message);
+            if (enhancedPrompt == null)
+            {
+                return BadRequest("Failed to enhance prompt.");
+            }
+
+            return Ok(new { enhancedPrompt });
+        }
+
         private int GetUserId()
         {
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
