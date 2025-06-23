@@ -1,7 +1,8 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { ApiService } from './api.service';
 import { BehaviorSubject, Observable, tap } from 'rxjs';
 import { StorageService } from './storage.service';
+import { ChatStateService } from '../../features/chat/chat-state.service';
 
 export interface User {
 	id: string;
@@ -31,27 +32,27 @@ export interface LoginResponse {
 	providedIn: 'root',
 })
 export class AuthService {
+	private api = inject(ApiService);
+	private storage = inject(StorageService);
+	private chatState = inject(ChatStateService);
 	private currentUserSubject = new BehaviorSubject<User | null>(null);
 	public currentUser$ = this.currentUserSubject.asObservable();
 
-	constructor(
-		private api: ApiService,
-		private storage: StorageService,
-	) {
+	constructor() {}
+
+	init(): void {
 		// Try to load user from storage on service initialization
 		const savedUser = this.storage.getItem('user');
 		if (savedUser) {
 			try {
 				this.currentUserSubject.next(JSON.parse(savedUser));
+				this.chatState.initialize();
 			} catch (error) {
 				this.storage.removeItem('user');
 			}
 		}
 	}
 
-	/**
-	 * Log in user with username and password
-	 */
 	/**
 	 * Register a new user
 	 */
@@ -84,6 +85,9 @@ export class AuthService {
 
 				// Update current user subject
 				this.currentUserSubject.next(response.user);
+
+				// Initialize chat state
+				this.chatState.initialize();
 			}),
 		);
 	}
@@ -98,6 +102,9 @@ export class AuthService {
 
 		// Reset current user
 		this.currentUserSubject.next(null);
+
+		// Destroy chat state
+		this.chatState.destroy();
 	}
 
 	/**

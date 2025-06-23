@@ -1,21 +1,23 @@
 import {
 	ApplicationConfig,
-	provideBrowserGlobalErrorListeners,
-	provideZoneChangeDetection,
+	importProvidersFrom,
+	provideAppInitializer,
+	inject,
+    provideBrowserGlobalErrorListeners,
+    provideZoneChangeDetection,
 } from '@angular/core';
 import { provideRouter } from '@angular/router';
-import { provideAnimations } from '@angular/platform-browser/animations';
+import { routes } from './app.routes';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
-import { provideHashbrown } from '@hashbrownai/angular';
-import { MatSnackBarModule } from '@angular/material/snack-bar';
-import { importProvidersFrom } from '@angular/core';
-import { TranslateModule, TranslateLoader } from '@ngx-translate/core';
+import { provideAnimations } from '@angular/platform-browser/animations';
+import { AuthInterceptor } from './core/interceptors/auth.interceptor';
+import { AuthService } from './core/services/auth.service';
+import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { TranslateHttpLoader } from '@ngx-translate/http-loader';
 import { HttpClient } from '@angular/common/http';
-
-import { routes } from './app.routes';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { environment } from '../environments/environment';
-import { AuthInterceptor } from './core/interceptors/auth.interceptor';
+import { provideHashbrown } from '@hashbrownai/angular';
 
 // AoT requires an exported function for factories
 export function HttpLoaderFactory(http: HttpClient) {
@@ -38,10 +40,11 @@ export const appConfig: ApplicationConfig = {
 				loader: {
 					provide: TranslateLoader,
 					useFactory: HttpLoaderFactory,
-					deps: [HttpClient]
+					deps: [HttpClient],
 				},
-				defaultLanguage: 'vi'
-			})
+				defaultLanguage: 'vi',
+			}),
 		),
+		provideAppInitializer(() => inject(AuthService).init()),
 	],
 };

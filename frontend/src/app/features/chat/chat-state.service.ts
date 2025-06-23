@@ -1,8 +1,22 @@
 import { inject, Injectable } from '@angular/core';
 import { BehaviorSubject, throwError, of, Subject } from 'rxjs';
-import { catchError, tap, takeUntil, switchMap, withLatestFrom, filter, finalize, map } from 'rxjs/operators';
+import {
+	catchError,
+	tap,
+	takeUntil,
+	switchMap,
+	withLatestFrom,
+	filter,
+	finalize,
+	map,
+} from 'rxjs/operators';
 import { Agent, AgentService } from '../../core/services/agent.service';
-import { ChatService, Conversation, Message, StreamResponse } from '../../core/services/chat.service';
+import {
+	ChatService,
+	Conversation,
+	Message,
+	StreamResponse,
+} from '../../core/services/chat.service';
 import { NotificationService } from '../../core/services/notification.service';
 
 @Injectable({
@@ -37,23 +51,16 @@ export class ChatStateService {
 	public agents$ = this.agents.asObservable();
 	public selectedAgent$ = this.selectedAgent.asObservable();
 
-	constructor() {
+	initialize(): void {
 		this.handleSelectConversation();
 		this.handleSendMessage();
 		this.handleStartNewChat();
-	}
-
-	init(initialAgent?: Agent): void {
-		if (initialAgent) {
-			this.selectedAgent.next(initialAgent);
-		}
 		this.loadInitialData();
 	}
 
 	destroy(): void {
 		this.destroy$.next();
 		this.destroy$.complete();
-		this.destroy$ = new Subject<void>();
 		this.resetState();
 	}
 
@@ -134,13 +141,23 @@ export class ChatStateService {
 					this.isLoading.next(true);
 
 					const messageHandler$ = this.useStreaming
-						? this.handleStreamingResponse(messageText, selectedAgent!, currentConversation)
-						: this.handleNonStreamingResponse(messageText, selectedAgent!, currentConversation);
+						? this.handleStreamingResponse(
+								messageText,
+								selectedAgent!,
+								currentConversation,
+							)
+						: this.handleNonStreamingResponse(
+								messageText,
+								selectedAgent!,
+								currentConversation,
+							);
 
 					return messageHandler$.pipe(
 						catchError((err) => {
 							this.notificationService.showError('Failed to send message.');
-							this.messages.next(this.messages.value.filter((m) => m.id !== optimisticMessage.id));
+							this.messages.next(
+								this.messages.value.filter((m) => m.id !== optimisticMessage.id),
+							);
 							this.isLoading.next(false);
 							return throwError(() => err);
 						}),
@@ -151,83 +168,117 @@ export class ChatStateService {
 			.subscribe();
 	}
 
-	private handleNonStreamingResponse(messageText: string, selectedAgent: Agent, currentConversation: Conversation | null) {
-		return this.chatService.sendMessageNonStreaming(messageText, selectedAgent.name, currentConversation?.id).pipe(
-			tap((response) => {
-				const userMessage = { ...this.messages.value.find(m => m.id.startsWith('temp-'))!, id: `msg-user-${Date.now()}` };
-				const assistantMessage: Message = {
-					id: `msg-assistant-${Date.now()}`,
-					text: response.response,
-					sender: 'assistant',
-					timestamp: new Date(response.timestamp),
-					conversationId: response.sessionId.toString(),
-					agentName: response.agentName,
-				};
-				this.messages.next([...this.messages.value.filter(m => !m.id.startsWith('temp-')), userMessage, assistantMessage]);
+	private handleNonStreamingResponse(
+		messageText: string,
+		selectedAgent: Agent,
+		currentConversation: Conversation | null,
+	) {
+		return this.chatService
+			.sendMessageNonStreaming(messageText, selectedAgent.name, currentConversation?.id)
+			.pipe(
+				tap((response) => {
+					const userMessage = {
+						...this.messages.value.find((m) => m.id.startsWith('temp-'))!,
+						id: `msg-user-${Date.now()}`,
+					};
+					const assistantMessage: Message = {
+						id: `msg-assistant-${Date.now()}`,
+						text: response.response,
+						sender: 'assistant',
+						timestamp: new Date(response.timestamp),
+						conversationId: response.sessionId.toString(),
+						agentName: response.agentName,
+					};
+					this.messages.next([
+						...this.messages.value.filter((m) => !m.id.startsWith('temp-')),
+						userMessage,
+						assistantMessage,
+					]);
 
-				if (response.sessionId && !currentConversation?.id) {
-					this.activeConversation.next({
-						id: response.sessionId.toString(),
-						title: `Conversation ${response.sessionId}`,
-						timestamp: new Date(),
-					});
-					this.chatService
-						.loadConversations()
-						.pipe(takeUntil(this.destroy$))
-						.subscribe((convos) => this.conversations.next(convos));
-				}
-			}),
-			finalize(() => this.isLoading.next(false)),
-			map(() => void 0) // Discard the response value
-		);
+					if (response.sessionId && !currentConversation?.id) {
+						this.activeConversation.next({
+							id: response.sessionId.toString(),
+							title: `Conversation ${response.sessionId}`,
+							timestamp: new Date(),
+						});
+						this.chatService
+							.loadConversations()
+							.pipe(takeUntil(this.destroy$))
+							.subscribe((convos) => this.conversations.next(convos));
+					}
+				}),
+				finalize(() => this.isLoading.next(false)),
+				map(() => void 0), // Discard the response value
+			);
 	}
 
-	private handleStreamingResponse(messageText: string, selectedAgent: Agent, currentConversation: Conversation | null) {
+	private handleStreamingResponse(
+		messageText: string,
+		selectedAgent: Agent,
+		currentConversation: Conversation | null,
+	) {
 		let assistantMessage: Message | null = null;
 		const assistantMessageId = `streaming-${Date.now()}`;
 
-		return this.chatService.sendMessage(messageText, selectedAgent.name, currentConversation?.id).pipe(
-			tap((response: StreamResponse) => {
-				if (response.error) throw new Error(response.error);
+		return this.chatService
+			.sendMessage(messageText, selectedAgent.name, currentConversation?.id)
+			.pipe(
+				tap((response: StreamResponse) => {
+					if (response.error) throw new Error(response.error);
 
-				if (response.sessionId && !currentConversation?.id) {
-					this.activeConversation.next({
-						id: response.sessionId.toString(),
-						title: `Conversation ${response.sessionId}`,
-						timestamp: new Date(),
-					});
-					this.chatService
-						.loadConversations()
-						.pipe(takeUntil(this.destroy$))
-						.subscribe((convos) => this.conversations.next(convos));
-				}
-
-				if (response.chunk) {
-					if (!assistantMessage) {
-						assistantMessage = {
-							id: assistantMessageId,
-							text: response.chunk,
-							sender: 'assistant',
+					if (response.sessionId && !currentConversation?.id) {
+						this.activeConversation.next({
+							id: response.sessionId.toString(),
+							title: `Conversation ${response.sessionId}`,
 							timestamp: new Date(),
-							conversationId: currentConversation?.id || this.activeConversation.value?.id || '',
-							agentName: this.selectedAgent.value?.name,
-						};
-						this.messages.next([...this.messages.value, assistantMessage]);
-					} else {
-						assistantMessage.text += response.chunk;
-						this.messages.next(this.messages.value.map(m => m.id === assistantMessageId ? { ...assistantMessage! } : m));
+						});
+						this.chatService
+							.loadConversations()
+							.pipe(takeUntil(this.destroy$))
+							.subscribe((convos) => this.conversations.next(convos));
 					}
-				}
-			}),
-			finalize(() => {
-				this.isLoading.next(false);
-				const finalMessage = this.messages.value.find(m => m.id === assistantMessageId);
-				if (finalMessage) {
-					this.messages.next(this.messages.value.map(m => m.id === assistantMessageId ? { ...finalMessage, id: `msg-${Date.now()}` } : m));
-				}
-			}),
-			map(() => void 0) // Discard the response values
-		);
+
+					if (response.chunk) {
+						if (!assistantMessage) {
+							assistantMessage = {
+								id: assistantMessageId,
+								text: response.chunk,
+								sender: 'assistant',
+								timestamp: new Date(),
+								conversationId:
+									currentConversation?.id ||
+									this.activeConversation.value?.id ||
+									'',
+								agentName: this.selectedAgent.value?.name,
+							};
+							this.messages.next([...this.messages.value, assistantMessage]);
+						} else {
+							assistantMessage.text += response.chunk;
+							this.messages.next(
+								this.messages.value.map((m) =>
+									m.id === assistantMessageId ? { ...assistantMessage! } : m,
+								),
+							);
+						}
+					}
+				}),
+				finalize(() => {
+					this.isLoading.next(false);
+					const finalMessage = this.messages.value.find(
+						(m) => m.id === assistantMessageId,
+					);
+					if (finalMessage) {
+						this.messages.next(
+							this.messages.value.map((m) =>
+								m.id === assistantMessageId
+									? { ...finalMessage, id: `msg-${Date.now()}` }
+									: m,
+							),
+						);
+					}
+				}),
+				map(() => void 0), // Discard the response values
+			);
 	}
 
 	private handleStartNewChat(): void {

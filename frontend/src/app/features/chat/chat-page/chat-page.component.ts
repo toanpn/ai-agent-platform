@@ -27,11 +27,13 @@ export class ChatPageComponent implements OnInit, OnDestroy {
 	}
 
 	ngOnInit(): void {
-		this.chatState.init(this.initialAgent);
+		if (this.initialAgent) {
+			this.chatState.selectAgent(this.initialAgent);
+		}
 	}
 
 	ngOnDestroy(): void {
-		this.chatState.destroy();
+		// The lifecycle is now managed by AuthService
 	}
 
 	onConversationSelected(conversation: Conversation): void {
