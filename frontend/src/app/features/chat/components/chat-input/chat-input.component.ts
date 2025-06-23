@@ -1,4 +1,10 @@
-import { Component, EventEmitter, Output, Input } from '@angular/core';
+import {
+	Component,
+	ChangeDetectionStrategy,
+	input,
+	output,
+	signal,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
@@ -26,25 +32,22 @@ import { TranslateModule } from '@ngx-translate/core';
 	],
 	templateUrl: './chat-input.component.html',
 	styleUrls: ['./chat-input.component.scss'],
+	changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ChatInputComponent {
-	/** Event emitter for when a message is sent */
-	@Output() sendMessage = new EventEmitter<string>();
-
-	/** Whether the input is disabled (e.g., while waiting for a response) */
-	@Input() disabled: boolean = false;
-
-	/** The current message text being composed */
-	messageText: string = '';
+	sendMessage = output<string>();
+	disabled = input<boolean>(false);
+	messageText = signal('');
 
 	/**
 	 * Handles the send button click event
 	 * Emits the message text if it's not empty and the input is not disabled
 	 */
 	onSendClick(): void {
-		if (this.messageText.trim() && !this.disabled) {
-			this.sendMessage.emit(this.messageText);
-			this.resetInput();
+		const text = this.messageText().trim();
+		if (text && !this.disabled()) {
+			this.sendMessage.emit(text);
+			this.messageText.set('');
 		}
 	}
 
@@ -54,16 +57,14 @@ export class ChatInputComponent {
 	 * @param event - The keyboard event
 	 */
 	onKeyDown(event: KeyboardEvent): void {
-		if (event.key === 'Enter' && !event.shiftKey && !this.disabled) {
+		if (event.key === 'Enter' && !event.shiftKey && !this.disabled()) {
 			event.preventDefault();
 			this.onSendClick();
 		}
 	}
 
-	/**
-	 * Resets the input field after sending a message
-	 */
-	private resetInput(): void {
-		this.messageText = '';
+	onMessageTextChanged(event: Event) {
+		const value = (event.target as HTMLInputElement).value;
+		this.messageText.set(value);
 	}
 }

@@ -1,4 +1,11 @@
-import { Component, Input, ViewChild, ElementRef, AfterViewChecked } from '@angular/core';
+import {
+	Component,
+	input,
+	ChangeDetectionStrategy,
+	viewChild,
+	ElementRef,
+	effect,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TranslateModule } from '@ngx-translate/core';
 import { Message } from '../../../../core/services/chat.service';
@@ -10,25 +17,29 @@ import { ChatMessageComponent } from '../chat-message/chat-message.component';
 	imports: [CommonModule, ChatMessageComponent, TranslateModule],
 	templateUrl: './chat-messages.component.html',
 	styleUrls: ['./chat-messages.component.scss'],
+	changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ChatMessagesComponent implements AfterViewChecked {
-	@Input() messages: Message[] | null = [];
-	@Input() isLoading: boolean | null = false;
+export class ChatMessagesComponent {
+	messages = input.required<Message[]>();
+	isLoading = input<boolean>(false);
 
-	@ViewChild('messagesContainer') private messagesContainer!: ElementRef;
+	private messagesContainer = viewChild<ElementRef>('messagesContainer');
 
-	ngAfterViewChecked() {
-		this.scrollToBottom();
+	constructor() {
+		effect(() => {
+			// Trigger scrolling when messages change
+			this.scrollToBottom();
+		});
 	}
 
 	private scrollToBottom(): void {
 		try {
-			if (this.messagesContainer) {
-				this.messagesContainer.nativeElement.scrollTop =
-					this.messagesContainer.nativeElement.scrollHeight;
+			const container = this.messagesContainer();
+			if (container) {
+				container.nativeElement.scrollTop = container.nativeElement.scrollHeight;
 			}
 		} catch (err) {
-			// ignore
+			console.error('Could not scroll to bottom:', err);
 		}
 	}
 } 

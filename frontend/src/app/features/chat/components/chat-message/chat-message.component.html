@@ -1,14 +1,14 @@
 <div
 	class="message-container"
-	[ngClass]="{ 'user-message': isUserMessage, 'assistant-message': !isUserMessage }"
+	[class]="isUserMessage() ? 'user-message' : 'assistant-message'"
 >
 	<div class="message-sender">
-		{{ isUserMessage ? ('CHAT.YOU' | translate) : ('CHAT.ASSISTANT' | translate) }}
-		<span class="message-time">{{ formattedTimestamp }}</span>
+		{{ isUserMessage() ? ('CHAT.YOU' | translate) : ('CHAT.ASSISTANT' | translate) }}
+		<span class="message-time">{{ formattedTimestamp() }}</span>
 	</div>
 	<mat-card>
 		<mat-card-content>
-			{{ message.text }}
+			{{ message().text }}
 		</mat-card-content>
 	</mat-card>
 </div>

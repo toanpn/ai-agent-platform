@@ -2,7 +2,7 @@
 	<mat-toolbar color="primary" class="app-toolbar">
 		<span>{{ title | translate }}</span>
 		<span class="spacer"></span>
-		@if(user$ | async; as user) {
+		@if(user(); as user) {
 		<button mat-button (click)="navigateTo('/agents')">{{ 'COMMON.AGENTS' | translate }}</button>
 		<button mat-button (click)="navigateTo('/chat')">{{ 'COMMON.CHAT' | translate }}</button>
 		
@@ -42,9 +42,7 @@
 				<span>{{ 'COMMON.LOGOUT' | translate }}</span>
 			</button>
 		</mat-menu>
-		} @else {
-		<button mat-button (click)="navigateTo('/demo')">Demo</button>
-		
+		} @else {		
 		<!-- Language Selector -->
 		<app-language-selector></app-language-selector>
 		

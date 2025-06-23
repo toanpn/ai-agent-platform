@@ -1,6 +1,6 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable, inject, signal } from '@angular/core';
 import { ApiService } from './api.service';
-import { BehaviorSubject, Observable, tap } from 'rxjs';
+import { Observable, tap } from 'rxjs';
 import { StorageService } from './storage.service';
 import { ChatStateService } from '../../features/chat/chat-state.service';
 
@@ -35,8 +35,9 @@ export class AuthService {
 	private api = inject(ApiService);
 	private storage = inject(StorageService);
 	private chatState = inject(ChatStateService);
-	private currentUserSubject = new BehaviorSubject<User | null>(null);
-	public currentUser$ = this.currentUserSubject.asObservable();
+
+	private currentUserSignal = signal<User | null>(null);
+	public readonly currentUser = this.currentUserSignal.asReadonly();
 
 	constructor() {}
 
@@ -45,7 +46,7 @@ export class AuthService {
 		const savedUser = this.storage.getItem('user');
 		if (savedUser) {
 			try {
-				this.currentUserSubject.next(JSON.parse(savedUser));
+				this.currentUserSignal.set(JSON.parse(savedUser));
 				this.chatState.initialize();
 			} catch (error) {
 				this.storage.removeItem('user');
@@ -59,14 +60,7 @@ export class AuthService {
 	register(userData: RegisterRequest): Observable<LoginResponse> {
 		return this.api.post<LoginResponse>('/auth/register', userData).pipe(
 			tap((response) => {
-				// Save token
-				this.storage.setItem('token', response.token);
-
-				// Save user
-				this.storage.setItem('user', JSON.stringify(response.user));
-
-				// Update current user subject
-				this.currentUserSubject.next(response.user);
+				this.handleAuthSuccess(response);
 			}),
 		);
 	}
@@ -77,16 +71,7 @@ export class AuthService {
 	login(credentials: LoginRequest): Observable<LoginResponse> {
 		return this.api.post<LoginResponse>('/auth/login', credentials).pipe(
 			tap((response) => {
-				// Save token
-				this.storage.setItem('token', response.token);
-
-				// Save user
-				this.storage.setItem('user', JSON.stringify(response.user));
-
-				// Update current user subject
-				this.currentUserSubject.next(response.user);
-
-				// Initialize chat state
+				this.handleAuthSuccess(response);
 				this.chatState.initialize();
 			}),
 		);
@@ -101,7 +86,7 @@ export class AuthService {
 		this.storage.removeItem('user');
 
 		// Reset current user
-		this.currentUserSubject.next(null);
+		this.currentUserSignal.set(null);
 
 		// Destroy chat state
 		this.chatState.destroy();
@@ -126,5 +111,16 @@ export class AuthService {
 	 */
 	getToken(): string | null {
 		return this.storage.getItem('token');
+	}
+
+	private handleAuthSuccess(response: LoginResponse): void {
+		// Save token
+		this.storage.setItem('token', response.token);
+
+		// Save user
+		this.storage.setItem('user', JSON.stringify(response.user));
+
+		// Update current user signal
+		this.currentUserSignal.set(response.user);
 	}
 }

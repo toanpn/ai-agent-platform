@@ -1,4 +1,11 @@
-import { Component, Input, Output, EventEmitter, inject } from '@angular/core';
+import {
+	Component,
+	inject,
+	input,
+	output,
+	ChangeDetectionStrategy,
+	computed,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -28,17 +35,25 @@ import { Agent } from '../../../../core/services/agent.service';
 	],
 	templateUrl: './chat-sidebar.component.html',
 	styleUrls: ['./chat-sidebar.component.scss'],
+	changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ChatSidebarComponent {
-	@Input() conversations: Conversation[] | null = [];
-	@Input() agents: Agent[] | null = [];
-	@Input() selectedAgent: Agent | null = null;
-	@Output() conversationSelected = new EventEmitter<Conversation>();
-	@Output() startNewChat = new EventEmitter<void>();
-	@Output() agentSelected = new EventEmitter<Agent>();
-
-	authService = inject(AuthService);
+	// Services
+	private authService = inject(AuthService);
 	private router = inject(Router);
+
+	// Inputs
+	conversations = input<Conversation[] | null>([]);
+	agents = input<Agent[] | null>([]);
+	selectedAgent = input<Agent | null>(null);
+
+	// Outputs
+	conversationSelected = output<Conversation>();
+	startNewChat = output<void>();
+	agentSelected = output<Agent>();
+
+	// Computed
+	currentUser = computed(() => this.authService.currentUser());
 
 	onSelectConversation(conversation: Conversation): void {
 		this.conversationSelected.emit(conversation);

@@ -1,8 +1,10 @@
 <div class="messages-container" #messagesContainer>
-	<div *ngFor="let message of messages">
+	@for (message of messages(); track message.id) {
 		<app-chat-message [message]="message"></app-chat-message>
-	</div>
-	<div *ngIf="isLoading" class="loading-indicator">
-		<p>{{ 'CHAT.ASSISTANT_THINKING' | translate }}</p>
-	</div>
+	}
+	@if (isLoading()) {
+		<div class="loading-indicator">
+			<p>{{ 'CHAT.ASSISTANT_THINKING' | translate }}</p>
+		</div>
+	}
 </div> 

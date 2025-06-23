@@ -17,9 +17,11 @@
 			<mat-icon>expand_more</mat-icon>
 		</button>
 		<mat-menu #agentMenu="matMenu">
-			<button *ngFor="let agent of agents" mat-menu-item (click)="onSelectAgent(agent)">
-				{{ agent.name }}
-			</button>
+			@for (agent of agents(); track agent.id) {
+				<button mat-menu-item (click)="onSelectAgent(agent)">
+					{{ agent.name }}
+				</button>
+			}
 		</mat-menu>
 	</div>
 
@@ -27,36 +29,41 @@
 
 	<div class="conversations-list">
 		<mat-nav-list>
-			<a
-				mat-list-item
-				*ngFor="let conversation of conversations"
-				(click)="onSelectConversation(conversation)"
-			>
-				<div class="conversation-item">
-					<mat-icon>chat</mat-icon>
-					<div class="conversation-details">
-						<div class="conversation-title">{{ conversation.title }}</div>
-						<div class="conversation-time">
-							{{ conversation.timestamp | date: 'short' }}
+			@for (conversation of conversations(); track conversation.id) {
+				<a
+					mat-list-item
+					(click)="onSelectConversation(conversation)"
+				>
+					<div class="conversation-item">
+						<mat-icon>chat</mat-icon>
+						<div class="conversation-details">
+							<div class="conversation-title">{{ conversation.title }}</div>
+							<div class="conversation-time">
+								{{ conversation.timestamp | date: 'short' }}
+							</div>
 						</div>
 					</div>
-				</div>
-			</a>
+				</a>
+			}
 		</mat-nav-list>
 
-		<div class="empty-state" *ngIf="conversations?.length === 0">
-			<p>{{ 'CHAT.NO_CONVERSATIONS' | translate }}</p>
-		</div>
+		@if (conversations()?.length === 0) {
+			<div class="empty-state">
+				<p>{{ 'CHAT.NO_CONVERSATIONS' | translate }}</p>
+			</div>
+		}
 	</div>
 
 	<div class="sidebar-footer">
-		<div class="user-info" *ngIf="authService.currentUser$ | async as user">
-			<mat-icon>account_circle</mat-icon>
-			<div class="user-details">
-				<div class="username">{{ user.username }}</div>
-				<div class="email">{{ user.email }}</div>
+		@if (currentUser(); as user) {
+			<div class="user-info">
+				<mat-icon>account_circle</mat-icon>
+				<div class="user-details">
+					<div class="username">{{ user.username }}</div>
+					<div class="email">{{ user.email }}</div>
+				</div>
 			</div>
-		</div>
+		}
 		<button mat-icon-button (click)="logout()" [matTooltip]="'COMMON.LOGOUT' | translate">
 			<mat-icon>exit_to_app</mat-icon>
 		</button>

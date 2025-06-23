@@ -1,16 +1,15 @@
-import { Component, inject, OnInit, OnDestroy } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy, DestroyRef, OnInit } from '@angular/core';
 import { Router, RouterOutlet } from '@angular/router';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 import { CommonModule } from '@angular/common';
-import { Subject, takeUntil } from 'rxjs';
 import { TranslateModule } from '@ngx-translate/core';
 import { AuthService } from './core/services/auth.service';
 import { ThemeService } from './core/services/theme.service';
-import { TranslationService } from './core/services/translation.service';
 import { LanguageSelectorComponent } from './shared/components/language-selector/language-selector.component';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 /**
  * AppComponent is the root component of the chatbot application.
@@ -28,34 +27,27 @@ import { LanguageSelectorComponent } from './shared/components/language-selector
 		MatIconModule,
 		MatMenuModule,
 		TranslateModule,
-		LanguageSelectorComponent
+		LanguageSelectorComponent,
 	],
 	templateUrl: './app.html',
 	styleUrl: './app.scss',
+	changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AppComponent implements OnInit, OnDestroy {
+export class AppComponent implements OnInit {
 	private authService = inject(AuthService);
 	private themeService = inject(ThemeService);
-	private translationService = inject(TranslationService);
 	private router = inject(Router);
-	private destroy$ = new Subject<void>();
+	private destroyRef = inject(DestroyRef);
 
 	title = 'COMMON.TITLE';
-	user$ = this.authService.currentUser$;
+	user = this.authService.currentUser;
 
 	// Theme-related properties
 	isDarkMode = false;
 	currentTheme = 'auto';
 
-	constructor() {}
-
-	ngOnInit(): void {
+	ngOnInit() {
 		this.initTheme();
-	}
-
-	ngOnDestroy(): void {
-		this.destroy$.next();
-		this.destroy$.complete();
 	}
 
 	/**
@@ -63,13 +55,17 @@ export class AppComponent implements OnInit, OnDestroy {
 	 */
 	private initTheme(): void {
 		// Subscribe to theme changes
-		this.themeService.isDarkMode$.pipe(takeUntil(this.destroy$)).subscribe((isDark) => {
-			this.isDarkMode = isDark;
-		});
+		this.themeService.isDarkMode$
+			.pipe(takeUntilDestroyed(this.destroyRef))
+			.subscribe((isDark) => {
+				this.isDarkMode = isDark;
+			});
 
-		this.themeService.currentTheme$.pipe(takeUntil(this.destroy$)).subscribe((theme) => {
-			this.currentTheme = theme;
-		});
+		this.themeService.currentTheme$
+			.pipe(takeUntilDestroyed(this.destroyRef))
+			.subscribe((theme) => {
+				this.currentTheme = theme;
+			});
 	}
 
 	/**

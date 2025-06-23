@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, input, ChangeDetectionStrategy, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { Message } from '../../../../core/services/chat.service';
@@ -10,18 +10,15 @@ import { TranslateModule } from '@ngx-translate/core';
 	imports: [CommonModule, MatCardModule, TranslateModule],
 	templateUrl: './chat-message.component.html',
 	styleUrls: ['./chat-message.component.scss'],
+	changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ChatMessageComponent {
-	@Input() message!: Message;
+	message = input.required<Message>();
 
-	constructor() {}
-
-	get isUserMessage(): boolean {
-		return this.message.sender === 'user';
-	}
-
-	get formattedTimestamp(): string {
-		const date = new Date(this.message.timestamp);
+	isUserMessage = computed(() => this.message().sender === 'user');
+	
+	formattedTimestamp = computed(() => {
+		const date = new Date(this.message().timestamp);
 		return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-	}
+	});
 }

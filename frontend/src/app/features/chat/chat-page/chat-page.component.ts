@@ -1,6 +1,5 @@
-import { Component, inject, OnInit, OnDestroy } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
 import { ChatSidebarComponent } from '../components/chat-sidebar/chat-sidebar.component';
 import { ChatMessagesComponent } from '../components/chat-messages/chat-messages.component';
 import { ChatInputComponent } from '../components/chat-input/chat-input.component';
@@ -14,27 +13,10 @@ import { Agent } from '../../../core/services/agent.service';
 	imports: [CommonModule, ChatSidebarComponent, ChatMessagesComponent, ChatInputComponent],
 	templateUrl: './chat-page.component.html',
 	styleUrls: ['./chat-page.component.scss'],
+	changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ChatPageComponent implements OnInit, OnDestroy {
-	chatState = inject(ChatStateService);
-	private router = inject(Router);
-
-	private initialAgent: Agent | undefined;
-
-	constructor() {
-		const navigation = this.router.getCurrentNavigation();
-		this.initialAgent = navigation?.extras.state?.['agent'] as Agent;
-	}
-
-	ngOnInit(): void {
-		if (this.initialAgent) {
-			this.chatState.selectAgent(this.initialAgent);
-		}
-	}
-
-	ngOnDestroy(): void {
-		// The lifecycle is now managed by AuthService
-	}
+export class ChatPageComponent {
+	readonly chatState = inject(ChatStateService);
 
 	onConversationSelected(conversation: Conversation): void {
 		this.chatState.selectConversation(conversation);
