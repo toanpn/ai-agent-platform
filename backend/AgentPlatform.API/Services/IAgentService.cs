@@ -12,5 +12,6 @@ namespace AgentPlatform.API.Services
         Task<bool> AddFunctionToAgentAsync(int agentId, CreateAgentFunctionRequestDto request, int userId);
         Task SyncAgentsJsonAsync();
         Task<bool> SetAgentToolsAsync(int agentId, List<string> tools, int userId);
+        Task<List<string>?> GetAgentToolsAsync(int agentId, int userId);
     }
 }

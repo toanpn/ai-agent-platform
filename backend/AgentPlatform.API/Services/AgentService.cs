@@ -254,5 +254,18 @@ namespace AgentPlatform.API.Services
                 Console.WriteLine($"Failed to sync agents.json: {ex.Message}");
             }
         }
+
+        public async Task<List<string>?> GetAgentToolsAsync(int agentId, int userId)
+        {
+            var agent = await _context.Agents
+                .FirstOrDefaultAsync(a => a.Id == agentId && a.CreatedById == userId);
+
+            if (agent == null)
+            {
+                return null;
+            }
+
+            return agent.ToolsArray.ToList();
+        }
     }
 } 

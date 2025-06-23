@@ -119,5 +119,17 @@ namespace AgentPlatform.API.Controllers
 
             return Ok(new { message = "Tools have been set successfully" });
         }
+
+        [HttpGet("{id}/tools")]
+        public async Task<ActionResult<List<string>>> GetTools(int id)
+        {
+            var userId = GetUserId();
+            var tools = await _agentService.GetAgentToolsAsync(id, userId);
+            if (tools == null)
+            {
+                return NotFound();
+            }
+            return Ok(tools);
+        }
     }
 } 
