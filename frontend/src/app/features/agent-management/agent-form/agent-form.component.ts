@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
+import { TranslateModule } from '@ngx-translate/core';
 import {
 	AgentService,
 	Agent,
@@ -13,7 +14,7 @@ import { switchMap, of, catchError } from 'rxjs';
 @Component({
 	selector: 'app-agent-form',
 	standalone: true,
-	imports: [CommonModule, ReactiveFormsModule, RouterModule],
+	imports: [CommonModule, ReactiveFormsModule, RouterModule, TranslateModule],
 	templateUrl: './agent-form.component.html',
 	styleUrls: ['./agent-form.component.scss'],
 })
@@ -43,7 +44,7 @@ export class AgentFormComponent implements OnInit {
 				this.isEditMode = true;
 				this.loadAgent(agentId);
 			} else {
-				this.saveError = 'Invalid agent ID';
+				this.saveError = 'AGENTS.INVALID_AGENT_ID';
 			}
 		}
 	}
@@ -62,7 +63,7 @@ export class AgentFormComponent implements OnInit {
 			},
 			error: (error) => {
 				console.error('Error loading agent:', error);
-				this.saveError = 'Failed to load agent details. Please try again.';
+				this.saveError = 'AGENTS.FAILED_LOAD_AGENT';
 				this.loading = false;
 			},
 		});
@@ -103,7 +104,7 @@ export class AgentFormComponent implements OnInit {
 				},
 				error: (error) => {
 					console.error('Error updating agent:', error);
-					this.saveError = 'Failed to update agent. Please try again.';
+					this.saveError = 'AGENTS.FAILED_UPDATE_AGENT';
 					this.loading = false;
 				},
 			});
@@ -123,7 +124,7 @@ export class AgentFormComponent implements OnInit {
 				},
 				error: (error) => {
 					console.error('Error creating agent:', error);
-					this.saveError = 'Failed to create agent. Please try again.';
+					this.saveError = 'AGENTS.FAILED_CREATE_AGENT';
 					this.loading = false;
 				},
 			});

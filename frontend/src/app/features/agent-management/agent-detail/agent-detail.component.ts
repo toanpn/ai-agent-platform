@@ -1,13 +1,14 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
+import { TranslateModule } from '@ngx-translate/core';
 import { AgentService, Agent } from '../../../core/services/agent.service';
 import { ChatStateService } from '../../chat/chat-state.service';
 
 @Component({
 	selector: 'app-agent-detail',
 	standalone: true,
-	imports: [CommonModule, RouterModule],
+	imports: [CommonModule, RouterModule, TranslateModule],
 	templateUrl: './agent-detail.component.html',
 	styleUrls: ['./agent-detail.component.scss'],
 })
@@ -28,11 +29,11 @@ export class AgentDetailComponent implements OnInit {
 			if (!isNaN(agentId)) {
 				this.loadAgent(agentId);
 			} else {
-				this.errorMessage = 'Invalid agent ID';
+				this.errorMessage = 'AGENTS.INVALID_AGENT_ID';
 				this.loading = false;
 			}
 		} else {
-			this.errorMessage = 'Agent ID not provided';
+			this.errorMessage = 'AGENTS.AGENT_ID_NOT_PROVIDED';
 			this.loading = false;
 		}
 	}
@@ -45,7 +46,7 @@ export class AgentDetailComponent implements OnInit {
 			},
 			error: (error) => {
 				console.error('Error loading agent:', error);
-				this.errorMessage = 'Failed to load agent details. Please try again.';
+				this.errorMessage = 'AGENTS.FAILED_LOAD_AGENT';
 				this.loading = false;
 			},
 		});
@@ -65,14 +66,14 @@ export class AgentDetailComponent implements OnInit {
 	}
 
 	deleteAgent(): void {
-		if (this.agent && confirm('Are you sure you want to delete this agent?')) {
+		if (this.agent && confirm('AGENTS.CONFIRM_DELETE_AGENT')) {
 			this.agentService.deleteAgent(this.agent.id).subscribe({
 				next: () => {
 					this.router.navigate(['/agents']);
 				},
 				error: (error) => {
 					console.error('Error deleting agent:', error);
-					alert('Failed to delete agent. Please try again.');
+					alert('AGENTS.FAILED_CREATE_AGENT');
 				},
 			});
 		}

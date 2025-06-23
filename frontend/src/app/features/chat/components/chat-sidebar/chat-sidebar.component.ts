@@ -7,6 +7,7 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { Router, RouterModule } from '@angular/router';
 import { MatMenuModule } from '@angular/material/menu';
+import { TranslateModule } from '@ngx-translate/core';
 import { AuthService } from '../../../../core/services/auth.service';
 import { Conversation } from '../../../../core/services/chat.service';
 import { Agent } from '../../../../core/services/agent.service';
@@ -23,6 +24,7 @@ import { Agent } from '../../../../core/services/agent.service';
 		MatTooltipModule,
 		RouterModule,
 		MatMenuModule,
+		TranslateModule,
 	],
 	templateUrl: './chat-sidebar.component.html',
 	styleUrls: ['./chat-sidebar.component.scss'],

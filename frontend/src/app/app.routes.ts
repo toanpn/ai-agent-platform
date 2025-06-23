@@ -18,6 +18,13 @@ export const routes: Routes = [
 		],
 	},
 	{
+		path: 'demo',
+		loadComponent: () =>
+			import('./shared/components/translation-demo/translation-demo.component').then(
+				(c) => c.TranslationDemoComponent,
+			),
+	},
+	{
 		path: 'chat',
 		canActivate: [authGuard],
 		loadComponent: () =>

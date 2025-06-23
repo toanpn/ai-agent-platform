@@ -3,6 +3,6 @@
 		<app-chat-message [message]="message"></app-chat-message>
 	</div>
 	<div *ngIf="isLoading" class="loading-indicator">
-		<p>Assistant is thinking...</p>
+		<p>{{ 'CHAT.ASSISTANT_THINKING' | translate }}</p>
 	</div>
 </div> 

@@ -1,17 +1,17 @@
 <div class="chat-input-wrapper" role="form" aria-label="Message input form">
 	<mat-form-field appearance="outline" class="message-input">
-		<mat-label>Type a message</mat-label>
+		<mat-label>{{ 'CHAT.TYPE_MESSAGE' | translate }}</mat-label>
 		<input
 			matInput
 			type="text"
-			placeholder="Type a message..."
+			[placeholder]="'CHAT.TYPE_MESSAGE' | translate"
 			[(ngModel)]="messageText"
 			(keydown)="onKeyDown($event)"
 			[disabled]="disabled"
 			aria-label="Message text input"
 			autocomplete="off"
 		/>
-		<mat-hint *ngIf="disabled">Waiting for response...</mat-hint>
+		<mat-hint *ngIf="disabled">{{ 'COMMON.LOADING' | translate }}</mat-hint>
 	</mat-form-field>
 
 	<button
@@ -20,7 +20,7 @@
 		class="send-button"
 		[disabled]="!messageText.trim() || disabled"
 		(click)="onSendClick()"
-		aria-label="Send message"
+		[attr.aria-label]="'CHAT.SEND_MESSAGE' | translate"
 	>
 		<mat-icon aria-hidden="true">send</mat-icon>
 	</button>

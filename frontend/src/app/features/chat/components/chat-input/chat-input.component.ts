@@ -5,6 +5,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { TranslateModule } from '@ngx-translate/core';
 
 /**
  * ChatInputComponent handles user input for sending messages in the chat interface.
@@ -21,6 +22,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 		MatIconModule,
 		MatInputModule,
 		MatFormFieldModule,
+		TranslateModule,
 	],
 	templateUrl: './chat-input.component.html',
 	styleUrls: ['./chat-input.component.scss'],

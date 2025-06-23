@@ -1,12 +1,13 @@
 import { Component, Input, ViewChild, ElementRef, AfterViewChecked } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { TranslateModule } from '@ngx-translate/core';
 import { Message } from '../../../../core/services/chat.service';
 import { ChatMessageComponent } from '../chat-message/chat-message.component';
 
 @Component({
 	selector: 'app-chat-messages',
 	standalone: true,
-	imports: [CommonModule, ChatMessageComponent],
+	imports: [CommonModule, ChatMessageComponent, TranslateModule],
 	templateUrl: './chat-messages.component.html',
 	styleUrls: ['./chat-messages.component.scss'],
 })

@@ -8,6 +8,7 @@ This document outlines the technical architecture and development plan for the n
 - **Backend-Driven:** The application will be a pure consumer of the `AgentPlatform.API`. It will not connect to any third-party LLM services directly.
 - **Component-Based:** The UI will be built using Angular, leveraging a modular, component-based architecture.
 - **Simplified UX:** Following the business specifications, the UI will be streamlined. Features like Workspaces, direct LLM model selection, and client-side presets/prompts are explicitly excluded to maintain simplicity.
+- **Internationalization:** The application supports multiple languages with Vietnamese as the default language, providing a localized user experience.
 
 ## 2. Technology Stack
 
@@ -19,6 +20,7 @@ This document outlines the technical architecture and development plan for the n
 -   **Styling:** SCSS with Angular Material Design system for consistent theming and component styling.
 -   **State Management:** Angular Services with RxJS `BehaviorSubject` for reactive state management.
 -   **API Communication:** Angular's `HttpClient` module.
+-   **Internationalization:** ngx-translate library for multi-language support.
 -   **Testing:** Jasmine and Karma for unit testing.
 -   **Code Quality:** ESLint with TypeScript support and Prettier for code formatting.
 
@@ -40,6 +42,10 @@ The project will be organized into feature modules to ensure a clean and scalabl
 │   ├── main.ts
 │   ├── styles.scss
 │   ├── index.html
+│   ├── assets/
+│   │   └── i18n/
+│   │       ├── en.json
+│   │       └── vi.json
 │   ├── app/
 │   │   ├── app.config.ts
 │   │   ├── app.routes.ts
@@ -59,7 +65,8 @@ The project will be organized into feature modules to ensure a clean and scalabl
 │   │   │       ├── agent.service.ts
 │   │   │       ├── hashbrown.service.ts
 │   │   │       ├── notification.service.ts
-│   │   │       └── storage.service.ts
+│   │   │       ├── storage.service.ts
+│   │   │       └── translation.service.ts
 │   │   │
 │   │   ├── features/
 │   │   │   ├── auth/
@@ -85,6 +92,8 @@ The project will be organized into feature modules to ensure a clean and scalabl
 │   │   │
 │   │   └── shared/
 │   │       ├── components/
+│   │       │   └── language-selector/
+│   │       │       └── language-selector.component.ts
 │   │       ├── models/
 │   │       └── pipes/
 │   │
@@ -97,8 +106,8 @@ The project will be organized into feature modules to ensure a clean and scalabl
 
 A reactive state management approach using **Angular Services and RxJS** will be employed.
 
--   **Singleton Services:** Services provided in `root` (e.g., `AuthService`, `ChatService`) will hold the application's state.
--   **`BehaviorSubject`:** Each service will use `BehaviorSubject` to store and manage its part of the state (e.g., `currentUser$`, `activeConversation$`, `messages$`).
+-   **Singleton Services:** Services provided in `root` (e.g., `AuthService`, `ChatService`, `TranslationService`) will hold the application's state.
+-   **`BehaviorSubject`:** Each service will use `BehaviorSubject` to store and manage its part of the state (e.g., `currentUser$`, `activeConversation$`, `messages$`, `currentLanguage$`).
 -   **Observables:** Components will subscribe to the public `Observable` streams exposed by these services to receive state updates.
 -   **Immutability:** State updates will be handled immutably to ensure predictable state transitions.
 
@@ -109,25 +118,57 @@ This approach avoids the boilerplate of more complex libraries like NgRx while p
 The application will be broken down into the following key components, aligning with the UI specification.
 
 -   **`LoginComponent`**:
-    -   **Responsibility:** Handles user login via a form.
+    -   **Responsibility:** Handles user login via a form with localized text and validation messages.
     -   **Interaction:** Calls `AuthService.login()` on form submission. Navigates to the chat view on success.
 -   **`ChatSidebarComponent`**:
-    -   **Responsibility:** Displays user info, a "New Chat" button, and the list of past conversations.
+    -   **Responsibility:** Displays user info, a "New Chat" button, and the list of past conversations with localized labels.
     -   **Interaction:** Subscribes to `ChatService.conversations$` to display history. Calls `ChatService.loadChat(id)` when a conversation is selected or `ChatService.startNewChat()` when the button is clicked.
 -   **`ChatViewComponent`**:
-    -   **Responsibility:** The main container that orchestrates the chat interface.
+    -   **Responsibility:** The main container that orchestrates the chat interface with language selector in the toolbar.
     -   **Interaction:** Subscribes to `ChatService.activeConversation$` and `ChatService.messages$` to display the current chat. Hosts the `ChatMessage` and `ChatInput` components.
 -   **`ChatMessageComponent`**:
-    -   **Responsibility:** Renders a single message, with distinct styling for user vs. assistant messages.
+    -   **Responsibility:** Renders a single message, with distinct styling for user vs. assistant messages and localized sender labels.
     -   **Interaction:** Receives message data via an `@Input()`.
 -   **`ChatInputComponent`**:
-    -   **Responsibility:** Manages the text input, file attachment button, and send button.
+    -   **Responsibility:** Manages the text input, file attachment button, and send button with localized placeholders and labels.
     -   **Interaction:** Emits a `(sendMessage)` event with the message text and optional `File` object.
+-   **`ChatMessagesComponent`**:
+    -   **Responsibility:** Displays the list of messages with localized loading indicators.
+    -   **Interaction:** Receives messages array and loading state via `@Input()`.
+-   **`LanguageSelectorComponent`**:
+    -   **Responsibility:** Provides a dropdown for language selection (EN/VI) in the application toolbar.
+    -   **Interaction:** Uses `TranslationService` to switch languages and persists the selection.
 -   **Agent Management Components** (`AgentListComponent`, `AgentFormComponent`, `AgentDetailComponent`):
-    -   **Responsibility:** Handle the CRUD (Create, Read, Update, Delete) operations for Agents as detailed in the UI spec.
+    -   **Responsibility:** Handle the CRUD (Create, Read, Update, Delete) operations for Agents with fully localized interface.
     -   **Interaction:** Will use a dedicated `AgentService` to interact with the `/api/agents` endpoints.
 
-## 6. API Integration and Data Flow
+## 6. Internationalization (i18n) Strategy
+
+The application implements comprehensive internationalization using the ngx-translate library:
+
+-   **Supported Languages:** Vietnamese (default) and English
+-   **Translation Files:** JSON-based translation files located in `src/assets/i18n/`
+-   **Language Persistence:** Selected language is stored in localStorage and restored on application restart
+-   **Dynamic Switching:** Language can be changed at runtime without page reload
+-   **Translation Keys:** Organized by feature (AUTH, CHAT, AGENTS, COMMON, etc.) for maintainability
+-   **Service Integration:** `TranslationService` manages language switching and provides reactive language state
+-   **Component Integration:** All UI text, validation messages, and error messages are translatable
+
+### Translation Structure
+```
+{
+  "COMMON": { /* Common UI elements */ },
+  "AUTH": { /* Authentication related text */ },
+  "CHAT": { /* Chat interface text */ },
+  "AGENTS": { /* Agent management text */ },
+  "FILES": { /* File management text */ },
+  "NAVIGATION": { /* Navigation elements */ },
+  "VALIDATION": { /* Form validation messages */ },
+  "ERRORS": { /* Error messages */ }
+}
+```
+
+## 7. API Integration and Data Flow
 
 All communication with the backend will be centralized through the `AgentPlatform.API`.
 
@@ -149,18 +190,24 @@ All communication with the backend will be centralized through the `AgentPlatfor
     a. The `ChatService` receives the final response from the API.
     b. It updates the `messages$` stream with the official response from the backend, replacing the optimistic message with the saved one and adding the assistant's reply.
 
-## 7. Key Feature Implementation Strategy
+## 8. Key Feature Implementation Strategy
 
 -   **Conversation Handling & Message Threading:** Managed by the `ChatService`, which tracks the `activeConversationId` and fetches message history for that ID from the `/api/chat/conversations/{id}` endpoint.
 -   **User Authentication:**
     -   JWT-based authentication flow.
     -   Token stored securely in `localStorage` via a `StorageService`.
     -   `AuthGuard` will protect all feature routes (e.g., `/chat`, `/agents`).
+-   **Internationalization:**
+    -   Vietnamese as the default language with English support.
+    -   Language selector in the application toolbar.
+    -   All UI text, validation messages, and error messages are translatable.
+    -   Language preference persisted across sessions.
 -   **Responsive Design:** Angular Flex Layout and Angular Material's responsive utilities will be used to ensure the layout adapts correctly to different screen sizes across desktop and mobile devices.
 -   **Integration of Technologies:**
     -   **Angular:** Standalone components will be used for better encapsulation and modern Angular patterns.
     -   **Hashbrown/Angular Material:** HashbrownAI components serve as the primary UI library, with Angular Material providing additional complex components like dialogs and tables.
     -   **SCSS:** Used for component-specific styling with Angular Material's theming system for consistent design patterns.
     -   **TypeScript:** Strict mode enabled for enhanced type safety and code quality.
+    -   **ngx-translate:** Provides robust internationalization capabilities with reactive language switching.
 
-This specification provides a comprehensive blueprint for the development team. It aligns with the business requirements for a simplified, backend-driven application while leveraging a modern and scalable Angular architecture.
+This specification provides a comprehensive blueprint for the development team. It aligns with the business requirements for a simplified, backend-driven application while leveraging a modern and scalable Angular architecture with full internationalization support.

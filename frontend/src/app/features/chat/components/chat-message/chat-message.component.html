@@ -3,7 +3,7 @@
 	[ngClass]="{ 'user-message': isUserMessage, 'assistant-message': !isUserMessage }"
 >
 	<div class="message-sender">
-		{{ isUserMessage ? 'You' : 'Assistant' }}
+		{{ isUserMessage ? ('CHAT.YOU' | translate) : ('CHAT.ASSISTANT' | translate) }}
 		<span class="message-time">{{ formattedTimestamp }}</span>
 	</div>
 	<mat-card>

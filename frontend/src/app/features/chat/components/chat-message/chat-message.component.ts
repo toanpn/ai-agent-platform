@@ -2,11 +2,12 @@ import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { Message } from '../../../../core/services/chat.service';
+import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
 	selector: 'app-chat-message',
 	standalone: true,
-	imports: [CommonModule, MatCardModule],
+	imports: [CommonModule, MatCardModule, TranslateModule],
 	templateUrl: './chat-message.component.html',
 	styleUrls: ['./chat-message.component.scss'],
 })

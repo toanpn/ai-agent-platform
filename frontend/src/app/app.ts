@@ -6,8 +6,11 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 import { CommonModule } from '@angular/common';
 import { Subject, takeUntil } from 'rxjs';
+import { TranslateModule } from '@ngx-translate/core';
 import { AuthService } from './core/services/auth.service';
 import { ThemeService } from './core/services/theme.service';
+import { TranslationService } from './core/services/translation.service';
+import { LanguageSelectorComponent } from './shared/components/language-selector/language-selector.component';
 
 /**
  * AppComponent is the root component of the chatbot application.
@@ -24,6 +27,8 @@ import { ThemeService } from './core/services/theme.service';
 		MatButtonModule,
 		MatIconModule,
 		MatMenuModule,
+		TranslateModule,
+		LanguageSelectorComponent
 	],
 	templateUrl: './app.html',
 	styleUrl: './app.scss',
@@ -31,10 +36,11 @@ import { ThemeService } from './core/services/theme.service';
 export class AppComponent implements OnInit, OnDestroy {
 	private authService = inject(AuthService);
 	private themeService = inject(ThemeService);
+	private translationService = inject(TranslationService);
 	private router = inject(Router);
 	private destroy$ = new Subject<void>();
 
-	title = 'AI Agent Platform';
+	title = 'COMMON.TITLE';
 	user$ = this.authService.currentUser$;
 
 	// Theme-related properties

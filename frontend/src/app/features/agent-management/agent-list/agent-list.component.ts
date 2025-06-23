@@ -2,6 +2,7 @@ import { Component, OnInit, DestroyRef, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
+import { TranslateModule } from '@ngx-translate/core';
 import { AgentService, Agent } from '../../../core/services/agent.service';
 import { BehaviorSubject, Subject, EMPTY, merge } from 'rxjs';
 import { switchMap, tap, catchError, exhaustMap } from 'rxjs/operators';
@@ -14,7 +15,7 @@ interface AgentListAction {
 @Component({
 	selector: 'app-agent-list',
 	standalone: true,
-	imports: [CommonModule, RouterModule],
+	imports: [CommonModule, RouterModule, TranslateModule],
 	templateUrl: './agent-list.component.html',
 	styleUrls: ['./agent-list.component.scss'],
 })
@@ -130,7 +131,7 @@ export class AgentListComponent implements OnInit {
 	deleteAgent(id: number, event: Event): void {
 		event.stopPropagation();
 		
-		if (confirm('Are you sure you want to delete this agent?')) {
+		if (confirm('AGENTS.CONFIRM_DELETE_AGENT')) {
 			this.dispatch({ type: 'DELETE_AGENT', payload: id });
 		}
 	}

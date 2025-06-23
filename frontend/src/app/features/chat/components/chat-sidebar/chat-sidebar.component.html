@@ -2,18 +2,18 @@
 	<div class="sidebar-header">
 		<button mat-raised-button color="primary" (click)="onStartNewChat()">
 			<mat-icon>add</mat-icon>
-			New Chat
+			{{ 'CHAT.NEW_CHAT' | translate }}
 		</button>
 		<button mat-button routerLink="/agents" class="manage-agents-button">
 			<mat-icon>settings</mat-icon>
-			Manage Agents
+			{{ 'AGENTS.AGENT_SETTINGS' | translate }}
 		</button>
 	</div>
 
 	<div class="agent-selector">
 		<button mat-button [matMenuTriggerFor]="agentMenu" class="agent-selector-button">
 			<mat-icon>person</mat-icon>
-			<span>{{ selectedAgent?.name || 'Select Agent' }}</span>
+			<span>{{ selectedAgent?.name || ('AGENTS.SELECT_MODEL' | translate) }}</span>
 			<mat-icon>expand_more</mat-icon>
 		</button>
 		<mat-menu #agentMenu="matMenu">
@@ -45,7 +45,7 @@
 		</mat-nav-list>
 
 		<div class="empty-state" *ngIf="conversations?.length === 0">
-			<p>No previous conversations</p>
+			<p>{{ 'CHAT.NO_CONVERSATIONS' | translate }}</p>
 		</div>
 	</div>
 
@@ -57,7 +57,7 @@
 				<div class="email">{{ user.email }}</div>
 			</div>
 		</div>
-		<button mat-icon-button (click)="logout()" matTooltip="Logout">
+		<button mat-icon-button (click)="logout()" [matTooltip]="'COMMON.LOGOUT' | translate">
 			<mat-icon>exit_to_app</mat-icon>
 		</button>
 	</div>

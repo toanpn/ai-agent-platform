@@ -1,57 +1,57 @@
 <div class="agent-form-container">
 	<div class="header">
-		<h1>{{ isEditMode ? 'Edit Agent' : 'Create New Agent' }}</h1>
+		<h1>{{ isEditMode ? ('AGENTS.EDIT_AGENT' | translate) : ('AGENTS.CREATE_NEW_AGENT' | translate) }}</h1>
 	</div>
 
 	<div class="loading-indicator" *ngIf="loading">
-		<p>{{ isEditMode ? 'Loading agent details...' : 'Creating agent...' }}</p>
+		<p>{{ isEditMode ? ('AGENTS.LOADING_AGENT' | translate) : ('AGENTS.CREATING_AGENT' | translate) }}</p>
 	</div>
 
 	<div class="error-message" *ngIf="saveError">
-		<p>{{ saveError }}</p>
+		<p>{{ saveError | translate }}</p>
 	</div>
 
 	<form [formGroup]="agentForm" (ngSubmit)="onSubmit()" *ngIf="!loading || isEditMode">
 		<div class="form-group">
-			<label for="name">Agent Name</label>
-			<input type="text" id="name" formControlName="name" placeholder="Enter agent name" />
+			<label for="name">{{ 'AGENTS.AGENT_NAME' | translate }}</label>
+			<input type="text" id="name" formControlName="name" [placeholder]="'AGENTS.ENTER_AGENT_NAME' | translate" />
 			<div
 				class="validation-error"
 				*ngIf="agentForm.get('name')?.invalid && agentForm.get('name')?.touched"
 			>
-				<p *ngIf="agentForm.get('name')?.errors?.['required']">Name is required</p>
+				<p *ngIf="agentForm.get('name')?.errors?.['required']">{{ 'AGENTS.NAME_REQUIRED' | translate }}</p>
 				<p *ngIf="agentForm.get('name')?.errors?.['minlength']">
-					Name must be at least 3 characters
+					{{ 'AGENTS.NAME_MIN_LENGTH' | translate }}
 				</p>
 				<p *ngIf="agentForm.get('name')?.errors?.['maxlength']">
-					Name cannot exceed 50 characters
+					{{ 'AGENTS.NAME_MAX_LENGTH' | translate }}
 				</p>
 			</div>
 		</div>
 
 		<div class="form-group">
-			<label for="department">Department</label>
-			<input type="text" id="department" formControlName="department" placeholder="Enter department name" />
+			<label for="department">{{ 'AGENTS.DEPARTMENT' | translate }}</label>
+			<input type="text" id="department" formControlName="department" [placeholder]="'AGENTS.ENTER_DEPARTMENT' | translate" />
 			<div
 				class="validation-error"
 				*ngIf="agentForm.get('department')?.invalid && agentForm.get('department')?.touched"
 			>
-				<p *ngIf="agentForm.get('department')?.errors?.['required']">Department is required</p>
+				<p *ngIf="agentForm.get('department')?.errors?.['required']">{{ 'AGENTS.DEPARTMENT_REQUIRED' | translate }}</p>
 				<p *ngIf="agentForm.get('department')?.errors?.['minlength']">
-					Department must be at least 2 characters
+					{{ 'AGENTS.DEPARTMENT_MIN_LENGTH' | translate }}
 				</p>
 				<p *ngIf="agentForm.get('department')?.errors?.['maxlength']">
-					Department cannot exceed 50 characters
+					{{ 'AGENTS.DEPARTMENT_MAX_LENGTH' | translate }}
 				</p>
 			</div>
 		</div>
 
 		<div class="form-group">
-			<label for="description">Description (Optional)</label>
+			<label for="description">{{ 'AGENTS.AGENT_DESCRIPTION' | translate }} ({{ 'AGENTS.OPTIONAL' | translate }})</label>
 			<textarea
 				id="description"
 				formControlName="description"
-				placeholder="Describe what this agent does"
+				[placeholder]="'AGENTS.DESCRIBE_AGENT' | translate"
 				rows="4"
 			></textarea>
 			<div
@@ -61,17 +61,17 @@
 				"
 			>
 				<p *ngIf="agentForm.get('description')?.errors?.['maxlength']">
-					Description cannot exceed 500 characters
+					{{ 'AGENTS.DESCRIPTION_MAX_LENGTH' | translate }}
 				</p>
 			</div>
 		</div>
 
 		<div class="form-group">
-			<label for="instructions">Instructions (Optional)</label>
+			<label for="instructions">{{ 'AGENTS.INSTRUCTIONS' | translate }} ({{ 'AGENTS.OPTIONAL' | translate }})</label>
 			<textarea
 				id="instructions"
 				formControlName="instructions"
-				placeholder="Enter specific instructions for the agent"
+				[placeholder]="'AGENTS.ENTER_INSTRUCTIONS' | translate"
 				rows="6"
 			></textarea>
 			<div
@@ -81,18 +81,18 @@
 				"
 			>
 				<p *ngIf="agentForm.get('instructions')?.errors?.['maxlength']">
-					Instructions cannot exceed 1000 characters
+					{{ 'AGENTS.INSTRUCTIONS_MAX_LENGTH' | translate }}
 				</p>
 			</div>
 			<div class="helper-text">
-				<p>Provide detailed instructions on how this agent should behave and respond.</p>
+				<p>{{ 'AGENTS.INSTRUCTIONS_HELP' | translate }}</p>
 			</div>
 		</div>
 
 		<div class="form-actions">
-			<button type="button" class="cancel-button" (click)="cancel()">Cancel</button>
+			<button type="button" class="cancel-button" (click)="cancel()">{{ 'COMMON.CANCEL' | translate }}</button>
 			<button type="submit" class="save-button" [disabled]="agentForm.invalid || loading">
-				{{ isEditMode ? 'Save Changes' : 'Create Agent' }}
+				{{ isEditMode ? ('AGENTS.SAVE_CHANGES' | translate) : ('AGENTS.CREATE_AGENT' | translate) }}
 			</button>
 		</div>
 	</form>

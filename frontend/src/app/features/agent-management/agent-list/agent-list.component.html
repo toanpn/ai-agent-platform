@@ -1,17 +1,17 @@
 <div class="agent-list-container">
 	<div class="header">
-		<h1>Manage Agents</h1>
+		<h1>{{ 'AGENTS.AGENT_SETTINGS' | translate }}</h1>
 		<div class="header-actions">
 			<button class="back-button" (click)="goBackToChat()">
 				<span class="icon">←</span>
-				Back to Chat
+				{{ 'COMMON.CHAT' | translate }}
 			</button>
 			<button class="refresh-button" (click)="refreshAgents()" [disabled]="loading$ | async">
-				🔄 Refresh
+				🔄 {{ 'COMMON.LOADING' | translate }}
 			</button>
 			<button class="create-button" routerLink="/agents/new">
 				<span class="icon">✨</span>
-				Create New Agent
+				{{ 'AGENTS.CREATE_AGENT' | translate }}
 			</button>
 		</div>
 	</div>
@@ -20,7 +20,7 @@
 
 	@if (loading) {
 		<div class="loading-indicator">
-			<p>Loading agents...</p>
+			<p>{{ 'COMMON.LOADING' | translate }}</p>
 		</div>
 	}
 
@@ -28,8 +28,8 @@
 
 	@if (agents?.length === 0 && !loading) {
 		<div class="empty-state">
-			<p>No agents found. Create your first agent to get started!</p>
-			<button routerLink="/agents/new">Create New Agent</button>
+			<p>{{ 'AGENTS.CREATE_FIRST_AGENT' | translate }}</p>
+			<button routerLink="/agents/new">{{ 'AGENTS.CREATE_AGENT' | translate }}</button>
 		</div>
 	}
 
@@ -43,7 +43,7 @@
 					<div class="agent-header">
 						<h2>{{ agent.name }}</h2>
 						<div class="status" [class.active]="agent.isActive" [class.inactive]="!agent.isActive">
-							{{ agent.isActive ? 'Active' : 'Inactive' }}
+							{{ agent.isActive ? ('AGENTS.AGENT_ACTIVE' | translate) : ('AGENTS.AGENT_INACTIVE' | translate) }}
 						</div>
 						<div class="actions">
 							<button
@@ -51,10 +51,10 @@
 								[routerLink]="['/agents/edit', agent.id]"
 								(click)="$event.stopPropagation()"
 							>
-								Edit
+								{{ 'COMMON.EDIT' | translate }}
 							</button>
 							<button class="delete-button" (click)="deleteAgent(agent.id, $event)">
-								Delete
+								{{ 'COMMON.DELETE' | translate }}
 							</button>
 						</div>
 					</div>
@@ -62,23 +62,23 @@
 					@if (agent.description) {
 						<p class="description">{{ agent.description }}</p>
 					} @else {
-						<p class="no-description">No description provided</p>
+						<p class="no-description">{{ 'AGENTS.ENTER_AGENT_DESCRIPTION' | translate }}</p>
 					}
 					@if (agent.functions && agent.functions.length > 0) {
 						<div class="functions">
-							<span class="function-count">{{ agent.functions.length }} function(s)</span>
+							<span class="function-count">{{ agent.functions.length }} {{ 'AGENTS.AGENT_TOOLS' | translate }}</span>
 						</div>
 					}
 					@if (agent.files && agent.files.length > 0) {
 						<div class="files">
-							<span class="file-count">{{ agent.files.length }} file(s)</span>
+							<span class="file-count">{{ agent.files.length }} {{ 'CHAT.ATTACH_FILE' | translate }}</span>
 						</div>
 					}
 					<div class="metadata">
-						<span class="created-by">Created by: {{ agent.createdBy.email }}</span>
-						<span class="created-date">Created: {{ agent.createdAt | date: 'short' }}</span>
+						<span class="created-by">{{ 'COMMON.CREATE' | translate }}: {{ agent.createdBy.email }}</span>
+						<span class="created-date">{{ 'COMMON.CREATE' | translate }}: {{ agent.createdAt | date: 'short' }}</span>
 						@if (agent.updatedAt) {
-							<span class="updated-date">Updated: {{ agent.updatedAt | date: 'short' }}</span>
+							<span class="updated-date">{{ 'COMMON.EDIT' | translate }}: {{ agent.updatedAt | date: 'short' }}</span>
 						}
 					</div>
 				</div>

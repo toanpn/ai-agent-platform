@@ -9,6 +9,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTabsModule } from '@angular/material/tabs';
+import { TranslateModule } from '@ngx-translate/core';
 import { AuthService, LoginRequest, RegisterRequest } from '../../../core/services/auth.service';
 import { NotificationService } from '../../../core/services/notification.service';
 import { finalize, Subscription } from 'rxjs';
@@ -31,6 +32,7 @@ import { finalize, Subscription } from 'rxjs';
 		MatIconModule,
 		MatProgressSpinnerModule,
 		MatTabsModule,
+		TranslateModule,
 	],
 	templateUrl: './login.component.html',
 	styleUrls: ['./login.component.scss'],
@@ -137,16 +139,16 @@ export class LoginComponent implements OnDestroy {
 	 */
 	private validateLoginForm(): boolean {
 		if (!this.loginCredentials.email || !this.loginCredentials.password) {
-			this.loginError = 'Please fill out all fields';
-			this.notificationService.showWarning('Please fill out all fields');
+			this.loginError = 'AUTH.FILL_ALL_FIELDS';
+			this.notificationService.showWarning('AUTH.FILL_ALL_FIELDS');
 			return false;
 		}
 
 		// Basic email validation
 		const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 		if (!emailPattern.test(this.loginCredentials.email)) {
-			this.loginError = 'Please enter a valid email address';
-			this.notificationService.showWarning('Please enter a valid email address');
+			this.loginError = 'AUTH.VALID_EMAIL';
+			this.notificationService.showWarning('AUTH.VALID_EMAIL');
 			return false;
 		}
 
@@ -165,23 +167,23 @@ export class LoginComponent implements OnDestroy {
 			!this.registerCredentials.firstName ||
 			!this.registerCredentials.lastName
 		) {
-			this.registerError = 'Please fill out all fields';
-			this.notificationService.showWarning('Please fill out all fields');
+			this.registerError = 'AUTH.FILL_ALL_FIELDS';
+			this.notificationService.showWarning('AUTH.FILL_ALL_FIELDS');
 			return false;
 		}
 
 		// Basic email validation
 		const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 		if (!emailPattern.test(this.registerCredentials.email)) {
-			this.registerError = 'Please enter a valid email address';
-			this.notificationService.showWarning('Please enter a valid email address');
+			this.registerError = 'AUTH.VALID_EMAIL';
+			this.notificationService.showWarning('AUTH.VALID_EMAIL');
 			return false;
 		}
 
 		// Password strength validation (minimum 6 characters)
 		if (this.registerCredentials.password.length < 6) {
-			this.registerError = 'Password must be at least 6 characters long';
-			this.notificationService.showWarning('Password must be at least 6 characters long');
+			this.registerError = 'AUTH.PASSWORD_MIN_LENGTH';
+			this.notificationService.showWarning('AUTH.PASSWORD_MIN_LENGTH');
 			return false;
 		}
 
@@ -192,44 +194,27 @@ export class LoginComponent implements OnDestroy {
 	 * Handles successful authentication response (both login and register)
 	 */
 	private handleAuthSuccess(): void {
-		this.notificationService.showSuccess('Login successful');
+		this.notificationService.showSuccess('AUTH.LOGIN_SUCCESS');
 		this.router.navigate(['/chat']);
 	}
 
 	/**
 	 * Handles login error response
-	 * @param err - The HTTP error response
+	 * @param err - Error response from the server
 	 */
 	private handleLoginError(err: any): void {
 		console.error('Login error:', err);
-
-		// Set the inline error message
-		this.loginError = 'Invalid username or password';
-
-		// Show specific login error message
-		if (err.status === 401) {
-			this.notificationService.showError('Invalid username or password');
-		} else {
-			this.notificationService.showError('Login failed. Please try again.');
-		}
+		this.loginError = 'AUTH.LOGIN_ERROR';
+		this.notificationService.showError('AUTH.LOGIN_ERROR');
 	}
 
 	/**
 	 * Handles registration error response
-	 * @param err - The HTTP error response
+	 * @param err - Error response from the server
 	 */
 	private handleRegisterError(err: any): void {
 		console.error('Registration error:', err);
-
-		// Set default error message
-		this.registerError = 'Registration failed. Please try again.';
-
-		// Show specific registration error message based on status code
-		if (err.status === 409) {
-			this.registerError = 'Username or email already exists';
-			this.notificationService.showError('Username or email already exists');
-		} else {
-			this.notificationService.showError('Registration failed. Please try again.');
-		}
+		this.registerError = 'AUTH.REGISTER_ERROR';
+		this.notificationService.showError('AUTH.REGISTER_ERROR');
 	}
 }

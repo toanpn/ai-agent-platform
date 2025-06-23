@@ -1,11 +1,11 @@
 <div class="agent-detail-container">
 	<div class="loading-indicator" *ngIf="loading">
-		<p>Loading agent details...</p>
+		<p>{{ 'AGENTS.LOADING_AGENT' | translate }}</p>
 	</div>
 
 	<div class="error-message" *ngIf="errorMessage">
-		<p>{{ errorMessage }}</p>
-		<button routerLink="/agents">Back to Agents</button>
+		<p>{{ errorMessage | translate }}</p>
+		<button routerLink="/agents">{{ 'AGENTS.BACK_TO_AGENTS' | translate }}</button>
 	</div>
 
 	<ng-container *ngIf="agent && !loading">
@@ -13,37 +13,37 @@
 			<div class="title-section">
 				<h1>{{ agent.name }}</h1>
 				<div class="status" [class.active]="agent.isActive" [class.inactive]="!agent.isActive">
-					{{ agent.isActive ? 'Active' : 'Inactive' }}
+					{{ agent.isActive ? ('AGENTS.AGENT_ACTIVE' | translate) : ('AGENTS.AGENT_INACTIVE' | translate) }}
 				</div>
 				<div class="actions">
-					<button class="edit-button" (click)="editAgent()">Edit</button>
-					<button class="delete-button" (click)="deleteAgent()">Delete</button>
+					<button class="edit-button" (click)="editAgent()">{{ 'COMMON.EDIT' | translate }}</button>
+					<button class="delete-button" (click)="deleteAgent()">{{ 'COMMON.DELETE' | translate }}</button>
 				</div>
 			</div>
 			<button class="chat-button" (click)="startChat()">
 				<span class="icon">💬</span>
-				Start Chat with this Agent
+				{{ 'AGENTS.START_CHAT_WITH_AGENT' | translate }}
 			</button>
 		</div>
 
 		<div class="agent-details">
 			<div class="section">
-				<h2>Department</h2>
+				<h2>{{ 'AGENTS.DEPARTMENT' | translate }}</h2>
 				<p>{{ agent.department }}</p>
 			</div>
 
 			<div class="section" *ngIf="agent.description">
-				<h2>Description</h2>
+				<h2>{{ 'AGENTS.AGENT_DESCRIPTION' | translate }}</h2>
 				<p>{{ agent.description }}</p>
 			</div>
 
 			<div class="section" *ngIf="agent.instructions">
-				<h2>Instructions</h2>
+				<h2>{{ 'AGENTS.INSTRUCTIONS' | translate }}</h2>
 				<p>{{ agent.instructions }}</p>
 			</div>
 
 			<div class="section" *ngIf="agent.functions && agent.functions.length > 0">
-				<h2>Functions</h2>
+				<h2>{{ 'AGENTS.FUNCTIONS' | translate }}</h2>
 				<div class="functions-list">
 					<div class="function-item" *ngFor="let func of agent.functions">
 						<h3>{{ func.name }}</h3>
@@ -52,7 +52,7 @@
 							<span class="method" *ngIf="func.httpMethod">{{ func.httpMethod }}</span>
 							<span class="endpoint" *ngIf="func.endpointUrl">{{ func.endpointUrl }}</span>
 							<span class="status" [class.active]="func.isActive" [class.inactive]="!func.isActive">
-								{{ func.isActive ? 'Active' : 'Inactive' }}
+								{{ func.isActive ? ('AGENTS.AGENT_ACTIVE' | translate) : ('AGENTS.AGENT_INACTIVE' | translate) }}
 							</span>
 						</div>
 					</div>
@@ -60,7 +60,7 @@
 			</div>
 
 			<div class="section" *ngIf="agent.files && agent.files.length > 0">
-				<h2>Files</h2>
+				<h2>{{ 'AGENTS.FILES' | translate }}</h2>
 				<div class="files-list">
 					<div class="file-item" *ngFor="let file of agent.files">
 						<h3>{{ file.fileName }}</h3>
@@ -68,7 +68,7 @@
 							<span class="size">{{ (file.fileSize / 1024) | number:'1.0-1' }} KB</span>
 							<span class="type" *ngIf="file.contentType">{{ file.contentType }}</span>
 							<span class="indexed" [class.yes]="file.isIndexed" [class.no]="!file.isIndexed">
-								{{ file.isIndexed ? 'Indexed' : 'Not Indexed' }}
+								{{ file.isIndexed ? ('AGENTS.INDEXED' | translate) : ('AGENTS.NOT_INDEXED' | translate) }}
 							</span>
 						</div>
 					</div>
@@ -77,29 +77,29 @@
 
 			<div class="section meta-info">
 				<div class="meta-item">
-					<span class="label">Created by:</span>
+					<span class="label">{{ 'AGENTS.CREATED_BY' | translate }}:</span>
 					<span class="value">{{ agent.createdBy.email }}</span>
 				</div>
 				<div class="meta-item">
-					<span class="label">Created:</span>
+					<span class="label">{{ 'AGENTS.CREATED' | translate }}:</span>
 					<span class="value">{{ agent.createdAt | date: 'medium' }}</span>
 				</div>
 				<div class="meta-item" *ngIf="agent.updatedAt">
-					<span class="label">Last Updated:</span>
+					<span class="label">{{ 'AGENTS.LAST_UPDATED' | translate }}:</span>
 					<span class="value">{{ agent.updatedAt | date: 'medium' }}</span>
 				</div>
 				<div class="meta-item">
-					<span class="label">Main Router:</span>
-					<span class="value">{{ agent.isMainRouter ? 'Yes' : 'No' }}</span>
+					<span class="label">{{ 'AGENTS.MAIN_ROUTER' | translate }}:</span>
+					<span class="value">{{ agent.isMainRouter ? ('COMMON.YES' | translate) : ('COMMON.NO' | translate) }}</span>
 				</div>
 			</div>
 		</div>
 
 		<div class="footer-actions">
-			<button class="back-button" routerLink="/agents">Back to Agents</button>
+			<button class="back-button" routerLink="/agents">{{ 'AGENTS.BACK_TO_AGENTS' | translate }}</button>
 			<button class="chat-button" (click)="startChat()">
 				<span class="icon">💬</span>
-				Start Chat with this Agent
+				{{ 'AGENTS.START_CHAT_WITH_AGENT' | translate }}
 			</button>
 		</div>
 	</ng-container>

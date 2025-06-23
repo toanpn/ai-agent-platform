@@ -1,10 +1,14 @@
 <div class="app-container">
 	<mat-toolbar color="primary" class="app-toolbar">
-		<span>{{ title }}</span>
+		<span>{{ title | translate }}</span>
 		<span class="spacer"></span>
 		@if(user$ | async; as user) {
-		<button mat-button (click)="navigateTo('/agents')">Agents</button>
-		<button mat-button (click)="navigateTo('/chat')">Chat</button>
+		<button mat-button (click)="navigateTo('/agents')">{{ 'COMMON.AGENTS' | translate }}</button>
+		<button mat-button (click)="navigateTo('/chat')">{{ 'COMMON.CHAT' | translate }}</button>
+		<button mat-button (click)="navigateTo('/demo')">Demo</button>
+		
+		<!-- Language Selector -->
+		<app-language-selector></app-language-selector>
 		
 		<!-- Theme Toggle Button -->
 		<button 
@@ -22,24 +26,29 @@
 		</button>
 		<mat-menu #menu="matMenu">
 			<button mat-menu-item>
-				<span>Welcome, {{ user.email }}</span>
+				<span>{{ 'COMMON.WELCOME' | translate }}, {{ user.email }}</span>
 			</button>
 			<div class="menu-divider"></div>
 			<button mat-menu-item disabled class="theme-info">
 				<mat-icon>{{ currentTheme === 'auto' ? 'brightness_auto' : (isDarkMode ? 'dark_mode' : 'light_mode') }}</mat-icon>
-				<span>Theme: {{ getThemeDisplayName() }}</span>
+				<span>{{ 'COMMON.THEME' | translate }}: {{ getThemeDisplayName() }}</span>
 			</button>
 			<button mat-menu-item (click)="toggleTheme()">
 				<mat-icon>{{ isDarkMode ? 'light_mode' : 'dark_mode' }}</mat-icon>
-				<span>Switch to {{ isDarkMode ? 'Light' : 'Dark' }} Theme</span>
+				<span>{{ isDarkMode ? ('COMMON.SWITCH_TO_LIGHT' | translate) : ('COMMON.SWITCH_TO_DARK' | translate) }}</span>
 			</button>
 			<div class="menu-divider"></div>
 			<button mat-menu-item (click)="logout()">
 				<mat-icon>exit_to_app</mat-icon>
-				<span>Logout</span>
+				<span>{{ 'COMMON.LOGOUT' | translate }}</span>
 			</button>
 		</mat-menu>
 		} @else {
+		<button mat-button (click)="navigateTo('/demo')">Demo</button>
+		
+		<!-- Language Selector -->
+		<app-language-selector></app-language-selector>
+		
         <!-- Theme Toggle Button -->
 		<button 
 			mat-icon-button 
