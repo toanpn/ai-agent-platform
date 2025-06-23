@@ -13,7 +13,7 @@
 	<div class="agent-selector">
 		<button mat-button [matMenuTriggerFor]="agentMenu" class="agent-selector-button">
 			<mat-icon>person</mat-icon>
-			<span>{{ selectedAgent?.name || ('AGENTS.SELECT_MODEL' | translate) }}</span>
+			<span>{{ selectedAgent()?.name || ('AGENTS.SELECT_MODEL' | translate) }}</span>
 			<mat-icon>expand_more</mat-icon>
 		</button>
 		<mat-menu #agentMenu="matMenu">
@@ -28,8 +28,9 @@
 	<mat-divider></mat-divider>
 
 	<div class="conversations-list">
+        @let displayConversations = conversations();
 		<mat-nav-list>
-			@for (conversation of conversations(); track conversation.id) {
+			@for (conversation of displayConversations; track conversation.id) {
 				<a
 					mat-list-item
 					(click)="onSelectConversation(conversation)"
@@ -47,7 +48,7 @@
 			}
 		</mat-nav-list>
 
-		@if (conversations()?.length === 0) {
+		@if (displayConversations?.length === 0) {
 			<div class="empty-state">
 				<p>{{ 'CHAT.NO_CONVERSATIONS' | translate }}</p>
 			</div>

@@ -1,0 +1,27 @@
+.execution-step {
+  margin-bottom: 1rem;
+}
+.step-title {
+  margin-left: 0.5rem;
+  font-weight: 500;
+}
+.step-content {
+  padding: 1rem 0;
+}
+.step-section {
+  margin-bottom: 1rem;
+}
+label {
+  font-weight: bold;
+  display: block;
+  margin-bottom: 0.5rem;
+}
+pre {
+  background-color: var(--color-background-alt);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-secondary);
+  padding: 1rem;
+  border-radius: 4px;
+  white-space: pre-wrap;
+  word-break: break-all;
+} 

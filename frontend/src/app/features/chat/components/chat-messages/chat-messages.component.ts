@@ -27,8 +27,10 @@ export class ChatMessagesComponent {
 
 	constructor() {
 		effect(() => {
-			// Trigger scrolling when messages change
-			this.scrollToBottom();
+			// Use a timeout to allow the DOM to update before scrolling
+			if (this.messages()) {
+				setTimeout(() => this.scrollToBottom(), 0);
+			}
 		});
 	}
 

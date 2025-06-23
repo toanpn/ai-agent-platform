@@ -157,7 +157,6 @@
     "DESCRIBE_AGENT": "Mô tả agent này làm gì",
     "ENTER_INSTRUCTIONS": "Nhập hướng dẫn cụ thể cho agent",
     "INSTRUCTIONS_HELP": "Cung cấp hướng dẫn chi tiết về cách agent này nên hành xử và phản hồi.",
-    "NAME_REQUIRED": "Tên là bắt buộc",
     "NAME_MIN_LENGTH": "Tên phải có ít nhất 3 ký tự",
     "NAME_MAX_LENGTH": "Tên không được vượt quá 50 ký tự",
     "DEPARTMENT_REQUIRED": "Phòng ban là bắt buộc",

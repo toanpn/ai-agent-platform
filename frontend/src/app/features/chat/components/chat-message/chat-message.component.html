@@ -1,14 +1,37 @@
+@let isUserMessageValue = isUserMessage();
+@let displayMessage = message();
+
 <div
 	class="message-container"
-	[class]="isUserMessage() ? 'user-message' : 'assistant-message'"
+	[class]="isUserMessageValue ? 'user-message' : 'assistant-message'"
 >
 	<div class="message-sender">
-		{{ isUserMessage() ? ('CHAT.YOU' | translate) : ('CHAT.ASSISTANT' | translate) }}
+		{{ isUserMessageValue ? ('CHAT.YOU' | translate) : (displayMessage.agentName || ('CHAT.ASSISTANT' | translate)) }}
 		<span class="message-time">{{ formattedTimestamp() }}</span>
 	</div>
 	<mat-card>
 		<mat-card-content>
-			{{ message().text }}
+            @if (displayMessage.masterAgentThinking) {
+			<div class="thinking-block">
+				<mat-icon>psychology</mat-icon>
+				<p>{{ displayMessage.masterAgentThinking }}</p>
+			</div>
+            }
+
+			<p>{{ displayMessage.text }}</p>
+
+            @if (displayMessage.executionDetails) {
+			<app-execution-details 
+				[details]="displayMessage.executionDetails!"
+			></app-execution-details>
+            }
+
+            @if (displayMessage.error) {
+			<div class="error-block">
+				<mat-icon>error_outline</mat-icon>
+				<p>Error: {{ displayMessage.error }}</p>
+			</div>
+            }
 		</mat-card-content>
 	</mat-card>
 </div>

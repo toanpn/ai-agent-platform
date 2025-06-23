@@ -43,13 +43,13 @@ export class ChatStateService {
 		// React to changes in selectedAgent using toObservable
 		toObservable(this.selectedAgent)
 			.pipe(
-				takeUntilDestroyed(this.destroyRef),
 				tap((agent) => {
 					if (agent) {
 						// Logic to handle agent changes if needed in the future
 						console.log(`Agent selected: ${agent.name}`);
 					}
 				}),
+				takeUntilDestroyed(this.destroyRef),
 			)
 			.subscribe();
 	}
@@ -79,8 +79,8 @@ export class ChatStateService {
 
 	async sendMessage(messageText: string): Promise<void> {
 		const agent = this.selectedAgent();
-		if (!messageText.trim() || !agent) {
-			this.notificationService.showError('Please select an agent and type a message.');
+		if (!messageText.trim()) {
+			this.notificationService.showError('Please type a message.');
 			return;
 		}
 
@@ -92,7 +92,7 @@ export class ChatStateService {
 
 		try {
 			const response = await lastValueFrom(
-				this.chatService.sendMessageNonStreaming(messageText, agent.name, conversationId),
+				this.chatService.sendMessageNonStreaming(messageText, agent?.name, conversationId),
 			);
 
 			const userMessage: Message = { ...optimisticMessage, id: `msg-user-${Date.now()}` };
@@ -103,6 +103,12 @@ export class ChatStateService {
 				timestamp: new Date(response.timestamp),
 				conversationId: response.sessionId.toString(),
 				agentName: response.agentName,
+				masterAgentThinking: response.masterAgentThinking,
+				agentsUsed: response.agentsUsed,
+				toolsUsed: response.toolsUsed,
+				executionDetails: response.executionDetails,
+				metadata: response.metadata,
+				error: response.success ? undefined : response.error,
 			};
 
 			this.messages.update((msgs) => [
@@ -137,18 +143,16 @@ export class ChatStateService {
 			conversations: this.chatService.loadConversations(),
 		})
 			.pipe(
-				takeUntilDestroyed(this.destroyRef),
-				catchError(() => {
-					this.notificationService.showError('Failed to load initial data.');
+				catchError((error: Error) => {
+                    this.notificationService.showError('Failed to load initial data.');
+                    console.error('Failed to load initial data.', error);
 					return EMPTY;
 				}),
 				tap(() => this.isLoading.set(false)),
+				takeUntilDestroyed(this.destroyRef),
 			)
 			.subscribe(({ agents, conversations }) => {
 				this.agents.set(agents);
-				if (agents.length > 0 && !this.selectedAgent()) {
-					this.selectedAgent.set(agents[0]);
-				}
 				this.conversations.set(conversations);
 			});
 	}
@@ -158,12 +162,12 @@ export class ChatStateService {
 		this.chatService
 			.loadChat(conversationId)
 			.pipe(
-				takeUntilDestroyed(this.destroyRef),
 				catchError(() => {
 					this.notificationService.showError('Failed to load chat messages.');
 					return EMPTY;
 				}),
 				tap(() => this.isLoading.set(false)),
+				takeUntilDestroyed(this.destroyRef),
 			)
 			.subscribe((chat) => {
 				this.messages.set(chat?.messages || []);

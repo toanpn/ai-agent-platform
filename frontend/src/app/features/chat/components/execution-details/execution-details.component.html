@@ -1,0 +1,14 @@
+<mat-accordion *ngIf="details && details.executionSteps.length > 0">
+  <mat-expansion-panel class="execution-details-container">
+    <mat-expansion-panel-header>
+      <mat-panel-title>
+        <mat-icon>source_notes</mat-icon>
+        <span class="details-title">Execution Details ({{ details.totalSteps }} steps)</span>
+      </mat-panel-title>
+    </mat-expansion-panel-header>
+
+    <div class="details-content">
+      <app-execution-step *ngFor="let step of details.executionSteps" [step]="step"></app-execution-step>
+    </div>
+  </mat-expansion-panel>
+</mat-accordion> 

@@ -36,6 +36,14 @@ export interface Message {
 
 	/** The name of the agent that sent the message (if applicable) */
 	agentName?: string;
+
+	// Enhanced response fields
+	masterAgentThinking?: string;
+	agentsUsed?: string[];
+	toolsUsed?: string[];
+	executionDetails?: ExecutionDetails;
+	metadata?: { [key: string]: unknown };
+	error?: string;
 }
 
 /**
@@ -81,6 +89,13 @@ export interface ChatResponseDto {
 	agentName: string;
 	sessionId: number;
 	timestamp: string;
+	success: boolean;
+	error?: string;
+	masterAgentThinking?: string;
+	agentsUsed: string[];
+	toolsUsed: string[];
+	executionDetails: ExecutionDetails;
+	metadata: { [key: string]: unknown };
 }
 
 export interface ChatHistoryDto {
@@ -88,6 +103,17 @@ export interface ChatHistoryDto {
 	totalCount: number;
 	page: number;
 	pageSize: number;
+}
+
+export interface ExecutionStep {
+	toolName: string;
+	toolInput: string;
+	observation: string;
+}
+
+export interface ExecutionDetails {
+	executionSteps: ExecutionStep[];
+	totalSteps: number;
 }
 
 /**
@@ -163,13 +189,13 @@ export class ChatService {
 	 */
 	sendMessageNonStreaming(
 		text: string,
-		agentName: string,
+		agentName?: string,
 		conversationId?: string,
 	): Observable<ChatResponseDto> {
 		return this.api.post<ChatResponseDto>('/Chat/message', {
 			message: text,
 			sessionId: conversationId,
-			agentName: agentName,
+			agentName,
 		});
 	}
 

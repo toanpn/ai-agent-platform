@@ -6,9 +6,9 @@ import {
 } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { catchError, throwError } from 'rxjs';
-import { AuthService } from '../services/auth.service';
 import { NotificationService } from '../services/notification.service';
 import { Router } from '@angular/router';
+import { StorageService } from '../services/storage.service';
 
 /**
  * AuthInterceptor handles authentication headers and error responses for all HTTP requests.
@@ -25,10 +25,10 @@ export const AuthInterceptor: HttpInterceptorFn = (
 	req: HttpRequest<unknown>,
 	next: HttpHandlerFn,
 ) => {
-	const authService = inject(AuthService);
+	const storageService = inject(StorageService);
 	const notificationService = inject(NotificationService);
 	const router = inject(Router);
-	const token = authService.getToken();
+	const token = storageService.getItem('token');
 
 	// Clone the request and add authorization header if token exists
 	let request = req;
@@ -48,8 +48,9 @@ export const AuthInterceptor: HttpInterceptorFn = (
 
 			// Handle authentication errors by redirecting to login
 			if (error.status === 401) {
-				authService.logout();
-				router.navigate(['/login']);
+				storageService.removeItem('token');
+				storageService.removeItem('user');
+				router.navigate(['/auth/login']);
 			}
 
 			// Re-throw the error so it can still be handled by components

@@ -3,11 +3,13 @@ import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { Message } from '../../../../core/services/chat.service';
 import { TranslateModule } from '@ngx-translate/core';
+import { MatIconModule } from '@angular/material/icon';
+import { ExecutionDetailsComponent } from '../execution-details/execution-details.component';
 
 @Component({
 	selector: 'app-chat-message',
 	standalone: true,
-	imports: [CommonModule, MatCardModule, TranslateModule],
+	imports: [CommonModule, MatCardModule, TranslateModule, MatIconModule, ExecutionDetailsComponent],
 	templateUrl: './chat-message.component.html',
 	styleUrls: ['./chat-message.component.scss'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
