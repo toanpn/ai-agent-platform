@@ -110,7 +110,11 @@
     "CONFIRM_DELETE_CONVERSATION": "Are you sure you want to delete this conversation?",
     "FILE_UPLOAD_ERROR": "Failed to upload file",
     "FILE_UPLOAD_SUCCESS": "File uploaded successfully",
-    "UNSUPPORTED_FILE_TYPE": "Unsupported file type"
+    "UNSUPPORTED_FILE_TYPE": "Unsupported file type",
+    "ENHANCE_PROMPT": "Enhance Prompt",
+    "ENHANCING_PROMPT": "Enhancing prompt...",
+    "PROMPT_ENHANCED_SUCCESS": "Prompt enhanced successfully",
+    "PROMPT_ENHANCED_ERROR": "Failed to enhance prompt"
   },
   "AGENTS": {
     "CREATE_AGENT": "Create Agent",
@@ -186,7 +190,10 @@
     "LLM_CONFIG": "LLM Configuration",
     "TEMPERATURE": "Temperature",
     "MAX_TOKENS": "Max Tokens",
-    "SYSTEM_PROMPT": "System Prompt"
+    "SYSTEM_PROMPT": "System Prompt",
+    "ENHANCE_DESCRIPTION": "Enhance Description",
+    "DESCRIPTION_ENHANCED_SUCCESS": "Description enhanced successfully",
+    "DESCRIPTION_ENHANCED_ERROR": "Failed to enhance description"
   },
   "FILES": {
     "FILES": "Files",

@@ -47,12 +47,28 @@
 		</div>
 
 		<div class="form-group">
-			<label for="description">{{ 'AGENTS.AGENT_DESCRIPTION' | translate }} ({{ 'AGENTS.OPTIONAL' | translate }})</label>
+			<div class="field-header">
+				<label for="description">{{ 'AGENTS.AGENT_DESCRIPTION' | translate }} ({{ 'AGENTS.OPTIONAL' | translate }})</label>
+				<button
+					type="button"
+					mat-icon-button
+					color="accent"
+					class="enhance-button"
+					[disabled]="!agentForm.get('description')?.value?.trim() || isEnhancingDescription"
+					(click)="enhanceDescription()"
+					[matTooltip]="'AGENTS.ENHANCE_DESCRIPTION' | translate"
+					[attr.aria-label]="'AGENTS.ENHANCE_DESCRIPTION' | translate"
+				>
+					<mat-spinner *ngIf="isEnhancingDescription" diameter="20" aria-hidden="true"></mat-spinner>
+					<mat-icon *ngIf="!isEnhancingDescription" aria-hidden="true">auto_fix_high</mat-icon>
+				</button>
+			</div>
 			<textarea
 				id="description"
 				formControlName="description"
 				[placeholder]="'AGENTS.DESCRIBE_AGENT' | translate"
 				rows="4"
+				[disabled]="isEnhancingDescription"
 			></textarea>
 			<div
 				class="validation-error"

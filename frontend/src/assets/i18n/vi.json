@@ -110,7 +110,11 @@
     "CONFIRM_DELETE_CONVERSATION": "Bạn có chắc chắn muốn xóa cuộc trò chuyện này?",
     "FILE_UPLOAD_ERROR": "Không thể tải lên tệp",
     "FILE_UPLOAD_SUCCESS": "Tải lên tệp thành công",
-    "UNSUPPORTED_FILE_TYPE": "Loại tệp không được hỗ trợ"
+    "UNSUPPORTED_FILE_TYPE": "Loại tệp không được hỗ trợ",
+    "ENHANCE_PROMPT": "Cải Thiện Tin Nhắn",
+    "ENHANCING_PROMPT": "Đang cải thiện tin nhắn...",
+    "PROMPT_ENHANCED_SUCCESS": "Cải thiện tin nhắn thành công",
+    "PROMPT_ENHANCED_ERROR": "Không thể cải thiện tin nhắn"
   },
   "AGENTS": {
     "CREATE_AGENT": "Tạo Agent",
@@ -187,7 +191,10 @@
     "LLM_CONFIG": "Cấu hình LLM",
     "TEMPERATURE": "Nhiệt độ",
     "MAX_TOKENS": "Số token tối đa",
-    "SYSTEM_PROMPT": "Prompt hệ thống"
+    "SYSTEM_PROMPT": "Prompt hệ thống",
+    "ENHANCE_DESCRIPTION": "Cải Thiện Mô Tả",
+    "DESCRIPTION_ENHANCED_SUCCESS": "Cải thiện mô tả thành công",
+    "DESCRIPTION_ENHANCED_ERROR": "Không thể cải thiện mô tả"
   },
   "FILES": {
     "FILES": "Tệp",

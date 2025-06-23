@@ -200,6 +200,19 @@ export class ChatService {
 	}
 
 	/**
+	 * Enhance a prompt using the prompt enhancement API.
+	 * @param message The message text to enhance.
+	 * @returns An observable of the enhanced prompt.
+	 */
+	enhancePrompt(message: string): Observable<string> {
+		return this.api.post<{ enhancedPrompt: string }>('/Chat/enhance-prompt', {
+			message: message,
+		}).pipe(
+			map(response => response.enhancedPrompt)
+		);
+	}
+
+	/**
 	 * Helper method to convert the backend ChatMessageDto into the local `Message` model.
 	 */
 	private mapMessageDto(dto: ChatMessageDto, conversationId: number | string): Message {

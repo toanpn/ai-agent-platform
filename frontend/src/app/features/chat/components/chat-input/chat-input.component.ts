@@ -4,6 +4,9 @@ import {
 	input,
 	output,
 	signal,
+	inject,
+	DestroyRef,
+	OnInit,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -11,7 +14,16 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
-import { TranslateModule } from '@ngx-translate/core';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { TextFieldModule } from '@angular/cdk/text-field';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Subject } from 'rxjs';
+import { exhaustMap, tap, catchError, switchMap } from 'rxjs/operators';
+import { of } from 'rxjs';
+import { ChatService } from '../../../../core/services/chat.service';
+import { NotificationService } from '../../../../core/services/notification.service';
 
 /**
  * ChatInputComponent handles user input for sending messages in the chat interface.
@@ -28,16 +40,65 @@ import { TranslateModule } from '@ngx-translate/core';
 		MatIconModule,
 		MatInputModule,
 		MatFormFieldModule,
+		MatProgressSpinnerModule,
+		MatTooltipModule,
+		TextFieldModule,
 		TranslateModule,
 	],
 	templateUrl: './chat-input.component.html',
 	styleUrls: ['./chat-input.component.scss'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ChatInputComponent {
+export class ChatInputComponent implements OnInit {
 	sendMessage = output<string>();
 	disabled = input<boolean>(false);
 	messageText = signal('');
+	isEnhancing = signal(false);
+
+	private chatService = inject(ChatService);
+	private notificationService = inject(NotificationService);
+	private translateService = inject(TranslateService);
+	private destroyRef = inject(DestroyRef);
+
+	// Action subjects for declarative reactive patterns
+	private enhancePromptTrigger$ = new Subject<string>();
+
+	ngOnInit(): void {
+		this.setupEnhancePromptHandler();
+	}
+
+	/**
+	 * Sets up the declarative handler for enhance prompt action
+	 */
+	private setupEnhancePromptHandler(): void {
+		this.enhancePromptTrigger$
+			.pipe(
+				tap(() => this.isEnhancing.set(true)),
+				exhaustMap((text) =>
+					this.chatService.enhancePrompt(text).pipe(
+						switchMap((enhancedPrompt) => {
+							this.messageText.set(enhancedPrompt);
+							this.isEnhancing.set(false);
+							return this.translateService.get('CHAT.PROMPT_ENHANCED_SUCCESS');
+						}),
+						tap((message) => {
+							this.notificationService.showSuccess(message);
+						}),
+						catchError((error) => {
+							console.error('Error enhancing prompt:', error);
+							this.isEnhancing.set(false);
+							return this.translateService.get('CHAT.PROMPT_ENHANCED_ERROR').pipe(
+								tap((errorMessage) => {
+									this.notificationService.showError(errorMessage);
+								})
+							);
+						})
+					)
+				),
+				takeUntilDestroyed(this.destroyRef)
+			)
+			.subscribe();
+	}
 
 	/**
 	 * Handles the send button click event
@@ -63,8 +124,21 @@ export class ChatInputComponent {
 		}
 	}
 
-	onMessageTextChanged(event: Event) {
+	onMessageTextChanged(event: Event): void {
 		const value = (event.target as HTMLInputElement).value;
 		this.messageText.set(value);
+	}
+
+	/**
+	 * Triggers the enhance prompt action
+	 * Uses declarative pattern with subject trigger
+	 */
+	onEnhanceClick(): void {
+		const text = this.messageText().trim();
+		if (!text || this.disabled() || this.isEnhancing()) {
+			return;
+		}
+
+		this.enhancePromptTrigger$.next(text);
 	}
 }

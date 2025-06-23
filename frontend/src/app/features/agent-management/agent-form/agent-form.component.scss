@@ -43,6 +43,31 @@
 		.form-group {
 			margin-bottom: var(--spacing-lg);
 
+			.field-header {
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				margin-bottom: var(--spacing-sm);
+
+				label {
+					margin: 0;
+					font-weight: 500;
+					color: var(--color-text-secondary);
+				}
+
+				.enhance-button {
+					color: var(--color-primary-600);
+					
+					&:hover:not(:disabled) {
+						background-color: var(--color-primary-50);
+					}
+
+					&:disabled {
+						opacity: 0.5;
+					}
+				}
+			}
+
 			label {
 				display: block;
 				font-weight: 500;

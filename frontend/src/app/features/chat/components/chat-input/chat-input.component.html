@@ -1,30 +1,54 @@
 <div class="chat-input-wrapper" role="form" aria-label="Message input form">
 	<mat-form-field appearance="outline" class="message-input">
 		<mat-label>{{ 'CHAT.TYPE_MESSAGE' | translate }}</mat-label>
-		<input
+		<textarea
 			matInput
-			type="text"
 			[placeholder]="'CHAT.TYPE_MESSAGE' | translate"
 			[value]="messageText()"
 			(input)="onMessageTextChanged($event)"
 			(keydown)="onKeyDown($event)"
-			[disabled]="disabled()"
+			[disabled]="disabled() || isEnhancing()"
 			aria-label="Message text input"
 			autocomplete="off"
-		/>
+			rows="3"
+			cdkTextareaAutosize
+			cdkAutosizeMinRows="1"
+			cdkAutosizeMaxRows="5"
+		></textarea>
 		@if (disabled()) {
 			<mat-hint>{{ 'COMMON.LOADING' | translate }}</mat-hint>
 		}
+		@if (isEnhancing()) {
+			<mat-hint>{{ 'CHAT.ENHANCING_PROMPT' | translate }}</mat-hint>
+		}
 	</mat-form-field>
 
-	<button
-		mat-fab
-		color="primary"
-		class="send-button"
-		[disabled]="!messageText().trim() || disabled()"
-		(click)="onSendClick()"
-		[attr.aria-label]="'CHAT.SEND_MESSAGE' | translate"
-	>
-		<mat-icon aria-hidden="true">send</mat-icon>
-	</button>
+	<div class="input-actions">
+		<button
+			mat-icon-button
+			color="accent"
+			class="enhance-button"
+			[disabled]="!messageText().trim() || disabled() || isEnhancing()"
+			(click)="onEnhanceClick()"
+			[matTooltip]="'CHAT.ENHANCE_PROMPT' | translate"
+			[attr.aria-label]="'CHAT.ENHANCE_PROMPT' | translate"
+		>
+			@if (isEnhancing()) {
+				<mat-spinner diameter="20" aria-hidden="true"></mat-spinner>
+			} @else {
+				<mat-icon aria-hidden="true">auto_fix_high</mat-icon>
+			}
+		</button>
+
+		<button
+			mat-fab
+			color="primary"
+			class="send-button"
+			[disabled]="!messageText().trim() || disabled() || isEnhancing()"
+			(click)="onSendClick()"
+			[attr.aria-label]="'CHAT.SEND_MESSAGE' | translate"
+		>
+			<mat-icon aria-hidden="true">send</mat-icon>
+		</button>
+	</div>
 </div>

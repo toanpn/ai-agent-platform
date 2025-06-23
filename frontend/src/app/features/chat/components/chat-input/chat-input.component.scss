@@ -1,14 +1,33 @@
 .chat-input-wrapper {
 	display: flex;
-	align-items: center;
+	align-items: flex-end;
+	gap: var(--spacing-sm);
 
 	.message-input {
 		flex: 1;
-		margin-right: var(--spacing-sm);
 	}
 
-	.send-button {
+	.input-actions {
+		display: flex;
+		align-items: center;
+		gap: var(--spacing-xs);
 		margin-bottom: 5px;
+
+		.enhance-button {
+			color: var(--color-primary-600);
+			
+			&:hover:not(:disabled) {
+				background-color: var(--color-primary-50);
+			}
+
+			&:disabled {
+				opacity: 0.5;
+			}
+		}
+
+		.send-button {
+			flex-shrink: 0;
+		}
 	}
 
 	.mat-mdc-form-field-subscript-wrapper {
