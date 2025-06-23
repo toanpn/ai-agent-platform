@@ -11,24 +11,24 @@ This guide provides best practices for using RxJS in our Angular application to 
 
 **Always clean up subscriptions.** Un-destroyed subscriptions are a common source of memory leaks.
 
--   **`takeUntil` for Components/Services**: For observables that live as long as a component or service, use the `takeUntil` operator with a `destroy$` subject. The subject should emit in the `ngOnDestroy` lifecycle hook.
+-   **`takeUntilDestroyed` (Preferred)**: The `takeUntilDestroyed` helper from `@angular/core/rxjs-interop` is the cleanest and most modern way to tie an observable's lifecycle to a component or service.
 
     ```typescript
-    private destroy$ = new Subject<void>();
+    import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+    import { DestroyRef } from '@angular/core';
 
-    ngOnInit(): void {
+    // ...
+
+    constructor(private destroyRef: DestroyRef) {}
+
+    someMethod() {
       this.someObservable$
-        .pipe(takeUntil(this.destroy$))
+        .pipe(takeUntilDestroyed(this.destroyRef))
         .subscribe(...);
-    }
-
-    ngOnDestroy(): void {
-      this.destroy$.next();
-      this.destroy$.complete();
     }
     ```
 
--   **`async` Pipe in Templates**: The `async` pipe is the safest and easiest way to manage subscriptions. It automatically subscribes and unsubscribes. Prefer it whenever possible.
+-   **`async` Pipe in Templates**: The `async` pipe is the safest and easiest way to manage subscriptions in templates. It automatically subscribes and unsubscribes. Prefer it whenever possible.
 
     ```html
     <div *ngIf="data$ | async as data">{{ data.name }}</div>
@@ -36,7 +36,45 @@ This guide provides best practices for using RxJS in our Angular application to 
 
 -   **`take(1)` or `first()` for Single Emissions**: If you only need the first value from an observable (e.g., an HTTP call), use `take(1)` or `first()`. The observable will automatically complete, so no manual un-subscription is needed.
 
-## 2. Avoid Nested Subscriptions
+## 2. Declarative Action Handling with Subjects
+
+For handling user actions (like button clicks) that trigger asynchronous operations, use a `Subject` as a trigger for a declarative stream. This separates the event trigger from the business logic.
+
+-   **Create a Trigger**: Define a `Subject` that will emit when an action occurs.
+-   **Create a Declarative Stream**: In the constructor or `ngOnInit`, define a pipeline that listens to the trigger.
+-   **Use Higher-Order Mapping Operators**: Use operators like `exhaustMap` or `switchMap` to handle the asynchronous work.
+-   **Trigger the Action**: In the event handler (e.g., the `click` method), simply call `.next()` on the subject.
+
+**Example Implementation:**
+```typescript
+// In component
+private deleteTrigger$ = new Subject<number>();
+
+constructor() {
+  this.deleteTrigger$.pipe(
+    exhaustMap(id => this.myService.deleteItem(id).pipe(
+      catchError(err => {
+        // Handle error gracefully
+        return of(null);
+      })
+    )),
+    tap(result => {
+      if (result) {
+        // Perform side-effect on success, like navigation
+        this.router.navigate(['/items']);
+      }
+    }),
+    takeUntilDestroyed(this.destroyRef)
+  ).subscribe();
+}
+
+// Method called from the template
+deleteItem(id: number): void {
+  this.deleteTrigger$.next(id);
+}
+```
+
+## 3. Avoid Nested Subscriptions
 
 **Never subscribe within a subscribe.** This is an anti-pattern that leads to "callback hell," makes code hard to read, and complicates error handling and cancellation. Instead, use higher-order mapping operators to chain observables.
 
@@ -62,14 +100,14 @@ this.api.getData(id).pipe(
 });
 ```
 
-## 3. Use `tap` for Side-Effects Only
+## 4. Use `tap` for Side-Effects Only
 
 The `tap` operator is for performing side-effects that don't modify the value passed through the stream (e.g., logging, updating a variable, debugging).
 
 -   **DO**: `tap(value => console.log(value))`
 -   **DO NOT**: Put asynchronous operations (like another `subscribe` or Promise) inside a `tap`. This breaks the observable chain. Use a higher-order mapping operator instead.
 
-## 4. Handle Errors Gracefully
+## 5. Handle Errors Gracefully
 
 Use the `catchError` operator within an observable's `pipe` to handle errors. This prevents an error from destroying the outer stream.
 
@@ -85,7 +123,7 @@ this.data$.pipe(
 ).subscribe();
 ```
 
-## 5. State Management with Subjects
+## 6. State Management with Subjects
 
 -   Use a `BehaviorSubject` when you need to store and multicast the "current value" to new subscribers.
 -   In services, expose subjects as observables (`.asObservable()`) to prevent consumers from directly calling `.next()` on the subject, which would violate encapsulation.
