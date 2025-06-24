@@ -101,7 +101,7 @@ namespace AgentPlatform.API.Services
             _httpClient = httpClient;
             _logger = logger;
             
-            var baseUrl = configuration["AgentRuntime:BaseUrl"] ?? "http://localhost:5001";
+            var baseUrl = configuration["AgentRuntime:BaseUrl"] ?? "http://localhost:8000";
             _httpClient.BaseAddress = new Uri(baseUrl);
             
             _jsonOptions = new JsonSerializerOptions

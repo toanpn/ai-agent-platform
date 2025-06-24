@@ -10,15 +10,17 @@ import json
 import logging
 from datetime import datetime
 from typing import Dict, Any, List, Optional
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 from dotenv import load_dotenv
 import asyncio
+from werkzeug.utils import secure_filename
 
 # Import our custom modules
 from core.agent_manager import AgentManager
 from core.master_agent import MasterAgent, create_master_agent
 from core.prompt_enhancer import enhance_prompt_async
+from core.rag_service import RAGService
 
 # Load environment variables
 load_dotenv()
@@ -32,6 +34,32 @@ CORS(app)
 
 # Global system manager instance
 system_manager = None
+
+# Global RAG service instance
+rag_service = None
+
+# File upload configuration
+UPLOAD_FOLDER = 'uploads'
+ALLOWED_EXTENSIONS = {'pdf', 'docx', 'doc', 'xlsx', 'xls', 'txt', 'md'}
+MAX_FILE_SIZE = 16 * 1024 * 1024  # 16MB
+
+# Create upload directory if it doesn't exist
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
+def allowed_file(filename):
+    """Check if file extension is allowed."""
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+def init_rag_service():
+    """Initialize the RAG service."""
+    global rag_service
+    try:
+        rag_service = RAGService()
+        logger.info("✅ RAG service initialized successfully")
+    except Exception as e:
+        logger.error(f"❌ Failed to initialize RAG service: {e}")
+        rag_service = None
 
 class AgentSystemManager:
     """Manages the overall agent system including loading, reloading, and coordination."""
@@ -445,6 +473,9 @@ def initialize_system():
         logger.info("🔧 Initializing agent system components...")
         system_manager.initialize_system()
         
+        logger.info("🧠 Initializing RAG service...")
+        init_rag_service()
+        
         logger.info("✅ Agent system initialized successfully")
         
     except Exception as e:
@@ -643,12 +674,249 @@ async def get_execution_trace(session_id: str):
             "error": str(e)
         }
 
+# ==================== RAG ENDPOINTS ====================
+
+@app.route('/api/rag/upload', methods=['POST'])
+def upload_document():
+    """Upload and process a document for RAG."""
+    try:
+        # Check if RAG service is available
+        if not rag_service:
+            return jsonify({
+                'success': False,
+                'error': 'RAG service not initialized'
+            }), 500
+        
+        # Check if file is in request
+        if 'file' not in request.files:
+            return jsonify({
+                'success': False,
+                'error': 'No file provided'
+            }), 400
+        
+        file = request.files['file']
+        
+        # Check if file is selected
+        if file.filename == '':
+            return jsonify({
+                'success': False,
+                'error': 'No file selected'
+            }), 400
+        
+        # Check file size
+        if len(file.read()) > MAX_FILE_SIZE:
+            return jsonify({
+                'success': False,
+                'error': f'File too large. Maximum size is {MAX_FILE_SIZE / 1024 / 1024}MB'
+            }), 413
+        
+        # Reset file pointer
+        file.seek(0)
+        
+        # Check if file type is allowed
+        if not allowed_file(file.filename):
+            return jsonify({
+                'success': False,
+                'error': f'File type not supported. Allowed types: {", ".join(ALLOWED_EXTENSIONS)}'
+            }), 400
+        
+        # Get additional parameters
+        agent_id = request.form.get('agent_id')
+        metadata = {}
+        
+        # Parse metadata if provided
+        if 'metadata' in request.form:
+            try:
+                metadata = json.loads(request.form['metadata'])
+            except json.JSONDecodeError:
+                return jsonify({
+                    'success': False,
+                    'error': 'Invalid metadata JSON format'
+                }), 400
+        
+        # Save file temporarily
+        filename = secure_filename(file.filename)
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        unique_filename = f"{timestamp}_{filename}"
+        filepath = os.path.join(UPLOAD_FOLDER, unique_filename)
+        
+        file.save(filepath)
+        
+        try:
+            # Process document with RAG service
+            result = rag_service.add_document(filepath, agent_id, metadata)
+            
+            # Clean up temporary file
+            os.remove(filepath)
+            
+            return jsonify({
+                'success': True,
+                'result': result
+            })
+            
+        except Exception as e:
+            # Clean up temporary file on error
+            if os.path.exists(filepath):
+                os.remove(filepath)
+            raise e
+            
+    except Exception as e:
+        logger.error(f"Error uploading document: {e}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+
+@app.route('/api/rag/web-content', methods=['POST'])
+def add_web_content():
+    """Add web content to the knowledge base."""
+    try:
+        # Check if RAG service is available
+        if not rag_service:
+            return jsonify({
+                'success': False,
+                'error': 'RAG service not initialized'
+            }), 500
+        
+        data = request.get_json()
+        
+        if not data or 'url' not in data:
+            return jsonify({
+                'success': False,
+                'error': 'URL is required'
+            }), 400
+        
+        url = data['url']
+        agent_id = data.get('agent_id')
+        metadata = data.get('metadata', {})
+        
+        # Process web content
+        result = rag_service.add_web_content(url, agent_id, metadata)
+        
+        return jsonify({
+            'success': True,
+            'result': result
+        })
+        
+    except Exception as e:
+        logger.error(f"Error adding web content: {e}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+
+@app.route('/api/rag/search', methods=['POST'])
+def search_knowledge():
+    """Search the knowledge base."""
+    try:
+        # Check if RAG service is available
+        if not rag_service:
+            return jsonify({
+                'success': False,
+                'error': 'RAG service not initialized'
+            }), 500
+        
+        data = request.get_json()
+        
+        if not data or 'query' not in data:
+            return jsonify({
+                'success': False,
+                'error': 'Query is required'
+            }), 400
+        
+        query = data['query']
+        agent_id = data.get('agent_id')
+        max_results = data.get('max_results', 5)
+        
+        # Search knowledge base
+        results = rag_service.search_knowledge(query, agent_id, max_results)
+        
+        return jsonify({
+            'success': True,
+            'results': results,
+            'query': query,
+            'total_results': len(results)
+        })
+        
+    except Exception as e:
+        logger.error(f"Error searching knowledge base: {e}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+
+@app.route('/api/rag/stats', methods=['GET'])
+def get_knowledge_stats():
+    """Get knowledge base statistics."""
+    try:
+        # Check if RAG service is available
+        if not rag_service:
+            return jsonify({
+                'success': False,
+                'error': 'RAG service not initialized'
+            }), 500
+        
+        stats = rag_service.get_collection_stats()
+        
+        return jsonify({
+            'success': True,
+            'stats': stats
+        })
+        
+    except Exception as e:
+        logger.error(f"Error getting knowledge stats: {e}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+
+@app.route('/api/rag/agent/<agent_id>/documents', methods=['DELETE'])
+def delete_agent_documents(agent_id: str):
+    """Delete all documents for a specific agent."""
+    try:
+        # Check if RAG service is available
+        if not rag_service:
+            return jsonify({
+                'success': False,
+                'error': 'RAG service not initialized'
+            }), 500
+        
+        result = rag_service.delete_agent_documents(agent_id)
+        
+        return jsonify({
+            'success': True,
+            'result': result
+        })
+        
+    except Exception as e:
+        logger.error(f"Error deleting agent documents: {e}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+
+@app.route('/api/rag/supported-formats', methods=['GET'])
+def get_supported_formats():
+    """Get list of supported file formats."""
+    return jsonify({
+        'success': True,
+        'supported_formats': list(ALLOWED_EXTENSIONS),
+        'max_file_size_mb': MAX_FILE_SIZE / 1024 / 1024,
+        'additional_sources': ['web_urls']
+    })
+
+
 if __name__ == '__main__':
     # Initialize the system
     initialize_system()
     
     # Start the Flask server
-    port = int(os.getenv('PORT', 5002))
+    port = int(os.getenv('PORT', 8000))
     debug = os.getenv('FLASK_ENV') == 'development'
     
     logger.info(f"🚀 Starting Flask API server on port {port}")
@@ -660,5 +928,12 @@ if __name__ == '__main__':
     logger.info(f"   - Reload: POST /api/reload")
     logger.info(f"   - Manual init: POST /api/initialize")
     logger.info(f"   - Enhance prompt: POST /api/enhance-prompt")
+    logger.info(f"🧠 RAG endpoints:")
+    logger.info(f"   - Upload document: POST /api/rag/upload")
+    logger.info(f"   - Add web content: POST /api/rag/web-content")
+    logger.info(f"   - Search knowledge: POST /api/rag/search")
+    logger.info(f"   - Knowledge stats: GET /api/rag/stats")
+    logger.info(f"   - Delete agent docs: DELETE /api/rag/agent/<agent_id>/documents")
+    logger.info(f"   - Supported formats: GET /api/rag/supported-formats")
     
     app.run(host='0.0.0.0', port=port, debug=debug) 

@@ -24,7 +24,7 @@ Make sure you have a `.env` file with your Google API key:
 
 ```env
 GOOGLE_API_KEY=your_google_api_key_here
-PORT=5001
+PORT=8000
 FLASK_ENV=development
 ```
 
@@ -46,7 +46,7 @@ python start_api.py
 python api_server.py
 ```
 
-The server will start on `http://localhost:5001` by default.
+The server will start on `http://localhost:8000` by default.
 
 ## API Endpoints
 
@@ -116,7 +116,7 @@ The .NET API will automatically connect to the Python API server and route chat 
 
 ### Common Issues
 
-1. **Port 5001 already in use:**
+1. **Port 8000 already in use:**
    - Change the `PORT` environment variable
    - Update `appsettings.json` in the .NET API accordingly
 

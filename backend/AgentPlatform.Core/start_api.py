@@ -17,7 +17,7 @@ def main():
     initialize_system()
     
     # Get configuration
-    port = int(os.getenv('PORT', 5002))
+    port = int(os.getenv('PORT', 8000))
     debug = os.getenv('FLASK_ENV') == 'development'
     
     print(f"📡 API Server starting on port {port}")

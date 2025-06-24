@@ -8,4 +8,17 @@ fastapi>=0.100.0
 uvicorn>=0.23.0
 pydantic>=2.0.0
 flask>=2.3.0
-flask-cors>=4.0.0 
+flask-cors>=4.0.0
+# RAG Dependencies
+chromadb>=0.4.18
+langchain-google-vertexai>=1.0.0
+langchain-community>=0.0.20
+langchain-text-splitters>=0.0.1
+# Document Processing
+pypdf>=3.17.0
+python-docx>=1.1.0
+openpyxl>=3.1.0
+beautifulsoup4>=4.12.0
+# Additional utilities
+google-cloud-aiplatform>=1.38.0
+tiktoken>=0.5.0 

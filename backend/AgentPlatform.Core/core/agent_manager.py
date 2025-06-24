@@ -16,7 +16,7 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.prompts import ChatPromptTemplate
 
 # Import all available tools
-from toolkit import jira_tool, search_tool, utility_tools
+from toolkit import jira_tool, search_tool, utility_tools, rag_tool
 
 class AgentManager:
     def __init__(self):
@@ -41,6 +41,9 @@ class AgentManager:
         tools_registry["google_search"] = utility_tools.google_search
         tools_registry["check_calendar"] = utility_tools.check_calendar
         tools_registry["check_weather"] = utility_tools.check_weather
+        
+        # Register RAG tools
+        tools_registry["knowledge_lookup"] = rag_tool.knowledge_lookup
         
         return tools_registry
     

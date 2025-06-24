@@ -4,7 +4,8 @@
     "description": "Useful for resolving technical support requests, troubleshooting software and hardware issues, and handling Jira-related problems. The input must be a complete question.",
     "tools": [
       "jira_ticket_creator",
-      "it_knowledge_base_search"
+      "it_knowledge_base_search",
+      "knowledge_lookup"
     ],
     "llm_config": {
       "model_name": "gemini-2.0-flash",
@@ -16,11 +17,24 @@
     "description": "Useful for questions about HR policies, leave procedures, and recruitment information. The input must be a complete question.",
     "tools": [
       "policy_document_search",
-      "leave_request_tool"
+      "leave_request_tool",
+      "knowledge_lookup"
     ],
     "llm_config": {
       "model_name": "gemini-2.0-flash",
       "temperature": 0.7
+    }
+  },
+  {
+    "agent_name": "Knowledge_Agent",
+    "description": "Specializes in answering questions using uploaded documents and knowledge base. Perfect for queries about company policies, procedures, manuals, and any information stored in the knowledge base. This agent can access and search through all uploaded documents and web content.",
+    "tools": [
+      "knowledge_lookup",
+      "google_search"
+    ],
+    "llm_config": {
+      "model_name": "gemini-2.0-flash",
+      "temperature": 0.3
     }
   },
   {
@@ -36,11 +50,12 @@
   },
   {
     "agent_name": "General_Utility_Agent",
-    "description": "A versatile agent that can handle various utility tasks including web searches, calendar checks, and weather information. Use this as a fallback when other agents don\u0027t match the request.",
+    "description": "A versatile agent that can handle various utility tasks including web searches, calendar checks, and weather information. Use this as a fallback when other agents don't match the request.",
     "tools": [
       "google_search",
       "check_calendar",
-      "check_weather"
+      "check_weather",
+      "knowledge_lookup"
     ],
     "llm_config": {
       "model_name": "gemini-2.0-flash",
