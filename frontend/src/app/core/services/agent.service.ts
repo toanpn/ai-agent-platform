@@ -38,12 +38,18 @@ export interface AgentFunction {
 	createdAt: Date;
 }
 
+export interface LlmConfig {
+	modelName: string;
+	temperature: number;
+}
+
 export interface Agent {
 	id: number;
 	name: string;
 	department: string;
 	description?: string;
 	instructions?: string;
+	llmConfig?: LlmConfig;
 	tools?: string[];
 	isActive: boolean;
 	isMainRouter: boolean;
@@ -59,6 +65,7 @@ export interface CreateAgentRequest {
 	department: string;
 	description?: string;
 	instructions?: string;
+	llmConfig: LlmConfig;
 	tools?: string[];
 }
 
@@ -67,6 +74,7 @@ export interface UpdateAgentRequest {
 	department?: string;
 	description?: string;
 	instructions?: string;
+	llmConfig?: LlmConfig;
 	tools?: string[];
 	isActive?: boolean;
 }

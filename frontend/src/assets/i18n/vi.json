@@ -39,7 +39,9 @@
     "DESCRIPTION": "Mô tả",
     "TYPE": "Loại",
     "ACTIVE": "Hoạt động",
-    "INACTIVE": "Không hoạt động"
+    "INACTIVE": "Không hoạt động",
+    "OTHER": "khác",
+    "OTHERS": "khác"
   },
   "AUTH": {
     "LOGIN": "Đăng Nhập",
@@ -205,7 +207,17 @@
     "SYSTEM_PROMPT": "Prompt hệ thống",
     "ENHANCE_DESCRIPTION": "Cải Thiện Mô Tả",
     "DESCRIPTION_ENHANCED_SUCCESS": "Cải thiện mô tả thành công",
-    "DESCRIPTION_ENHANCED_ERROR": "Không thể cải thiện mô tả"
+    "DESCRIPTION_ENHANCED_ERROR": "Không thể cải thiện mô tả",
+    "LLM": {
+      "TITLE": "Cấu hình LLM",
+      "MODEL": "Mô hình LLM",
+      "TEMPERATURE": "Mức độ sáng tạo",
+      "TEMP_TOOLTIP_0": "Xác định, rất chính xác, không có yếu tố ngẫu nhiên",
+      "TEMP_TOOLTIP_1": "Chính xác hơn, ít sáng tạo hơn",
+      "TEMP_TOOLTIP_2": "Cân bằng giữa độ chính xác và sáng tạo",
+      "TEMP_TOOLTIP_3": "Sáng tạo hơn, đầu ra đa dạng hơn",
+      "TEMP_TOOLTIP_4": "Rất sáng tạo, độ ngẫu nhiên cao, khó đoán định"
+    }
   },
   "FILES": {
     "FILES": "Tệp",
@@ -227,7 +239,8 @@
     "FILE_TOO_LARGE": "Tệp quá lớn",
     "UNSUPPORTED_FILE_TYPE": "Loại tệp không được hỗ trợ",
     "DRAG_AND_DROP": "Kéo và thả tệp vào đây, hoặc nhấp để chọn",
-    "SELECT_FILES": "Chọn tệp"
+    "SELECT_FILES": "Chọn tệp",
+    "TITLE": "Tệp"
   },
   "NAVIGATION": {
     "HOME": "Trang chủ",
@@ -248,9 +261,10 @@
     "INVALID_FORMAT": "Định dạng không hợp lệ"
   },
   "ERRORS": {
-    "NETWORK_ERROR": "Lỗi mạng. Vui lòng kiểm tra kết nối của bạn.",
-    "SERVER_ERROR": "Lỗi máy chủ. Vui lòng thử lại sau.",
-    "UNAUTHORIZED": "Bạn không được phép thực hiện hành động này.",
+    "GENERIC_TITLE": "Đã xảy ra lỗi",
+    "GENERIC_MESSAGE": "Đã xảy ra lỗi không mong muốn. Vui lòng thử lại sau.",
+    "NO_PERMISSION": "Bạn không có quyền thực hiện hành động này.",
+    "UNAUTHORIZED": "Phiên làm việc đã hết hạn. Vui lòng đăng nhập lại.",
     "FORBIDDEN": "Truy cập bị từ chối.",
     "NOT_FOUND": "Không tìm thấy tài nguyên được yêu cầu.",
     "TIMEOUT": "Yêu cầu hết thời gian chờ. Vui lòng thử lại.",
