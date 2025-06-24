@@ -13,6 +13,7 @@ All UI development must start from a design specification, which is based on Fig
 
 - **Source of Truth:** Figma designs are the single source of truth for all UI elements, layouts, and styles.
 - **Specification Document:** Before starting implementation, ensure there is a clear specification document in markdown format. This document should translate the Figma design into clear development instructions, including details on colors, typography, spacing, and component behavior.
+- **Visual Context:** To make the specification more readable, download images of the relevant screens and user flows from Figma and embed them directly into the markdown specification document. This provides essential visual context alongside the technical details.
 
 For an example of a good specification document, see the one created for the login/register pages:
 - **Reference:** `[docs/figma-login-register-spec.md](mdc:docs/figma-login-register-spec.md)`

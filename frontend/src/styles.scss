@@ -13,14 +13,17 @@
 // 2. Mixins - Reusable mixins.
 @use './styles/mixins';
 
-// 3. Base - Base element styles.
+// 3. Forms - Shared form styles
+@use './styles/forms';
+
+// 4. Base - Base element styles.
 @use './styles/base';
 
-// 4. Components - Styles for third-party components (e.g., Angular Material).
+// 5. Components - Styles for third-party components (e.g., Angular Material).
 @use './styles/material';
 
-// 5. Layout - Scrollbar styles.
+// 6. Layout - Scrollbar styles.
 @use './styles/scrollbar';
 
-// 6. Utilities - Utility classes.
+// 7. Utilities - Utility classes.
 @use './styles/utilities';
