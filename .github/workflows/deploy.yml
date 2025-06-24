@@ -21,8 +21,8 @@ jobs:
       - name: Create project archive
         run: git ls-files | tar -czf project.tar.gz -T -
 
-      - name: Copy archive to VPS and Deploy
-        uses: appleboy/ssh-action@master
+      - name: Copy archive to VPS
+        uses: appleboy/scp-action@master
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USERNAME }}
@@ -30,6 +30,14 @@ jobs:
           port: ${{ secrets.VPS_PORT || 22 }}
           source: "project.tar.gz"
           target: "/tmp"
+
+      - name: Deploy on VPS
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USERNAME }}
+          password: ${{ secrets.VPS_PASSWORD }}
+          port: ${{ secrets.VPS_PORT || 22 }}
           script: |
             set -e
 
