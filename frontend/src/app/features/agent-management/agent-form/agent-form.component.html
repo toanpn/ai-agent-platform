@@ -70,6 +70,37 @@
 			</div>
 		</div>
 
+		<div class="llm-config-section" formGroupName="llmConfig">
+			<h2>{{ 'AGENTS.LLM.TITLE' | translate }}</h2>
+			<div class="form-group">
+				<label for="llmModel">{{ 'AGENTS.LLM.MODEL' | translate }}</label>
+				<mat-form-field appearance="outline" class="full-width">
+					<mat-select id="llmModel" formControlName="modelName">
+						<mat-option *ngFor="let model of llmModels" [value]="model">
+							{{ model }}
+						</mat-option>
+					</mat-select>
+				</mat-form-field>
+			</div>
+
+			<div class="form-group">
+				<label for="temperature">{{ 'AGENTS.LLM.TEMPERATURE' | translate }}</label>
+				<mat-slider
+					min="0"
+					max="1"
+					step="0.1"
+					discrete
+					thumbLabel
+					class="full-width"
+				>
+					<input matSliderThumb formControlName="temperature" />
+				</mat-slider>
+				<div class="helper-text" *ngIf="agentForm.get('llmConfig.temperature')?.value !== null">
+					<p>{{ getTemperatureTooltip(agentForm.get('llmConfig.temperature')?.value) | translate }}</p>
+				</div>
+			</div>
+		</div>
+
 		<div class="form-group">
 			<div class="field-header">
 				<label for="description">{{ 'AGENTS.AGENT_DESCRIPTION' | translate }} ({{ 'AGENTS.OPTIONAL' | translate }})</label>

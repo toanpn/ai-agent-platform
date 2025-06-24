@@ -8,6 +8,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatSelectModule } from '@angular/material/select';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatSliderModule } from '@angular/material/slider';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Subject } from 'rxjs';
@@ -18,6 +19,7 @@ import {
 	CreateAgentRequest,
 	UpdateAgentRequest,
 	Tool,
+	LlmConfig,
 } from '../../../core/services/agent.service';
 import { ChatService } from '../../../core/services/chat.service';
 import { NotificationService } from '../../../core/services/notification.service';
@@ -36,6 +38,7 @@ import { NotificationService } from '../../../core/services/notification.service
 		MatSelectModule,
 		MatFormFieldModule,
 		TranslateModule,
+		MatSliderModule,
 	],
 	templateUrl: './agent-form.component.html',
 	styleUrls: ['./agent-form.component.scss'],
@@ -48,6 +51,9 @@ export class AgentFormComponent implements OnInit {
 	saveError = '';
 	isEnhancingDescription = false;
 	
+	// LLM Configuration
+	llmModels: string[] = ['gemini-2.0-flash'];
+
 	// Tools related properties
 	tools: Tool[] = [];
 	loadingTools = false;
@@ -84,6 +90,10 @@ export class AgentFormComponent implements OnInit {
 			} else {
 				this.saveError = 'AGENTS.INVALID_AGENT_ID';
 			}
+		} else {
+			// Set default values for new agent
+			this.agentForm.get('llmConfig.modelName')?.setValue(this.llmModels[0]);
+			this.agentForm.get('llmConfig.temperature')?.setValue(0.7);
 		}
 	}
 
@@ -194,6 +204,10 @@ export class AgentFormComponent implements OnInit {
 						description: agent.description || '',
 						instructions: agent.instructions || '',
 						tools: agent.tools || [],
+						llmConfig: {
+							modelName: agent.llmConfig?.modelName || this.llmModels[0],
+							temperature: agent.llmConfig?.temperature ?? 0.7,
+						},
 					});
 					this.loading = false;
 				},
@@ -242,6 +256,10 @@ export class AgentFormComponent implements OnInit {
 			description: ['', [Validators.maxLength(500)]],
 			instructions: ['', [Validators.maxLength(1000)]],
 			tools: [[]],
+			llmConfig: this.fb.group({
+				modelName: ['', Validators.required],
+				temperature: [0.7, [Validators.required, Validators.min(0), Validators.max(1)]],
+			}),
 		});
 	}
 
@@ -250,30 +268,24 @@ export class AgentFormComponent implements OnInit {
 			return;
 		}
 
+		this.loading = true;
 		const formValue = this.agentForm.value;
+		const request: CreateAgentRequest | UpdateAgentRequest = {
+			name: formValue.name,
+			department: formValue.department,
+			description: formValue.description,
+			instructions: formValue.instructions,
+			tools: formValue.tools,
+			llmConfig: {
+				modelName: formValue.llmConfig.modelName,
+				temperature: formValue.llmConfig.temperature,
+			},
+		};
 
 		if (this.isEditMode && this.agentId) {
-			// Trigger update agent action
-			const updateRequest: UpdateAgentRequest = {
-				name: formValue.name,
-				department: formValue.department,
-				description: formValue.description || undefined,
-				instructions: formValue.instructions || undefined,
-				tools: formValue.tools || [],
-			};
-
-			this.updateAgentTrigger$.next({ id: this.agentId, request: updateRequest });
+			this.updateAgentTrigger$.next({ id: this.agentId, request: request });
 		} else {
-			// Trigger create agent action
-			const createRequest: CreateAgentRequest = {
-				name: formValue.name,
-				department: formValue.department,
-				description: formValue.description || undefined,
-				instructions: formValue.instructions || undefined,
-				tools: formValue.tools || [],
-			};
-
-			this.createAgentTrigger$.next(createRequest);
+			this.createAgentTrigger$.next(request as CreateAgentRequest);
 		}
 	}
 
@@ -298,5 +310,32 @@ export class AgentFormComponent implements OnInit {
 		}
 
 		this.enhanceDescriptionTrigger$.next(currentDescription);
+	}
+
+	/**
+	 * Returns a descriptive tooltip for the temperature value.
+	 * @param value The temperature value from the slider.
+	 * @returns A translated string explaining the temperature level.
+	 */
+	getTemperatureTooltip(value: number | null): string {
+		if (value === null) {
+			return '';
+		}
+		if (value === 0) {
+			return 'AGENTS.LLM.TEMP_TOOLTIP_0';
+		}
+		if (value >= 0.1 && value <= 0.3) {
+			return 'AGENTS.LLM.TEMP_TOOLTIP_1';
+		}
+		if (value >= 0.4 && value <= 0.6) {
+			return 'AGENTS.LLM.TEMP_TOOLTIP_2';
+		}
+		if (value >= 0.7 && value <= 0.9) {
+			return 'AGENTS.LLM.TEMP_TOOLTIP_3';
+		}
+		if (value === 1) {
+			return 'AGENTS.LLM.TEMP_TOOLTIP_4';
+		}
+		return '';
 	}
 }

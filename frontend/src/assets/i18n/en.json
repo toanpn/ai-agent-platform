@@ -39,7 +39,9 @@
     "DESCRIPTION": "Description",
     "TYPE": "Type",
     "ACTIVE": "Active",
-    "INACTIVE": "Inactive"
+    "INACTIVE": "Inactive",
+    "OTHER": "other",
+    "OTHERS": "others"
   },
   "AUTH": {
     "LOGIN": "Login",
@@ -204,7 +206,17 @@
     "SYSTEM_PROMPT": "System Prompt",
     "ENHANCE_DESCRIPTION": "Enhance Description",
     "DESCRIPTION_ENHANCED_SUCCESS": "Description enhanced successfully",
-    "DESCRIPTION_ENHANCED_ERROR": "Failed to enhance description"
+    "DESCRIPTION_ENHANCED_ERROR": "Failed to enhance description",
+    "LLM": {
+      "TITLE": "LLM Configuration",
+      "MODEL": "LLM Model",
+      "TEMPERATURE": "Temperature",
+      "TEMP_TOOLTIP_0": "Deterministic, very accurate, no randomness",
+      "TEMP_TOOLTIP_1": "More accurate, less creative",
+      "TEMP_TOOLTIP_2": "Balanced between accuracy and creativity",
+      "TEMP_TOOLTIP_3": "More creative, more diverse output",
+      "TEMP_TOOLTIP_4": "Highly creative, high randomness, less predictable"
+    }
   },
   "FILES": {
     "FILES": "Files",
@@ -226,7 +238,8 @@
     "FILE_TOO_LARGE": "File is too large",
     "UNSUPPORTED_FILE_TYPE": "Unsupported file type",
     "DRAG_AND_DROP": "Drag and drop files here, or click to select",
-    "SELECT_FILES": "Select Files"
+    "SELECT_FILES": "Select Files",
+    "TITLE": "Files"
   },
   "NAVIGATION": {
     "HOME": "Home",
