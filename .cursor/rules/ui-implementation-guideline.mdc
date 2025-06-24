@@ -1,0 +1,44 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+# UI Implementation and Refactoring Guideline
+
+This document provides a set of rules and best practices for creating new UI components or refactoring existing ones. The goal is to ensure all UI development is consistent, maintainable, and aligned with the project's design system. The recent refactoring of the Login component serves as a blueprint for this process.
+
+## 1. Follow the Design Specification
+
+All UI development must start from a design specification, which is based on Figma.
+
+- **Source of Truth:** Figma designs are the single source of truth for all UI elements, layouts, and styles.
+- **Specification Document:** Before starting implementation, ensure there is a clear specification document in markdown format. This document should translate the Figma design into clear development instructions, including details on colors, typography, spacing, and component behavior.
+
+For an example of a good specification document, see the one created for the login/register pages:
+- **Reference:** `[docs/figma-login-register-spec.md](mdc:docs/figma-login-register-spec.md)`
+
+## 2. Use Standard HTML for Structure
+
+To ensure maximum flexibility and adherence to custom designs, prefer standard HTML elements for component structure over pre-styled library components for basic elements.
+
+- **Example HTML Structure:** The login component was refactored to use standard `<div>`, `<form>`, `<input>`, and `<button>` elements instead of relying entirely on Angular Material components for its structure. This allows for precise styling control.
+- **Reference:** `[frontend/src/app/features/auth/login/login.component.html](mdc:frontend/src/app/features/auth/login/login.component.html)`
+
+## 3. Adhere to Styling Guidelines
+
+All styling must follow the project's established guidelines and use the central design token system.
+
+- **Use CSS Variables:** Never use hardcoded values (e.g., hex codes for colors) in component stylesheets. Instead, use the CSS variables defined in the global variables file.
+- **Central Variables File:** The single source of truth for all styling variables (colors, spacing, fonts, etc.) is `_variables.scss`.
+- **Reference:** `[frontend/src/styles/_variables.scss](mdc:frontend/src/styles/_variables.scss)`
+- **Adding New Styles:** If a new design requires colors or styles not present in the variables file, add them as new CSS variables to `_variables.scss` first, then use them in the component stylesheet. An example is the ` --color-login-*` variables that were added.
+- **Component Styles:** Component-specific styles that use these variables should be located in the component's own `.scss` file.
+- **Reference:** `[frontend/src/app/features/auth/login/login.component.scss](mdc:frontend/src/app/features/auth/login/login.component.scss)`
+
+## 4. Keep Component Logic Clean
+
+The component's TypeScript file should be updated to reflect the new HTML structure and remove any unnecessary dependencies.
+
+- **Remove Unused Imports:** When refactoring away from a component library like Angular Material, make sure to remove the corresponding module imports from the component's `.ts` file.
+- **Manage State:** The component's logic should be self-contained and manage the state required by its template (e.g., the `activeTab` property in the login component).
+- **Reference:** `[frontend/src/app/features/auth/login/login.component.ts](mdc:frontend/src/app/features/auth/login/login.component.ts)`
