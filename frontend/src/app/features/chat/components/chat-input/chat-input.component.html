@@ -24,6 +24,19 @@
 	</mat-form-field>
 
 	<div class="input-actions">
+		@if (isSpeechSupported) {
+			<button
+				mat-icon-button
+				[color]="isListening() ? 'warn' : 'primary'"
+				class="mic-button"
+				(click)="toggleListening()"
+				[matTooltip]="(isListening() ? 'CHAT.STOP_LISTENING' : 'CHAT.START_LISTENING') | translate"
+				[attr.aria-label]="(isListening() ? 'CHAT.STOP_LISTENING' : 'CHAT.START_LISTENING') | translate"
+				[disabled]="disabled() || isEnhancing()"
+			>
+				<mat-icon aria-hidden="true">{{ isListening() ? 'mic_off' : 'mic' }}</mat-icon>
+			</button>
+		}
 		<button
 			mat-icon-button
 			color="accent"

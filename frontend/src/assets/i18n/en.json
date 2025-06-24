@@ -114,7 +114,13 @@
     "ENHANCE_PROMPT": "Enhance Prompt",
     "ENHANCING_PROMPT": "Enhancing prompt...",
     "PROMPT_ENHANCED_SUCCESS": "Prompt enhanced successfully",
-    "PROMPT_ENHANCED_ERROR": "Failed to enhance prompt"
+    "PROMPT_ENHANCED_ERROR": "Failed to enhance prompt",
+    "START_LISTENING": "Start listening",
+    "STOP_LISTENING": "Stop listening",
+    "SPEECH_ERROR": "Speech recognition error: {{error}}",
+    "TTS_ENABLE": "Enable text-to-speech",
+    "TTS_DISABLE": "Disable text-to-speech",
+    "DEFAULT_AGENT_NAME": "AI Assistant"
   },
   "AGENTS": {
     "CREATE_AGENT": "Create Agent",

@@ -21,9 +21,10 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Subject } from 'rxjs';
 import { exhaustMap, tap, catchError, switchMap } from 'rxjs/operators';
-import { of } from 'rxjs';
 import { ChatService } from '../../../../core/services/chat.service';
 import { NotificationService } from '../../../../core/services/notification.service';
+import { SpeechService } from '../../../../core/services/speech.service';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 /**
  * ChatInputComponent handles user input for sending messages in the chat interface.
@@ -59,12 +60,39 @@ export class ChatInputComponent implements OnInit {
 	private notificationService = inject(NotificationService);
 	private translateService = inject(TranslateService);
 	private destroyRef = inject(DestroyRef);
+	private speechService = inject(SpeechService);
+
+	isSpeechSupported = this.speechService.isApiSupported;
+	isListening = toSignal(this.speechService.isListening$, { initialValue: false });
 
 	// Action subjects for declarative reactive patterns
 	private enhancePromptTrigger$ = new Subject<string>();
 
 	ngOnInit(): void {
 		this.setupEnhancePromptHandler();
+		this.setupTranscriptHandler();
+	}
+
+	/**
+	 * Sets up the handler for speech recognition transcripts.
+	 */
+	private setupTranscriptHandler(): void {
+		if (!this.isSpeechSupported) {
+			return;
+		}
+
+		this.speechService.transcript$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((transcript) => {
+			this.messageText.set(transcript.text);
+			if (transcript.isFinal && transcript.text) {
+				this.onSendClick();
+			}
+		});
+
+		this.speechService.error$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((error) => {
+			console.error('Speech recognition error:', error);
+			const errorMessage = this.translateService.instant('CHAT.SPEECH_ERROR', { error });
+			this.notificationService.showError(errorMessage);
+		});
 	}
 
 	/**
@@ -140,5 +168,21 @@ export class ChatInputComponent implements OnInit {
 		}
 
 		this.enhancePromptTrigger$.next(text);
+	}
+
+	/**
+	 * Toggles speech recognition on and off.
+	 */
+	toggleListening(): void {
+		if (!this.isSpeechSupported) {
+			return;
+		}
+
+		if (this.isListening()) {
+			this.speechService.stopListening();
+		} else {
+			const currentLang = this.translateService.currentLang || this.translateService.defaultLang;
+			this.speechService.startListening(currentLang);
+		}
 	}
 }
