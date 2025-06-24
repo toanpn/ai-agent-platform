@@ -95,34 +95,18 @@ export class SpeechService {
 		};
 
 		this.recognition.onresult = (event: SpeechRecognitionEvent) => {
-			let interimTranscript = '';
-			let finalTranscript = '';
-
-			for (let i = event.resultIndex; i < event.results.length; ++i) {
-				const transcriptPart = event.results[i][0].transcript;
-				if (event.results[i].isFinal) {
-					finalTranscript += transcriptPart;
-				} else {
-					interimTranscript += transcriptPart;
-				}
-			}
-
-			this.currentTranscript += finalTranscript || interimTranscript;
-
-			if (finalTranscript) {
-				this.transcript$.next({ text: this.currentTranscript.trim(), isFinal: true });
-				this.currentTranscript = '';
-			} else {
-				this.transcript$.next({ text: this.currentTranscript, isFinal: false });
-			}
+            this.currentTranscript = event.results[0][0].transcript;
+            const isFinal = event.results[0].isFinal;
+            this.transcript$.next({ text: this.currentTranscript.trim(), isFinal });
 		};
 
-		this.recognition.onend = () => {
-			this.isListening$.next(false);
-			this.currentTranscript = '';
+        this.recognition.onerror = this.handleRecognitionError.bind(this);
+        
+        this.recognition.onspeechend = () => {
+            this.isListening$.next(false);
+            this.currentTranscript = '';
+			this.recognition.stop();
 		};
-
-		this.recognition.onerror = this.handleRecognitionError.bind(this);
 	}
 
 	private handleRecognitionError(event: SpeechRecognitionErrorEvent): void {
