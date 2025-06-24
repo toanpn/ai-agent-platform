@@ -26,6 +26,11 @@ namespace AgentPlatform.API.Mapping
             
             CreateMap<Tool, ToolDto>();
             
+            CreateMap<ToolConfig, ToolConfigDto>();
+            CreateMap<CreateToolConfigDto, ToolConfig>();
+            CreateMap<UpdateToolConfigDto, ToolConfig>()
+                .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
+            
             CreateMap<ChatMessage, ChatMessageDto>();
             
             CreateMap<ChatSession, ChatSessionDto>()

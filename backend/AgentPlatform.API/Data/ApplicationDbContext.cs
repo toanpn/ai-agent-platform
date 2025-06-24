@@ -17,6 +17,7 @@ namespace AgentPlatform.API.Data
         public DbSet<AgentFile> AgentFiles { get; set; }
         public DbSet<AgentFunction> AgentFunctions { get; set; }
         public DbSet<Tool> Tools { get; set; }
+        public DbSet<ToolConfig> ToolConfigs { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -99,6 +100,20 @@ namespace AgentPlatform.API.Data
                 entity.HasIndex(e => e.Name).IsUnique();
                 entity.Property(e => e.Name).IsRequired().HasMaxLength(200);
                 entity.Property(e => e.Description).HasColumnType("nvarchar(max)");
+            });
+
+            // ToolConfig entity configuration
+            modelBuilder.Entity<ToolConfig>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.ToolName).IsRequired();
+                entity.Property(e => e.ConfigSchema).IsRequired();
+                entity.Property(e => e.CreatedAt).HasDefaultValueSql("GETDATE()");
+
+                entity.HasOne(e => e.Agent)
+                    .WithMany() // Assuming an agent can have multiple tool configs. If a navigation property is added to Agent, it should be specified here.
+                    .HasForeignKey(e => e.AgentId)
+                    .OnDelete(DeleteBehavior.Cascade);
             });
         }
     }

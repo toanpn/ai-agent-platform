@@ -12,10 +12,12 @@ namespace AgentPlatform.API.Controllers
     public class AgentController : ControllerBase
     {
         private readonly IAgentService _agentService;
+        private readonly IToolService _toolService;
 
-        public AgentController(IAgentService agentService)
+        public AgentController(IAgentService agentService, IToolService toolService)
         {
             _agentService = agentService;
+            _toolService = toolService;
         }
 
         [HttpGet]
@@ -130,6 +132,53 @@ namespace AgentPlatform.API.Controllers
                 return NotFound();
             }
             return Ok(tools);
+        }
+
+        [HttpGet("{agentId}/tools/config")]
+        public async Task<IActionResult> GetToolConfigs(int agentId)
+        {
+            var userId = GetUserId();
+            var toolConfigs = await _toolService.GetAgentToolConfigsAsync(agentId, userId);
+            return Ok(toolConfigs);
+        }
+
+        [HttpPost("{agentId}/tools/config")]
+        public async Task<IActionResult> AddToolConfig(int agentId, [FromBody] CreateToolConfigDto toolConfigDto)
+        {
+            if (agentId != toolConfigDto.AgentId)
+            {
+                return BadRequest("Agent ID in URL must match Agent ID in body.");
+            }
+            var userId = GetUserId();
+            var newToolConfig = await _toolService.AddToolConfigAsync(toolConfigDto, userId);
+            // Returning a 201 Created with a route to get the single resource is a bit tricky here
+            // because we don't have a "GetToolConfig(id)" endpoint on this controller.
+            // Returning the object is a pragmatic choice.
+            return Created($"api/agents/{agentId}/tools/config", newToolConfig);
+        }
+
+        [HttpPut("{agentId}/tools/config/{configId}")]
+        public async Task<IActionResult> UpdateToolConfig(int agentId, int configId, [FromBody] UpdateToolConfigDto toolConfigDto)
+        {
+            var userId = GetUserId();
+            var success = await _toolService.UpdateToolConfigAsync(configId, toolConfigDto, agentId, userId);
+            if (!success)
+            {
+                return NotFound();
+            }
+            return NoContent();
+        }
+
+        [HttpDelete("{agentId}/tools/config/{configId}")]
+        public async Task<IActionResult> DeleteToolConfig(int agentId, int configId)
+        {
+            var userId = GetUserId();
+            var success = await _toolService.DeleteToolConfigAsync(configId, agentId, userId);
+            if (!success)
+            {
+                return NotFound();
+            }
+            return NoContent();
         }
     }
 } 
