@@ -28,9 +28,8 @@ jobs:
           username: ${{ secrets.VPS_USERNAME }}
           password: ${{ secrets.VPS_PASSWORD }}
           port: ${{ secrets.VPS_PORT || 22 }}
-          scp:
-            - source: project.tar.gz
-              target: /tmp
+          source: "project.tar.gz"
+          target: "/tmp"
           script: |
             set -e
 
