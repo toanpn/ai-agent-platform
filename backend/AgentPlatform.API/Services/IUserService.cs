@@ -7,6 +7,7 @@ namespace AgentPlatform.API.Services
     {
         Task<AuthResponseDto?> AuthenticateAsync(LoginRequestDto loginRequest);
         Task<AuthResponseDto?> RegisterAsync(RegisterRequestDto registerRequest);
+        Task<AuthResponseDto?> ExternalLoginAsync(ExternalAuthDto externalAuth);
         Task<User?> GetUserByIdAsync(int userId);
         Task<User?> GetUserByEmailAsync(string email);
     }

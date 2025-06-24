@@ -40,5 +40,18 @@ namespace AgentPlatform.API.Controllers
 
             return CreatedAtAction(nameof(Register), response);
         }
+
+        [HttpPost("external-login")]
+        public async Task<ActionResult<AuthResponseDto>> ExternalLogin([FromBody] ExternalAuthDto externalAuth)
+        {
+            var response = await _userService.ExternalLoginAsync(externalAuth);
+            
+            if (response == null)
+            {
+                return Unauthorized(new { message = "Invalid external authentication" });
+            }
+
+            return Ok(response);
+        }
     }
 } 

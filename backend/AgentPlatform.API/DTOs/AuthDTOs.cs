@@ -48,4 +48,13 @@ namespace AgentPlatform.API.DTOs
         public bool IsActive { get; set; }
         public DateTime CreatedAt { get; set; }
     }
+
+    public class ExternalAuthDto
+    {
+        [Required]
+        public string Provider { get; set; } = string.Empty;
+
+        [Required]
+        public string IdToken { get; set; } = string.Empty;
+    }
 } 
