@@ -1,5 +1,7 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { BehaviorSubject, Subject } from 'rxjs';
+import { NotificationService } from './notification.service';
+import { TranslateService } from '@ngx-translate/core';
 
 export interface SpeechTranscript {
 	text: string;
@@ -11,21 +13,19 @@ export interface SpeechTranscript {
 })
 export class SpeechService {
 	isListening$ = new BehaviorSubject<boolean>(false);
-	isSpeaking$ = new BehaviorSubject<boolean>(false);
 	transcript$ = new Subject<SpeechTranscript>();
-	error$ = new Subject<string>();
-	isTextToSpeechEnabled = signal<boolean>(true);
 
-	private recognition: any;
-	private synthesizer: SpeechSynthesis;
+	private recognition!: SpeechRecognition;
 	private readonly isSupported: boolean;
 	private currentTranscript = '';
+	private hasPermission = false;
+	private notificationService = inject(NotificationService);
+	private translateService = inject(TranslateService);
 
 	constructor() {
-		const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-		this.synthesizer = window.speechSynthesis;
+		const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
-		if (SpeechRecognition && this.synthesizer) {
+		if (SpeechRecognition) {
 			this.isSupported = true;
 			this.recognition = new SpeechRecognition();
 			this.recognition.continuous = false;
@@ -33,7 +33,7 @@ export class SpeechService {
 			this.setupRecognitionListeners();
 		} else {
 			this.isSupported = false;
-			console.warn('Speech Recognition or Synthesis API not supported in this browser.');
+			console.warn('Speech Recognition API not supported in this browser.');
 		}
 	}
 
@@ -41,12 +41,21 @@ export class SpeechService {
 		return this.isSupported;
 	}
 
-	startListening(lang: string = 'en-US'): void {
-		if (this.isSupported && !this.isListening$.value) {
-			this.currentTranscript = '';
-			this.recognition.lang = this.mapToSpeechLang(lang);
-			this.recognition.start();
+	async startListening(lang: string = 'en-US'): Promise<void> {
+		if (!this.isSupported || this.isListening$.value) {
+			return;
 		}
+
+		if (!this.hasPermission) {
+			const permissionGranted = await this.requestMicrophonePermission();
+			if (!permissionGranted) {
+				return;
+			}
+		}
+
+		this.currentTranscript = '';
+		this.recognition.lang = this.mapToSpeechLang(lang);
+		this.recognition.start();
 	}
 
 	stopListening(): void {
@@ -55,38 +64,28 @@ export class SpeechService {
 		}
 	}
 
-	speak(text: string, lang: string = 'en-US'): void {
-		if (!this.isSupported || !this.isTextToSpeechEnabled()) {
-			return;
-		}
+	private async requestMicrophonePermission(): Promise<boolean> {
+		try {
+			const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+			stream.getTracks().forEach((track) => track.stop());
+			this.hasPermission = true;
+			return true;
+		} catch (err) {
+			const error = err as DOMException;
+			console.error('Microphone permission error:', error);
+			this.hasPermission = false;
 
-		if (this.synthesizer.speaking) {
-			this.synthesizer.cancel();
-		}
+			let errorKey = 'CHAT.MIC_GENERIC_ERROR';
 
-		if (text) {
-			const utterance = new SpeechSynthesisUtterance(text);
-			utterance.lang = this.mapToSpeechLang(lang);
-			utterance.onstart = () => this.isSpeaking$.next(true);
-			utterance.onend = () => this.isSpeaking$.next(false);
-			utterance.onerror = (event) => {
-				console.error('SpeechSynthesis Error', event);
-				this.isSpeaking$.next(false);
-			};
-			this.synthesizer.speak(utterance);
-		}
-	}
+			if (error.name === 'NotFoundError') {
+				errorKey = 'CHAT.MIC_NOT_FOUND_ERROR';
+			} else if (error.name === 'NotAllowedError') {
+				errorKey = 'CHAT.MIC_PERMISSION_ERROR';
+			}
 
-	cancel(): void {
-		if (this.isSupported && this.synthesizer.speaking) {
-			this.synthesizer.cancel();
-		}
-	}
-
-	toggleTextToSpeech(): void {
-		this.isTextToSpeechEnabled.update((enabled) => !enabled);
-		if (!this.isTextToSpeechEnabled()) {
-			this.cancel();
+			const errorMessage = this.translateService.instant(errorKey);
+			this.notificationService.showError(errorMessage);
+			return false;
 		}
 	}
 
@@ -95,7 +94,7 @@ export class SpeechService {
 			this.isListening$.next(true);
 		};
 
-		this.recognition.onresult = (event: any) => {
+		this.recognition.onresult = (event: SpeechRecognitionEvent) => {
 			let interimTranscript = '';
 			let finalTranscript = '';
 
@@ -108,12 +107,11 @@ export class SpeechService {
 				}
 			}
 
-			// Keep track of the full transcript
 			this.currentTranscript += finalTranscript || interimTranscript;
 
 			if (finalTranscript) {
 				this.transcript$.next({ text: this.currentTranscript.trim(), isFinal: true });
-				this.currentTranscript = ''; // Reset for next utterance
+				this.currentTranscript = '';
 			} else {
 				this.transcript$.next({ text: this.currentTranscript, isFinal: false });
 			}
@@ -121,14 +119,36 @@ export class SpeechService {
 
 		this.recognition.onend = () => {
 			this.isListening$.next(false);
-			this.currentTranscript = ''; // Clean up on end
+			this.currentTranscript = '';
 		};
 
-		this.recognition.onerror = (event: any) => {
-			this.error$.next(event.error);
+		this.recognition.onerror = this.handleRecognitionError.bind(this);
+	}
+
+	private handleRecognitionError(event: SpeechRecognitionErrorEvent): void {
+		if (event.error === 'no-speech') {
 			this.isListening$.next(false);
-			console.error('SpeechRecognition Error', event);
-		};
+			return;
+		}
+
+		console.error('SpeechRecognition Error', event);
+		this.isListening$.next(false);
+
+		let errorKey: string;
+		switch (event.error) {
+			case 'not-allowed':
+				errorKey = 'CHAT.MIC_PERMISSION_ERROR';
+				this.hasPermission = false; // Reset permission status
+				break;
+			case 'audio-capture':
+				errorKey = 'CHAT.MIC_NOT_FOUND_ERROR';
+				break;
+			default:
+				errorKey = 'CHAT.SPEECH_ERROR';
+				break;
+		}
+		const errorMessage = this.translateService.instant(errorKey, { error: event.error });
+		this.notificationService.showError(errorMessage);
 	}
 
 	private mapToSpeechLang(lang: string): string {

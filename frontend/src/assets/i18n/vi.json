@@ -120,7 +120,10 @@
     "SPEECH_ERROR": "Lỗi nhận dạng giọng nói: {{error}}",
     "TTS_ENABLE": "Bật đọc văn bản",
     "TTS_DISABLE": "Tắt đọc văn bản",
-    "DEFAULT_AGENT_NAME": "Trợ lý AI"
+    "DEFAULT_AGENT_NAME": "Trợ lý AI",
+    "MIC_PERMISSION_ERROR": "Quyền truy cập micro đã bị từ chối. Vui lòng cho phép truy cập micro trong cài đặt trình duyệt của bạn.",
+    "MIC_NOT_FOUND_ERROR": "Không tìm thấy micro. Vui lòng kết nối micro và thử lại.",
+    "MIC_GENERIC_ERROR": "Đã xảy ra lỗi khi truy cập micro."
   },
   "AGENTS": {
     "CREATE_AGENT": "Tạo Agent",

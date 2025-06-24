@@ -120,7 +120,10 @@
     "SPEECH_ERROR": "Speech recognition error: {{error}}",
     "TTS_ENABLE": "Enable text-to-speech",
     "TTS_DISABLE": "Disable text-to-speech",
-    "DEFAULT_AGENT_NAME": "AI Assistant"
+    "DEFAULT_AGENT_NAME": "Assistant",
+    "MIC_PERMISSION_ERROR": "Microphone permission denied. Please allow microphone access in your browser settings.",
+    "MIC_NOT_FOUND_ERROR": "No microphone found. Please connect a microphone and try again.",
+    "MIC_GENERIC_ERROR": "An error occurred while accessing the microphone."
   },
   "AGENTS": {
     "CREATE_AGENT": "Create Agent",

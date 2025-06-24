@@ -18,16 +18,6 @@
 					{{ 'CHAT.DEFAULT_AGENT_NAME' | translate }}
 				}
 			</h2>
-			@if (isSpeechSupported) {
-				<button
-					mat-icon-button
-					(click)="toggleTextToSpeech()"
-					[matTooltip]="(isTextToSpeechEnabled() ? 'CHAT.TTS_DISABLE' : 'CHAT.TTS_ENABLE') | translate"
-					[attr.aria-label]="(isTextToSpeechEnabled() ? 'CHAT.TTS_DISABLE' : 'CHAT.TTS_ENABLE') | translate"
-				>
-					<mat-icon>{{ isTextToSpeechEnabled() ? 'volume_up' : 'volume_off' }}</mat-icon>
-				</button>
-			}
 		</div>
 		<app-chat-messages
 			class="chat-messages"

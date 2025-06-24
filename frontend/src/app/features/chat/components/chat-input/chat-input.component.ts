@@ -87,12 +87,6 @@ export class ChatInputComponent implements OnInit {
 				this.onSendClick();
 			}
 		});
-
-		this.speechService.error$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((error) => {
-			console.error('Speech recognition error:', error);
-			const errorMessage = this.translateService.instant('CHAT.SPEECH_ERROR', { error });
-			this.notificationService.showError(errorMessage);
-		});
 	}
 
 	/**
