@@ -14,7 +14,7 @@ async def enhance_prompt_async(query: str, agent_info: Dict[str, Any]) -> Dict[s
 
     Returns:
         The enhanced, structured prompt as a dictionary with:
-        - assigned_agent: the selected agent name
+        - assigned_agents: a list of selected agent names
         - summary: a plain explanation of what the user likely wants
         - key_details_extracted: bullet-point list of extracted fields
         - original_user_query: raw query
@@ -24,16 +24,16 @@ async def enhance_prompt_async(query: str, agent_info: Dict[str, Any]) -> Dict[s
         llm = ChatGoogleGenerativeAI(model="gemini-2.0-flash", temperature=0)
 
         # Stage 1: Intent Classification
-        intent = await _classify_intent(llm, query, agent_info)
+        intents = await _classify_intents(llm, query, agent_info)
 
         # Stage 2: Entity Extraction
-        entities = await _extract_entities(llm, query, intent)
+        entities = await _extract_entities(llm, query, intents)
 
         # Stage 3: Generate User-Facing Prompt
-        user_facing_prompt = await _generate_user_facing_prompt(llm, query, intent, entities)
+        user_facing_prompt = await _generate_user_facing_prompt(llm, query, intents, entities)
 
         # Stage 4: Create Final Structure
-        enhanced_prompt = _create_final_structure(query, intent, entities, user_facing_prompt)
+        enhanced_prompt = _create_final_structure(query, intents, entities, user_facing_prompt)
 
         return enhanced_prompt
 
@@ -41,7 +41,7 @@ async def enhance_prompt_async(query: str, agent_info: Dict[str, Any]) -> Dict[s
         print(f"Error during prompt enhancement: {e}")
         # Fallback to original query on error
         return {
-            "assigned_agent": "General Assistant",
+            "assigned_agents": ["General Assistant"],
             "summary": "Unable to process the request due to an error.",
             "key_details_extracted": "No specific entities were extracted from the query.",
             "original_user_query": query,
@@ -51,58 +51,65 @@ async def enhance_prompt_async(query: str, agent_info: Dict[str, Any]) -> Dict[s
         }
 
 
-async def _classify_intent(llm: ChatGoogleGenerativeAI, query: str, agent_info: Dict[str, Any]) -> str:
-    """Classifies user intent based on available agents."""
+async def _classify_intents(llm: ChatGoogleGenerativeAI, query: str, agent_info: Dict[str, Any]) -> List[str]:
+    """Classifies user intents based on available agents, allowing for multiple selections."""
     
     agents = agent_info.get("agents", [])
     if not agents:
-        return "General Assistant"
+        return ["General Assistant"]
 
     agent_descriptions = "\n".join([f"- **{agent['name']}**: {agent['description']}" for agent in agents])
     
     prompt_template = ChatPromptTemplate.from_messages([
-        ("system", """You are an expert intent classifier in a multi-agent assistant system. 
-Your job is to read a user's query and match it to the **most appropriate agent** that can handle the request.
+        ("system", """You are an expert intent classifier in a multi-agent assistant system.
+Your job is to read a user's query and identify **all the agents** that may be required to handle the request.
 
 IMPORTANT:
-- You MUST return only the exact name of one agent from the list below.
-- If you are uncertain, return the name of the agent that seems most closely related.
-- Do NOT explain your reasoning. Your output should only be the agent's name.
+- Your output MUST be a JSON array of agent names. For example: ["Agent1", "Agent2"]
+- If only one agent is relevant, return an array with a single name: ["Agent1"]
+- If you are uncertain or the query is general, return `["General Assistant"]`.
+- Do NOT explain your reasoning. Your output should only be the JSON array.
 
 Available agents:
 {agent_descriptions}
 
-Classify the intent of the following user query and return ONLY the agent name."""),
+Classify the intent of the following user query and return a JSON array of agent names."""),
         ("human", "{query}")
     ])
     
     chain = prompt_template | llm
     result = await chain.ainvoke({"query": query, "agent_descriptions": agent_descriptions})
     
-    intent = _extract_content_from_response(result).strip()
+    response_content = _extract_content_from_response(result)
+    cleaned_json = _clean_json_response(response_content)
     
-    # Validate the intent against available agents
+    try:
+        intents = json.loads(cleaned_json)
+        if not isinstance(intents, list):
+            intents = ["General Assistant"]
+    except json.JSONDecodeError:
+        valid_agent_names = [agent['name'] for agent in agents]
+        intents = [name for name in valid_agent_names if name in response_content]
+        if not intents:
+            intents = ["General Assistant"]
+
     valid_agent_names = [agent['name'] for agent in agents]
-    if intent not in valid_agent_names:
-        # Fallback logic: find the best match or default
-        best_match = next((name for name in valid_agent_names if name.lower() in intent.lower()), None)
-        if best_match:
-            intent = best_match
-        else:
-            intent = valid_agent_names[0] if valid_agent_names else "General Assistant"
-
-    return intent
+    validated_intents = [intent for intent in intents if intent in valid_agent_names]
+    
+    return validated_intents if validated_intents else ["General Assistant"]
 
 
-async def _extract_entities(llm: ChatGoogleGenerativeAI, query: str, intent: str) -> Dict[str, Any]:
-    """Extracts key entities from the query based on the intent."""
+async def _extract_entities(llm: ChatGoogleGenerativeAI, query: str, intents: List[str]) -> Dict[str, Any]:
+    """Extracts key entities from the query based on the intents."""
+    
+    intent_str = ", ".join(intents)
     
     prompt_template = ChatPromptTemplate.from_messages([
         ("system", """You are an entity extraction engine.
 Your task is to extract key details from a user's query as a structured JSON object.
-Use the user's intent to guide what information is important to extract.
+Use the user's intents to guide what information is important to extract.
 
-Intent: {intent}
+Intents: {intents}
 
 Extract relevant entities such as:
 - Dates, times, deadlines
@@ -125,7 +132,7 @@ Do not add any explanatory text, markdown formatting, or other content."""),
     ])
 
     chain = prompt_template | llm
-    result = await chain.ainvoke({"query": query, "intent": intent})
+    result = await chain.ainvoke({"query": query, "intents": intent_str})
     
     try:
         response_content = _extract_content_from_response(result)
@@ -137,9 +144,10 @@ Do not add any explanatory text, markdown formatting, or other content."""),
         return {}
 
 
-async def _generate_user_facing_prompt(llm: ChatGoogleGenerativeAI, query: str, intent: str, entities: Dict[str, Any]) -> str:
+async def _generate_user_facing_prompt(llm: ChatGoogleGenerativeAI, query: str, intents: List[str], entities: Dict[str, Any]) -> str:
     """Generates a polite, complete sentence suitable for chatbot UI."""
     
+    intent_str = ", ".join(intents)
     entity_context = ""
     if entities:
         entity_list = [f"{k.replace('_', ' ')}: {v}" for k, v in entities.items()]
@@ -156,7 +164,7 @@ Guidelines:
 - Maintain the original intent and meaning
 - Use appropriate business language when applicable
 
-Agent Context: {intent}
+Agent Context: {intents}
 {entity_context}
 
 Rewrite the following query into a single, polite sentence. Return ONLY the rewritten sentence with no additional text or formatting."""),
@@ -166,7 +174,7 @@ Rewrite the following query into a single, polite sentence. Return ONLY the rewr
     chain = prompt_template | llm
     result = await chain.ainvoke({
         "query": query, 
-        "intent": intent,
+        "intents": intent_str,
         "entity_context": entity_context
     })
     
@@ -179,7 +187,7 @@ Rewrite the following query into a single, polite sentence. Return ONLY the rewr
     return user_facing_prompt
 
 
-def _create_final_structure(query: str, intent: str, entities: Dict[str, Any], user_facing_prompt: str) -> Dict[str, Any]:
+def _create_final_structure(query: str, intents: List[str], entities: Dict[str, Any], user_facing_prompt: str) -> Dict[str, Any]:
     """Creates the final structured response."""
     
     # Generate key details extracted
@@ -189,10 +197,10 @@ def _create_final_structure(query: str, intent: str, entities: Dict[str, Any], u
         key_details = "No specific entities were extracted from the query."
     
     # Generate summary
-    summary = _generate_summary(query, intent, entities)
+    summary = _generate_summary(query, intents, entities)
     
     return {
-        "assigned_agent": intent,
+        "assigned_agents": intents,
         "summary": summary,
         "key_details_extracted": key_details,
         "original_user_query": query,
@@ -200,9 +208,14 @@ def _create_final_structure(query: str, intent: str, entities: Dict[str, Any], u
     }
 
 
-def _generate_summary(query: str, intent: str, entities: Dict[str, Any]) -> str:
+def _generate_summary(query: str, intents: List[str], entities: Dict[str, Any]) -> str:
     """Generates a plain explanation of what the user likely wants."""
-    base = f"The user is asking about a matter related to {intent.replace('_', ' ')}."
+    if len(intents) > 1:
+        intent_str = f"a multi-step task involving {', '.join(intents)}"
+    else:
+        intent_str = f"a matter related to {intents[0]}"
+        
+    base = f"The user is asking about {intent_str}."
     
     if entities:
         detail = ", ".join([f"{k.replace('_', ' ')}: {v}" for k, v in entities.items()])
