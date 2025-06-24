@@ -1,0 +1,83 @@
+name: Deploy to VPS
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Branch to deploy from'
+        required: true
+        default: 'main'
+
+jobs:
+  deploy:
+    name: Deploy to VPS
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.branch }}
+
+      - name: Create project archive
+        run: git ls-files | tar -czf project.tar.gz -T -
+
+      - name: Copy archive to VPS and Deploy
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USERNAME }}
+          password: ${{ secrets.VPS_PASSWORD }}
+          port: ${{ secrets.VPS_PORT || 22 }}
+          scp:
+            - source: project.tar.gz
+              target: /tmp
+          script: |
+            set -e
+
+            # -- Server Preparation --
+            echo "Updating package lists and installing prerequisites..."
+            sudo apt-get update -y
+            sudo apt-get install -y curl apt-transport-https ca-certificates software-properties-common git
+
+            # Install Docker if not present
+            if ! command -v docker &> /dev/null; then
+                echo "Docker not found, installing..."
+                sudo install -m 0755 -d /etc/apt/keyrings
+                curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+                sudo chmod a+r /etc/apt/keyrings/docker.gpg
+                echo \
+                  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
+                  $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+                sudo apt-get update -y
+                sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+            else
+                echo "Docker is already installed."
+            fi
+
+            # -- Deployment --
+            export REMOTE_PROJECT_PATH=${{ secrets.REMOTE_PROJECT_PATH || '/opt/ai-agent-platform' }}
+            sudo mkdir -p $REMOTE_PROJECT_PATH
+            sudo mv /tmp/project.tar.gz $REMOTE_PROJECT_PATH/project.tar.gz
+            cd $REMOTE_PROJECT_PATH
+
+            echo "Unpacking project archive..."
+            sudo tar -xzf project.tar.gz -C .
+            sudo rm project.tar.gz
+            sudo chown -R ${{ secrets.VPS_USERNAME }}:${{ secrets.VPS_USERNAME }} $REMOTE_PROJECT_PATH
+
+            # -- Configuration --
+            echo "Creating .env file..."
+            echo "${{ secrets.ENV_FILE }}" > .env
+            
+            # -- Launch Application --
+            echo "Building and starting application with Docker Compose..."
+            DOCKER_CMD="docker compose"
+            if ! docker ps &>/dev/null; then
+                DOCKER_CMD="sudo docker compose"
+            fi
+            
+            ${DOCKER_CMD} up -d --build --remove-orphans
+
+            echo "🎉 Deployment Successful!"
+      - name: Cleanup local archive
+        run: rm project.tar.gz 
