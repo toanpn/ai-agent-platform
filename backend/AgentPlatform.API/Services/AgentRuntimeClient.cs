@@ -2,6 +2,7 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using AgentPlatform.Shared.Models;
+using AgentPlatform.API.DTOs;
 
 namespace AgentPlatform.API.Services
 {
@@ -294,7 +295,7 @@ namespace AgentPlatform.API.Services
             }
         }
 
-        public async Task<string?> EnhancePromptAsync(string query)
+        public async Task<PromptEnhancementResponseDto?> EnhancePromptAsync(string query)
         {
             try
             {
@@ -306,20 +307,31 @@ namespace AgentPlatform.API.Services
                     var responseStream = await response.Content.ReadAsStreamAsync();
                     using var jsonDocument = await JsonDocument.ParseAsync(responseStream);
                     var enhancementResponse = jsonDocument.RootElement;
-
                     if (enhancementResponse.TryGetProperty("enhanced_prompt", out var promptElement))
                     {
-                        return promptElement.GetRawText();
-                    }
+                        _logger.LogDebug("Prompt enhancement response: {Response}", promptElement);
 
-                    _logger.LogWarning("'/api/enhance-prompt' response did not contain 'enhanced_prompt' field.");
-                    return null;
+                        var result = JsonSerializer.Deserialize<PromptEnhancementResponseDto>(promptElement, _jsonOptions);
+
+                        if (result == null)
+                        {
+                            _logger.LogWarning("Failed to deserialize prompt enhancement response");
+                            return null;
+                        }
+
+                        return result;
+                    }
                 }
 
                 var errorContent = await response.Content.ReadAsStringAsync();
                 _logger.LogError("Error from core API service: {StatusCode} - {ErrorContent}", response.StatusCode, errorContent);
                 return null;
             
+            }
+            catch (JsonException ex)
+            {
+                _logger.LogError(ex, "Failed to parse JSON response from prompt enhancement service");
+                return null;
             }
             catch (Exception ex)
             {

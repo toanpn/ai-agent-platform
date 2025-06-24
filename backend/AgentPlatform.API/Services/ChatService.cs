@@ -236,7 +236,7 @@ namespace AgentPlatform.API.Services
             return true;
         }
 
-        public async Task<string?> EnhancePromptAsync(string query)
+        public async Task<PromptEnhancementResponseDto?> EnhancePromptAsync(string query)
         {
             return await _runtimeClient.EnhancePromptAsync(query);
         }

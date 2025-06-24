@@ -8,6 +8,6 @@ namespace AgentPlatform.API.Services
         Task<ChatHistoryDto> GetChatHistoryAsync(int userId, int page = 1, int pageSize = 10);
         Task<ChatSessionDto?> GetChatSessionAsync(int userId, int sessionId);
         Task<bool> DeleteChatSessionAsync(int userId, int sessionId);
-        Task<string?> EnhancePromptAsync(string query);
+        Task<PromptEnhancementResponseDto?> EnhancePromptAsync(string query);
     }
 } 

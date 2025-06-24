@@ -73,7 +73,7 @@ namespace AgentPlatform.API.Controllers
         }
 
         [HttpPost("enhance-prompt")]
-        public async Task<ActionResult<string>> EnhancePrompt([FromBody] EnhancePromptRequestDto request)
+        public async Task<ActionResult<PromptEnhancementResponseDto>> EnhancePrompt([FromBody] EnhancePromptRequestDto request)
         {
             var enhancedPrompt = await _chatService.EnhancePromptAsync(request.Message);
             if (enhancedPrompt == null)
