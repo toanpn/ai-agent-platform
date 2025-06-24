@@ -12,6 +12,12 @@ export interface User {
 	createdAt: Date;
 }
 
+export interface Tool {
+	id: number;
+	name: string;
+	description?: string;
+}
+
 export interface AgentFile {
 	id: number;
 	fileName: string;
@@ -38,6 +44,7 @@ export interface Agent {
 	department: string;
 	description?: string;
 	instructions?: string;
+	tools?: string[];
 	isActive: boolean;
 	isMainRouter: boolean;
 	createdBy: User;
@@ -52,6 +59,7 @@ export interface CreateAgentRequest {
 	department: string;
 	description?: string;
 	instructions?: string;
+	tools?: string[];
 }
 
 export interface UpdateAgentRequest {
@@ -59,6 +67,7 @@ export interface UpdateAgentRequest {
 	department?: string;
 	description?: string;
 	instructions?: string;
+	tools?: string[];
 	isActive?: boolean;
 }
 
@@ -111,6 +120,13 @@ export class AgentService {
 	 */
 	deleteAgent(id: number): Observable<void> {
 		return this.apiService.delete<void>(`${this.endpoint}/${id}`);
+	}
+
+	/**
+	 * Get all available tools
+	 */
+	getTools(): Observable<Tool[]> {
+		return this.apiService.get<Tool[]>('/tool');
 	}
 
 	/**

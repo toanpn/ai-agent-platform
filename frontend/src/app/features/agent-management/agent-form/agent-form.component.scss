@@ -99,6 +99,16 @@
 				resize: vertical;
 			}
 
+			// Tools dropdown styles
+			.full-width {
+				width: 100%;
+			}
+
+			.tool-description {
+				color: var(--color-text-tertiary);
+				font-size: 0.9em;
+			}
+
 			.validation-error {
 				color: var(--color-error-dark);
 				font-size: var(--font-size-xs);
