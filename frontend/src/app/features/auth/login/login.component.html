@@ -1,257 +1,221 @@
-<div class="login-container">
-	<mat-card class="login-card">
-		<mat-card-header>
-			<mat-card-title>{{ 'AUTH.WELCOME_TITLE' | translate }}</mat-card-title>
-			<mat-card-subtitle>{{ 'AUTH.WELCOME_SUBTITLE' | translate }}</mat-card-subtitle>
-		</mat-card-header>
+<div class="auth-container">
+	<div class="auth-box">
+		<!-- Header -->
+		<div class="auth-header">
+			<div class="logo"></div>
+			<h1>KiotViet AI Agent Platform</h1>
+			<p>Empowering your business with intelligent automation</p>
+		</div>
 
-		<mat-card-content>
-			<mat-tab-group [(selectedIndex)]="selectedTabIndex">
-				<!-- Login Tab -->
-				<mat-tab [label]="'AUTH.LOGIN' | translate">
-					<form (ngSubmit)="login()" #loginForm="ngForm" class="auth-form">
-						<div class="form-field">
-							<mat-form-field appearance="outline" class="full-width">
-								<mat-label>{{ 'AUTH.EMAIL' | translate }}</mat-label>
-								<input
-									matInput
-									type="email"
-									name="login-email"
-									[(ngModel)]="loginCredentials.email"
-									required
-									[placeholder]="'AUTH.ENTER_EMAIL' | translate"
-									email
-									#loginEmail="ngModel"
-								/>
-								<mat-icon matPrefix>email</mat-icon>
-								<mat-error *ngIf="loginEmail.invalid && (loginEmail.dirty || loginEmail.touched)">
-									<span *ngIf="loginEmail.errors?.['required']"
-										>{{ 'AUTH.EMAIL_REQUIRED' | translate }}</span
-									>
-									<span *ngIf="loginEmail.errors?.['email']"
-										>{{ 'AUTH.VALID_EMAIL' | translate }}</span
-									>
-								</mat-error>
-							</mat-form-field>
+		<!-- Form Container -->
+		<div class="form-container">
+			<div class="tabs">
+				<button
+					class="tab"
+					[class.active]="activeTab === 'login'"
+					(click)="activeTab = 'login'"
+				>
+					Login
+				</button>
+				<button
+					class="tab"
+					[class.active]="activeTab === 'register'"
+					(click)="activeTab = 'register'"
+				>
+					Register
+				</button>
+			</div>
+
+			<!-- Login Form -->
+			<div *ngIf="activeTab === 'login'" class="form-content">
+				<form (ngSubmit)="login()" #loginForm="ngForm">
+					<div class="form-field">
+						<label for="login-email">Email Address</label>
+						<div class="input-wrapper">
+							<i class="icon-email"></i>
+							<input
+								id="login-email"
+								type="email"
+								name="login-email"
+								[(ngModel)]="loginCredentials.email"
+								placeholder="your@email.com"
+								required
+								email
+								#loginEmail="ngModel"
+							/>
 						</div>
+					</div>
 
-						<div class="form-field">
-							<mat-form-field appearance="outline" class="full-width">
-								<mat-label>{{ 'AUTH.PASSWORD' | translate }}</mat-label>
-								<input
-									matInput
-									[type]="hidePassword ? 'password' : 'text'"
-									name="password"
-									[(ngModel)]="loginCredentials.password"
-									required
-									[placeholder]="'AUTH.ENTER_PASSWORD' | translate"
-									#password="ngModel"
-								/>
-								<mat-icon matPrefix>lock</mat-icon>
-								<button
-									mat-icon-button
-									matSuffix
-									(click)="hidePassword = !hidePassword"
-									[attr.aria-label]="'AUTH.HIDE_PASSWORD' | translate"
-									[attr.aria-pressed]="hidePassword"
-									type="button"
-								>
-									<mat-icon>{{
-										hidePassword ? 'visibility_off' : 'visibility'
-									}}</mat-icon>
-								</button>
-								<mat-error
-									*ngIf="password.invalid && (password.dirty || password.touched)"
-								>
-									{{ 'AUTH.PASSWORD_REQUIRED' | translate }}
-								</mat-error>
-							</mat-form-field>
-						</div>
-
-						<div *ngIf="loginError" class="error-message">
-							<mat-icon>error</mat-icon>
-							<span>{{ loginError | translate }}</span>
-						</div>
-
-						<div class="form-actions">
+					<div class="form-field">
+						<label for="login-password">Password</label>
+						<div class="input-wrapper">
+							<i class="icon-lock"></i>
+							<input
+								id="login-password"
+								[type]="hidePassword ? 'password' : 'text'"
+								name="password"
+								[(ngModel)]="loginCredentials.password"
+								placeholder="••••••••••"
+								required
+								#password="ngModel"
+							/>
 							<button
-								mat-raised-button
-								color="primary"
-								type="submit"
-								[disabled]="loginForm.invalid || loading"
-								class="login-button"
+								type="button"
+								class="icon-button"
+								(click)="hidePassword = !hidePassword"
 							>
-								<mat-spinner
-									*ngIf="loading"
-									diameter="20"
-									class="spinner"
-								></mat-spinner>
-								<span *ngIf="!loading">{{ 'AUTH.LOGIN' | translate }}</span>
+								<i [class]="hidePassword ? 'icon-eye-off' : 'icon-eye'"></i>
 							</button>
 						</div>
-					</form>
-				</mat-tab>
+					</div>
 
-				<!-- Register Tab -->
-				<mat-tab [label]="'AUTH.REGISTER' | translate">
-					<form (ngSubmit)="register()" #registerForm="ngForm" class="auth-form">
-						<div class="form-field">
-							<mat-form-field appearance="outline" class="full-width">
-								<mat-label>{{ 'AUTH.USERNAME' | translate }}</mat-label>
-								<input
-									matInput
-									type="text"
-									name="register-username"
-									[(ngModel)]="registerCredentials.username"
-									required
-									[placeholder]="'AUTH.CHOOSE_USERNAME' | translate"
-									#registerUsername="ngModel"
-								/>
-								<mat-icon matPrefix>person</mat-icon>
-								<mat-error
-									*ngIf="
-										registerUsername.invalid &&
-										(registerUsername.dirty || registerUsername.touched)
-									"
-								>
-									{{ 'AUTH.USERNAME_REQUIRED' | translate }}
-								</mat-error>
-							</mat-form-field>
+					<div class="form-options">
+						<div class="checkbox-wrapper">
+							<input type="checkbox" id="remember-me" name="remember-me" />
+							<label for="remember-me">Remember me</label>
 						</div>
+						<a href="#" class="forgot-password-link">Forgot password?</a>
+					</div>
 
-						<div class="form-field">
-							<mat-form-field appearance="outline" class="full-width">
-								<mat-label>{{ 'AUTH.FIRST_NAME' | translate }}</mat-label>
-								<input
-									matInput
-									type="text"
-									name="firstName"
-									[(ngModel)]="registerCredentials.firstName"
-									required
-									[placeholder]="'AUTH.ENTER_FIRST_NAME' | translate"
-									#firstName="ngModel"
-								/>
-								<mat-icon matPrefix>person_outline</mat-icon>
-								<mat-error
-									*ngIf="firstName.invalid && (firstName.dirty || firstName.touched)"
-								>
-									{{ 'AUTH.FIRST_NAME_REQUIRED' | translate }}
-								</mat-error>
-							</mat-form-field>
+					<button
+						type="submit"
+						class="button-primary"
+						[disabled]="loginForm.invalid || loading"
+					>
+						<span *ngIf="!loading">Sign in</span>
+						<mat-spinner *ngIf="loading" diameter="20"></mat-spinner>
+					</button>
+				</form>
+
+				<div class="divider">
+					<span>or continue with</span>
+				</div>
+
+				<div class="social-login">
+					<button type="button" class="button-social">
+						<i class="icon-google"></i>
+						<span>Google</span>
+					</button>
+					<button type="button" class="button-social">
+						<i class="icon-microsoft"></i>
+						<span>Microsoft</span>
+					</button>
+				</div>
+			</div>
+
+			<!-- Register Form -->
+			<div *ngIf="activeTab === 'register'" class="form-content">
+				<form (ngSubmit)="register()" #registerForm="ngForm">
+					<div class="form-field">
+						<label for="register-fullname">Full name</label>
+						<div class="input-wrapper">
+							<i class="icon-user"></i>
+							<input
+								id="register-fullname"
+								type="text"
+								name="register-fullname"
+								[(ngModel)]="registerCredentials.firstName"
+								placeholder="Jolie Nguyen"
+								required
+							/>
 						</div>
+					</div>
 
-						<div class="form-field">
-							<mat-form-field appearance="outline" class="full-width">
-								<mat-label>{{ 'AUTH.LAST_NAME' | translate }}</mat-label>
-								<input
-									matInput
-									type="text"
-									name="lastName"
-									[(ngModel)]="registerCredentials.lastName"
-									required
-									[placeholder]="'AUTH.ENTER_LAST_NAME' | translate"
-									#lastName="ngModel"
-								/>
-								<mat-icon matPrefix>person_outline</mat-icon>
-								<mat-error
-									*ngIf="lastName.invalid && (lastName.dirty || lastName.touched)"
-								>
-									{{ 'AUTH.LAST_NAME_REQUIRED' | translate }}
-								</mat-error>
-							</mat-form-field>
+					<div class="form-field">
+						<label for="register-email">Email Address</label>
+						<div class="input-wrapper">
+							<i class="icon-email"></i>
+							<input
+								id="register-email"
+								type="email"
+								name="email"
+								[(ngModel)]="registerCredentials.email"
+								placeholder="your@email.com"
+								required
+								email
+								#email="ngModel"
+							/>
 						</div>
+					</div>
 
-						<div class="form-field">
-							<mat-form-field appearance="outline" class="full-width">
-								<mat-label>{{ 'AUTH.EMAIL' | translate }}</mat-label>
-								<input
-									matInput
-									type="email"
-									name="email"
-									[(ngModel)]="registerCredentials.email"
-									required
-									[placeholder]="'AUTH.ENTER_EMAIL' | translate"
-									email
-									#email="ngModel"
-								/>
-								<mat-icon matPrefix>email</mat-icon>
-								<mat-error *ngIf="email.invalid && (email.dirty || email.touched)">
-									<span *ngIf="email.errors?.['required']"
-										>{{ 'AUTH.EMAIL_REQUIRED' | translate }}</span
-									>
-									<span *ngIf="email.errors?.['email']"
-										>{{ 'AUTH.VALID_EMAIL' | translate }}</span
-									>
-								</mat-error>
-							</mat-form-field>
-						</div>
-
-						<div class="form-field">
-							<mat-form-field appearance="outline" class="full-width">
-								<mat-label>{{ 'AUTH.PASSWORD' | translate }}</mat-label>
-								<input
-									matInput
-									[type]="hideRegisterPassword ? 'password' : 'text'"
-									name="register-password"
-									[(ngModel)]="registerCredentials.password"
-									required
-									[placeholder]="'AUTH.CREATE_PASSWORD' | translate"
-									#registerPassword="ngModel"
-									minlength="6"
-								/>
-								<mat-icon matPrefix>lock</mat-icon>
-								<button
-									mat-icon-button
-									matSuffix
-									(click)="hideRegisterPassword = !hideRegisterPassword"
-									[attr.aria-label]="'AUTH.HIDE_PASSWORD' | translate"
-									[attr.aria-pressed]="hideRegisterPassword"
-									type="button"
-								>
-									<mat-icon>{{
-										hideRegisterPassword ? 'visibility_off' : 'visibility'
-									}}</mat-icon>
-								</button>
-								<mat-error
-									*ngIf="
-										registerPassword.invalid &&
-										(registerPassword.dirty || registerPassword.touched)
-									"
-								>
-									<span *ngIf="registerPassword.errors?.['required']"
-										>{{ 'AUTH.PASSWORD_REQUIRED' | translate }}</span
-									>
-									<span *ngIf="registerPassword.errors?.['minlength']"
-										>{{ 'AUTH.PASSWORD_MIN_LENGTH' | translate }}</span
-									>
-								</mat-error>
-							</mat-form-field>
-						</div>
-
-						<div *ngIf="registerError" class="error-message">
-							<mat-icon>error</mat-icon>
-							<span>{{ registerError | translate }}</span>
-						</div>
-
-						<div class="form-actions">
+					<div class="form-field">
+						<label for="register-password">Password</label>
+						<div class="input-wrapper">
+							<i class="icon-lock"></i>
+							<input
+								id="register-password"
+								[type]="hideRegisterPassword ? 'password' : 'text'"
+								name="register-password"
+								[(ngModel)]="registerCredentials.password"
+								placeholder="••••••••••"
+								required
+								minlength="6"
+								#registerPassword="ngModel"
+							/>
 							<button
-								mat-raised-button
-								color="primary"
-								type="submit"
-								[disabled]="registerForm.invalid || loading"
-								class="register-button"
+								type="button"
+								class="icon-button"
+								(click)="hideRegisterPassword = !hideRegisterPassword"
 							>
-								<mat-spinner
-									*ngIf="loading"
-									diameter="20"
-									class="spinner"
-								></mat-spinner>
-								<span *ngIf="!loading">{{ 'AUTH.REGISTER' | translate }}</span>
+								<i
+									[class]="
+										hideRegisterPassword ? 'icon-eye-off' : 'icon-eye'
+									"
+								></i>
 							</button>
 						</div>
-					</form>
-				</mat-tab>
-			</mat-tab-group>
-		</mat-card-content>
-	</mat-card>
+					</div>
+
+					<div class="form-field">
+						<label for="confirm-password">Confirm password</label>
+						<div class="input-wrapper">
+							<i class="icon-lock"></i>
+							<input
+								id="confirm-password"
+								type="password"
+								name="confirm-password"
+								placeholder="••••••••••"
+								required
+							/>
+						</div>
+					</div>
+
+					<button
+						type="submit"
+						class="button-primary"
+						[disabled]="registerForm.invalid || loading"
+					>
+						<span *ngIf="!loading">Register</span>
+						<mat-spinner *ngIf="loading" diameter="20"></mat-spinner>
+					</button>
+				</form>
+
+				<div class="divider">
+					<span>or continue with</span>
+				</div>
+
+				<div class="social-login">
+					<button type="button" class="button-social">
+						<i class="icon-google"></i>
+						<span>Google</span>
+					</button>
+					<button type="button" class="button-social">
+						<i class="icon-microsoft"></i>
+						<span>Microsoft</span>
+					</button>
+				</div>
+			</div>
+		</div>
+
+		<!-- Footer -->
+		<div class="auth-footer">
+			<p>© 2023 KiotViet AI Agent Platform. All rights reserved.</p>
+			<div class="footer-links">
+				<a href="#">Terms</a>
+				<a href="#">Privacy</a>
+				<a href="#">Help</a>
+				<a href="#">Contact</a>
+			</div>
+		</div>
+	</div>
 </div>

@@ -1,132 +1,272 @@
 :host {
-	display: block;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	width: 100%;
+	min-height: 100vh;
+	background-color: var(--color-login-bg);
+	padding: 2rem;
+	font-family: 'Inter', sans-serif;
+}
+
+.auth-container {
+	display: flex;
+	justify-content: center;
+	align-items: center;
 	width: 100%;
 	height: 100%;
 }
 
-.login-container {
+.auth-box {
+	width: 100%;
+	max-width: 448px;
+	display: flex;
+	flex-direction: column;
+	gap: 2rem;
+}
+
+.auth-header {
+	text-align: center;
+	.logo {
+		width: 48px;
+		height: 48px;
+		border-radius: 50%;
+		background: linear-gradient(
+			to right,
+			var(--color-login-gradient-start),
+			var(--color-login-gradient-end)
+		);
+		margin: 0 auto 1rem;
+		// Icon inside the logo would go here
+	}
+	h1 {
+		font-size: 30px;
+		font-weight: 700;
+		color: var(--color-login-text-header);
+		margin: 0 0 0.5rem;
+	}
+	p {
+		font-size: 16px;
+		color: var(--color-login-text-subheader);
+		margin: 0;
+	}
+}
+
+.form-container {
+	background-color: var(--color-surface);
+	border-radius: 12px;
+	box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
+		0 4px 6px -2px rgba(0, 0, 0, 0.05);
+	overflow: hidden;
+}
+
+.tabs {
+	display: flex;
+	border-bottom: 1px solid var(--color-login-divider);
+
+	.tab {
+		flex: 1;
+		padding: 1rem;
+		border: none;
+		background: none;
+		cursor: pointer;
+		font-size: 16px;
+		font-weight: 400;
+		color: var(--color-login-text-tab-inactive);
+		border-bottom: 3px solid transparent;
+		transition: all 0.2s ease-in-out;
+
+		&.active {
+			font-weight: 600;
+			color: var(--color-login-gradient-start);
+			border-bottom-color: var(--color-login-gradient-start);
+		}
+	}
+}
+
+.form-content {
+	padding: 2rem;
+}
+
+form {
+	display: flex;
+	flex-direction: column;
+	gap: 1.25rem;
+}
+
+.form-field {
+	display: flex;
+	flex-direction: column;
+
+	label {
+		font-size: 14px;
+		font-weight: 500;
+		color: var(--color-login-text-label);
+		margin-bottom: 0.5rem;
+	}
+}
+
+.input-wrapper {
+	position: relative;
+	display: flex;
+	align-items: center;
+
+	input {
+		width: 100%;
+		height: 46px;
+		border: 1px solid var(--color-login-border);
+		border-radius: 8px;
+		padding: 0.5rem 1rem 0.5rem 2.5rem; // Left padding for icon
+		font-size: 16px;
+		color: var(--color-login-text-header);
+		box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+
+		&::placeholder {
+			color: var(--color-login-text-placeholder);
+		}
+
+		&:focus {
+			outline: 2px solid var(--color-login-gradient-start);
+			outline-offset: -1px;
+		}
+	}
+
+	[class^='icon-'] {
+		position: absolute;
+		left: 1rem;
+		color: var(--color-login-icon);
+		// You'll need to define the icon classes (e.g., with a font or SVG)
+	}
+
+	.icon-button {
+		position: absolute;
+		right: 0.5rem;
+		background: none;
+		border: none;
+		cursor: pointer;
+		padding: 0.5rem;
+	}
+}
+
+.form-options {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	font-size: 14px;
+}
+
+.checkbox-wrapper {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+
+	label {
+		font-weight: 400;
+		color: var(--color-login-text-label);
+		margin: 0;
+	}
+}
+
+.forgot-password-link {
+	color: var(--color-login-text-link);
+	font-weight: 500;
+	text-decoration: none;
+	&:hover {
+		text-decoration: underline;
+	}
+}
+
+.button-primary {
+	width: 100%;
+	height: 42px;
+	border: none;
+	border-radius: 8px;
+	color: var(--color-text-on-primary);
+	background: linear-gradient(
+		to right,
+		var(--color-login-gradient-start),
+		var(--color-login-gradient-end)
+	);
+	font-size: 14px;
+	font-weight: 500;
+	cursor: pointer;
+	box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+	transition: opacity 0.2s;
+
+	&:disabled {
+		opacity: 0.7;
+		cursor: not-allowed;
+	}
+}
+
+.divider {
+	display: flex;
+	align-items: center;
+	text-align: center;
+	color: var(--color-login-icon);
+	font-size: 14px;
+	margin: 1.5rem 0;
+
+	&::before,
+	&::after {
+		content: '';
+		flex: 1;
+		border-bottom: 1px solid var(--color-login-divider);
+	}
+
+	& span {
+		padding: 0 1rem;
+	}
+}
+
+.social-login {
+	display: flex;
+	gap: 0.75rem;
+}
+
+.button-social {
+	flex: 1;
 	display: flex;
 	justify-content: center;
 	align-items: center;
-	min-height: 100vh;
-	background-color: var(--color-background-alt);
-	padding: var(--spacing-md);
-	margin: 0;
-	box-sizing: border-box;
-}
-
-.login-card {
-	width: 100%;
-	max-width: 420px;
-	box-shadow: 0 4px 12px var(--shadow-color-card-hover);
-	background-color: var(--color-background);
-	color: var(--color-text);
-	border: 1px solid var(--color-border);
+	gap: 0.5rem;
+	height: 46px;
+	border: 1px solid var(--color-login-border);
 	border-radius: 8px;
-	box-sizing: border-box;
-	overflow: hidden;
+	background-color: var(--color-surface);
+	font-size: 14px;
+	font-weight: 500;
+	color: var(--color-login-text-label);
+	cursor: pointer;
+	box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
 
-	mat-card-header {
-		margin-bottom: var(--spacing-lg);
-		padding: var(--spacing-lg) var(--spacing-lg) 0;
-		border-bottom: 1px solid var(--color-border);
-		overflow: hidden;
-
-		mat-card-title {
-			font-size: var(--font-size-xl);
-			font-weight: 500;
-			margin-bottom: var(--spacing-sm);
-			color: var(--color-text);
-		}
-
-		mat-card-subtitle {
-			font-size: var(--font-size-md);
-			color: var(--color-text-secondary);
-		}
+	[class^='icon-'] {
+		// Icons for google/microsoft
 	}
+}
 
-	mat-card-content {
-		padding: var(--spacing-md) var(--spacing-lg) var(--spacing-lg);
-		overflow: hidden;
+.auth-footer {
+	text-align: center;
+	font-size: 14px;
+	color: var(--color-login-text-subheader);
 
-		.auth-form {
-			padding-top: 0;
-			overflow: hidden;
-		}
+	.footer-links {
+		display: flex;
+		justify-content: center;
+		gap: 1.5rem;
+		margin-top: 0.5rem;
 
-		.form-field {
-			margin-bottom: var(--spacing-md);
-			overflow: hidden;
-		}
-
-		.full-width {
-			width: 100%;
-			max-width: 100%;
-		}
-
-		.error-message {
-			display: flex;
-			align-items: center;
-			color: var(--color-error);
-			background-color: var(--color-error-background);
-			padding: var(--spacing-smd);
-			border-radius: 4px;
-			margin-bottom: var(--spacing-md);
-			border: 1px solid var(--color-error-dark);
-
-			mat-icon {
-				margin-right: var(--spacing-sm);
-				font-size: var(--font-size-lg);
-			}
-		}
-
-		.form-actions {
-			display: flex;
-			justify-content: center;
-			margin-top: var(--spacing-lg);
-
-			button {
-				min-width: 150px;
-				height: 44px;
-				font-size: var(--font-size-md);
-
-				.spinner {
-					display: inline-block;
-					margin-right: var(--spacing-sm);
-				}
+		a {
+			color: var(--color-login-text-subheader);
+			text-decoration: none;
+			&:hover {
+				text-decoration: underline;
 			}
 		}
 	}
 }
 
-// Use ::ng-deep for Material components that don't expose CSS tokens
-::ng-deep .login-card {
-	.mat-mdc-tab-header {
-		margin-bottom: var(--spacing-lg);
-		border-bottom: 1px solid var(--color-border);
-		overflow: hidden;
-	}
-
-	.mat-mdc-tab-body-content {
-		padding: var(--spacing-md) 0;
-		overflow: hidden;
-	}
-
-	.mat-mdc-tab {
-		font-size: var(--font-size-md);
-		color: var(--color-text-secondary);
-	}
-
-	.mat-mdc-tab.mdc-tab--active {
-		color: var(--color-primary);
-	}
-
-	.mat-mdc-tab .mdc-tab-indicator__content--underline {
-		border-color: var(--color-primary);
-	}
-
-	.mat-mdc-form-field {
-		overflow: hidden;
-		max-width: 100%;
-	}
-}
+// You will need to add icon styles. For example:
+// .icon-email::before { content: '...'; }
+// Using a library like Font Awesome or Material Icons is recommended.
+// For this example, I'm assuming you will add them.

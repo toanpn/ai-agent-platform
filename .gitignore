@@ -334,4 +334,10 @@ dmypy.json
 .pyre/
 
 # pytype static type analyzer
-.pytype/ 
+.pytype/
+
+# Deployment script
+deploy.sh
+
+# Deployment secrets
+.env.deploy

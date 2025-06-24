@@ -2,13 +2,7 @@ import { Component, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatButtonModule } from '@angular/material/button';
-import { MatCardModule } from '@angular/material/card';
-import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatTabsModule } from '@angular/material/tabs';
 import { TranslateModule } from '@ngx-translate/core';
 import { AuthService, LoginRequest, RegisterRequest } from '../../../core/services/auth.service';
 import { NotificationService } from '../../../core/services/notification.service';
@@ -25,13 +19,7 @@ import { finalize, Subscription } from 'rxjs';
 	imports: [
 		CommonModule,
 		FormsModule,
-		MatFormFieldModule,
-		MatInputModule,
-		MatButtonModule,
-		MatCardModule,
-		MatIconModule,
 		MatProgressSpinnerModule,
-		MatTabsModule,
 		TranslateModule,
 	],
 	templateUrl: './login.component.html',
@@ -65,7 +53,7 @@ export class LoginComponent implements OnDestroy {
 	hideRegisterPassword: boolean = true;
 
 	/** Currently selected tab index */
-	selectedTabIndex: number = 0;
+	activeTab: 'login' | 'register' = 'login';
 
 	/** Subscription for auth request */
 	private authSubscription?: Subscription;
