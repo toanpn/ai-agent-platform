@@ -8,6 +8,43 @@
 	display: flex;
 	flex: 1;
 	height: 100%;
+	overflow: hidden;
+
+	.chat-sidebar {
+		flex-shrink: 0;
+	}
+
+	.chat-main {
+		flex-grow: 1;
+		display: flex;
+		flex-direction: column;
+		height: 100%;
+
+		.chat-header {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			padding: var(--spacing-sm) var(--spacing-md);
+			border-bottom: 1px solid var(--border-color);
+			min-height: 64px;
+			flex-shrink: 0;
+
+			.chat-title {
+				margin: 0;
+				font-size: 1.25rem;
+				font-weight: 500;
+			}
+		}
+
+		.chat-messages {
+			flex-grow: 1;
+			overflow-y: auto;
+		}
+
+		.chat-input {
+			flex-shrink: 0;
+		}
+	}
 }
 
 .chat-sidebar {

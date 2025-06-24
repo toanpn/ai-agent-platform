@@ -114,7 +114,13 @@
     "ENHANCE_PROMPT": "Cải Thiện Tin Nhắn",
     "ENHANCING_PROMPT": "Đang cải thiện tin nhắn...",
     "PROMPT_ENHANCED_SUCCESS": "Cải thiện tin nhắn thành công",
-    "PROMPT_ENHANCED_ERROR": "Không thể cải thiện tin nhắn"
+    "PROMPT_ENHANCED_ERROR": "Không thể cải thiện tin nhắn",
+    "START_LISTENING": "Bắt đầu nghe",
+    "STOP_LISTENING": "Dừng nghe",
+    "SPEECH_ERROR": "Lỗi nhận dạng giọng nói: {{error}}",
+    "TTS_ENABLE": "Bật đọc văn bản",
+    "TTS_DISABLE": "Tắt đọc văn bản",
+    "DEFAULT_AGENT_NAME": "Trợ lý AI"
   },
   "AGENTS": {
     "CREATE_AGENT": "Tạo Agent",
