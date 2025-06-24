@@ -6,6 +6,8 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatSelectModule } from '@angular/material/select';
+import { MatFormFieldModule } from '@angular/material/form-field';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Subject } from 'rxjs';
@@ -15,6 +17,7 @@ import {
 	AgentService,
 	CreateAgentRequest,
 	UpdateAgentRequest,
+	Tool,
 } from '../../../core/services/agent.service';
 import { ChatService } from '../../../core/services/chat.service';
 import { NotificationService } from '../../../core/services/notification.service';
@@ -30,6 +33,8 @@ import { NotificationService } from '../../../core/services/notification.service
 		MatIconModule,
 		MatProgressSpinnerModule,
 		MatTooltipModule,
+		MatSelectModule,
+		MatFormFieldModule,
 		TranslateModule,
 	],
 	templateUrl: './agent-form.component.html',
@@ -42,6 +47,11 @@ export class AgentFormComponent implements OnInit {
 	loading = false;
 	saveError = '';
 	isEnhancingDescription = false;
+	
+	// Tools related properties
+	tools: Tool[] = [];
+	loadingTools = false;
+	toolsError = '';
 
 	private fb = inject(FormBuilder);
 	private agentService = inject(AgentService);
@@ -183,6 +193,7 @@ export class AgentFormComponent implements OnInit {
 						department: agent.department,
 						description: agent.description || '',
 						instructions: agent.instructions || '',
+						tools: agent.tools || [],
 					});
 					this.loading = false;
 				},
@@ -190,6 +201,33 @@ export class AgentFormComponent implements OnInit {
 					console.error('Error loading agent:', error);
 					this.saveError = 'AGENTS.FAILED_LOAD_AGENT';
 					this.loading = false;
+				},
+			});
+	}
+
+	/**
+	 * Load available tools from the API
+	 */
+	loadTools(): void {
+		if (this.tools.length > 0) {
+			return; // Already loaded
+		}
+
+		this.loadingTools = true;
+		this.toolsError = '';
+
+		this.agentService
+			.getTools()
+			.pipe(takeUntilDestroyed(this.destroyRef))
+			.subscribe({
+				next: (tools) => {
+					this.tools = tools;
+					this.loadingTools = false;
+				},
+				error: (error) => {
+					console.error('Error loading tools:', error);
+					this.toolsError = 'AGENTS.FAILED_LOAD_TOOLS';
+					this.loadingTools = false;
 				},
 			});
 	}
@@ -203,6 +241,7 @@ export class AgentFormComponent implements OnInit {
 			],
 			description: ['', [Validators.maxLength(500)]],
 			instructions: ['', [Validators.maxLength(1000)]],
+			tools: [[]],
 		});
 	}
 
@@ -220,6 +259,7 @@ export class AgentFormComponent implements OnInit {
 				department: formValue.department,
 				description: formValue.description || undefined,
 				instructions: formValue.instructions || undefined,
+				tools: formValue.tools || [],
 			};
 
 			this.updateAgentTrigger$.next({ id: this.agentId, request: updateRequest });
@@ -230,6 +270,7 @@ export class AgentFormComponent implements OnInit {
 				department: formValue.department,
 				description: formValue.description || undefined,
 				instructions: formValue.instructions || undefined,
+				tools: formValue.tools || [],
 			};
 
 			this.createAgentTrigger$.next(createRequest);

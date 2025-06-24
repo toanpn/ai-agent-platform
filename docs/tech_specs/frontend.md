@@ -16,7 +16,7 @@ This document outlines the technical architecture and development plan for the n
 -   **Language:** TypeScript
 -   **UI Components:**
     -   **Hashbrown:** The primary component library for UI elements (buttons, inputs, cards, etc.).
-    -   **Angular Material:** For more complex components like tables or dialogs if not available in Hashbrown.
+    -   **Angular Material:** For more complex components like tables, dialogs, and multi-select dropdowns if not available in Hashbrown.
 -   **Styling:** SCSS with Angular Material Design system for consistent theming and component styling.
 -   **State Management:** Angular Services with RxJS `BehaviorSubject` for reactive state management.
 -   **API Communication:** Angular's `HttpClient` module.
@@ -140,7 +140,13 @@ The application will be broken down into the following key components, aligning 
     -   **Interaction:** Uses `TranslationService` to switch languages and persists the selection.
 -   **Agent Management Components** (`AgentListComponent`, `AgentFormComponent`, `AgentDetailComponent`):
     -   **Responsibility:** Handle the CRUD (Create, Read, Update, Delete) operations for Agents with fully localized interface.
-    -   **Interaction:** Will use a dedicated `AgentService` to interact with the `/api/agents` endpoints.
+    -   **Interaction:** Uses a dedicated `AgentService` to interact with the `/api/agents` endpoints.
+    -   **Tools Management:** The `AgentFormComponent` includes a multi-select dropdown for tools selection:
+        -   Fetches available tools from `GET /tools` endpoint when dropdown is focused
+        -   Displays loading state and error handling for tools API calls
+        -   Supports multiple tool selection with tool descriptions
+        -   Integrates with form validation and submission
+        -   Maps existing agent tools when editing an agent
 
 ## 6. Internationalization (i18n) Strategy
 
@@ -160,7 +166,7 @@ The application implements comprehensive internationalization using the ngx-tran
   "COMMON": { /* Common UI elements */ },
   "AUTH": { /* Authentication related text */ },
   "CHAT": { /* Chat interface text */ },
-  "AGENTS": { /* Agent management text */ },
+  "AGENTS": { /* Agent management text including tools */ },
   "FILES": { /* File management text */ },
   "NAVIGATION": { /* Navigation elements */ },
   "VALIDATION": { /* Form validation messages */ },
@@ -176,19 +182,29 @@ All communication with the backend will be centralized through the `AgentPlatfor
 -   **`AuthInterceptor`**: An `HttpInterceptor` that automatically attaches the JWT Bearer token from `AuthService` to all outgoing requests to the API.
 -   **`AuthService`**: Manages all authentication-related API calls (`/api/users/login`, `/api/users/me`).
 -   **`ChatService`**: Handles all chat-related API calls (`/api/chat/...`, `/api/files`).
+-   **`AgentService`**: Manages agent-related API calls including tools:
+    -   `GET /agents` - Fetch all agents
+    -   `GET /agents/{id}` - Fetch specific agent
+    -   `POST /agents` - Create new agent (includes Tools field)
+    -   `PUT /agents/{id}` - Update existing agent (includes Tools field)
+    -   `DELETE /agents/{id}` - Delete agent
+    -   `GET /tools` - Fetch available tools for selection
 
-### Data Flow Example: Sending a Message
+### Data Flow Example: Creating an Agent with Tools
 
-1.  **User Action:** User types "Hello" in `ChatInputComponent` and clicks "Send".
-2.  **Component Event:** `ChatInputComponent` emits a `(sendMessage)` event with the string "Hello".
-3.  **View Orchestration:** The parent `ChatViewComponent` catches the event and calls `ChatService.sendMessage("Hello")`.
-4.  **Service Logic (`ChatService`):**
-    a. An optimistic message object `{ text: "Hello", sender: "user" }` is added to the `messages$` stream to instantly update the UI.
-    b. The service calls `ApiService.post('/api/chat', { message: "Hello", conversationId: ... })`.
-5.  **API Interaction (`ApiService` & `AuthInterceptor`):** The request is sent with the `Authorization` header attached.
-6.  **Response Handling:**
-    a. The `ChatService` receives the final response from the API.
-    b. It updates the `messages$` stream with the official response from the backend, replacing the optimistic message with the saved one and adding the assistant's reply.
+1.  **User Action:** User fills out agent form including tool selection and clicks "Create Agent".
+2.  **Component Event:** `AgentFormComponent` calls `AgentService.createAgent()` with form data including selected tools.
+3.  **Service Logic (`AgentService`):** Calls `ApiService.post('/agents', { name: "...", department: "...", tools: ["tool1", "tool2"] })`.
+4.  **API Interaction (`ApiService` & `AuthInterceptor`):** The request is sent with the `Authorization` header attached.
+5.  **Response Handling:** The service receives the created agent response and navigates to the agent detail view.
+
+### Data Flow Example: Loading Tools for Agent Form
+
+1.  **User Action:** User focuses on the tools dropdown in the agent form.
+2.  **Component Event:** `AgentFormComponent` calls `loadTools()` method.
+3.  **Service Logic (`AgentService`):** Calls `ApiService.get('/tools')` to fetch available tools.
+4.  **UI Update:** Tools are loaded into the dropdown with loading states and error handling.
+5.  **User Selection:** User selects multiple tools which are stored in the form state.
 
 ## 8. Key Feature Implementation Strategy
 
@@ -197,6 +213,12 @@ All communication with the backend will be centralized through the `AgentPlatfor
     -   JWT-based authentication flow.
     -   Token stored securely in `localStorage` via a `StorageService`.
     -   `AuthGuard` will protect all feature routes (e.g., `/chat`, `/agents`).
+-   **Agent Tools Management:**
+    -   Multi-select dropdown for tool selection in agent forms.
+    -   Lazy loading of tools from `/tools` endpoint when dropdown is focused.
+    -   Proper error handling and loading states for tools API calls.
+    -   Integration with agent creation and editing workflows.
+    -   Support for empty tool selection (sends empty array).
 -   **Internationalization:**
     -   Vietnamese as the default language with English support.
     -   Language selector in the application toolbar.
@@ -205,9 +227,9 @@ All communication with the backend will be centralized through the `AgentPlatfor
 -   **Responsive Design:** Angular Flex Layout and Angular Material's responsive utilities will be used to ensure the layout adapts correctly to different screen sizes across desktop and mobile devices.
 -   **Integration of Technologies:**
     -   **Angular:** Standalone components will be used for better encapsulation and modern Angular patterns.
-    -   **Hashbrown/Angular Material:** HashbrownAI components serve as the primary UI library, with Angular Material providing additional complex components like dialogs and tables.
+    -   **Hashbrown/Angular Material:** HashbrownAI components serve as the primary UI library, with Angular Material providing additional complex components like dialogs, tables, and multi-select dropdowns.
     -   **SCSS:** Used for component-specific styling with Angular Material's theming system for consistent design patterns.
     -   **TypeScript:** Strict mode enabled for enhanced type safety and code quality.
     -   **ngx-translate:** Provides robust internationalization capabilities with reactive language switching.
 
-This specification provides a comprehensive blueprint for the development team. It aligns with the business requirements for a simplified, backend-driven application while leveraging a modern and scalable Angular architecture with full internationalization support.
+This specification provides a comprehensive blueprint for the development team. It aligns with the business requirements for a simplified, backend-driven application while leveraging a modern and scalable Angular architecture with full internationalization support and comprehensive agent tools management.
