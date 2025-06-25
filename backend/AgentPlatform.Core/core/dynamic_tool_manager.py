@@ -16,7 +16,13 @@ from pydantic import BaseModel, Field
 class DynamicToolManager:
     def __init__(self, tools_config_path: str = "toolkit/tools.json"):
         """Initialize the Dynamic Tool Manager."""
-        self.tools_config_path = tools_config_path
+        # Convert to absolute path to ensure file can be found regardless of working directory
+        if not os.path.isabs(tools_config_path):
+            # Get the directory where this script is located
+            script_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+            self.tools_config_path = os.path.join(script_dir, tools_config_path)
+        else:
+            self.tools_config_path = tools_config_path
         self.tools_config = self._load_tools_config()
         
     def _load_tools_config(self) -> List[Dict[str, Any]]:
@@ -89,17 +95,29 @@ class DynamicToolManager:
                 
                 if param_type == "string":
                     if is_required and default_value is None:
-                        schema_fields[param_name] = Field(description=param_description)
+                        schema_fields[param_name] = (str, Field(description=param_description))
                     else:
-                        schema_fields[param_name] = Field(default=default_value, description=param_description)
+                        schema_fields[param_name] = (str, Field(default=default_value, description=param_description))
                 elif param_type == "integer":
                     if is_required and default_value is None:
-                        schema_fields[param_name] = Field(description=param_description)
+                        schema_fields[param_name] = (int, Field(description=param_description))
                     else:
-                        schema_fields[param_name] = Field(default=default_value, description=param_description)
+                        schema_fields[param_name] = (int, Field(default=default_value, description=param_description))
+                elif param_type == "object":
+                    if is_required and default_value is None:
+                        schema_fields[param_name] = (dict, Field(description=param_description))
+                    else:
+                        schema_fields[param_name] = (dict, Field(default=default_value or {}, description=param_description))
+                else:
+                    # Default to string type for unknown types
+                    if is_required and default_value is None:
+                        schema_fields[param_name] = (str, Field(description=param_description))
+                    else:
+                        schema_fields[param_name] = (str, Field(default=default_value, description=param_description))
         
-        # Create dynamic input model
-        DynamicInputModel = type(f"{tool_name}Input", (BaseModel,), schema_fields)
+        # Create dynamic input model using create_model
+        from pydantic import create_model
+        DynamicInputModel = create_model(f"{tool_name}Input", **schema_fields)
         
         # Create the dynamic tool class
         class DynamicTool(BaseTool):
@@ -107,17 +125,18 @@ class DynamicToolManager:
             description: str = tool_description
             args_schema: Type[BaseModel] = DynamicInputModel
             
-            def __init__(self, agent_config: Dict[str, Any], tool_file: str, tool_parameters: Dict[str, Any]):
-                super().__init__()
-                self.agent_config = agent_config
-                self.tool_file = tool_file
-                self.tool_parameters = tool_parameters
+            def __init__(self, agent_config: Dict[str, Any], tool_file: str, tool_parameters: Dict[str, Any], **kwargs):
+                super().__init__(**kwargs)
+                # Store configuration in a way that doesn't conflict with Pydantic
+                object.__setattr__(self, '_agent_config', agent_config)
+                object.__setattr__(self, '_tool_file', tool_file)
+                object.__setattr__(self, '_tool_parameters', tool_parameters)
                 
             def _run(self, **kwargs) -> str:
                 """Execute the tool with dynamic configuration."""
                 try:
                     # Merge agent configuration with runtime parameters
-                    merged_params = {**self.agent_config, **kwargs}
+                    merged_params = {**self._agent_config, **kwargs}
                     
                     # Import and execute the appropriate tool function
                     return self._execute_tool_function(merged_params)
@@ -129,16 +148,18 @@ class DynamicToolManager:
                 """Execute the specific tool function based on tool file and parameters."""
                 try:
                     # Import the tool module
-                    module_name = f"toolkit.{self.tool_file.replace('.py', '')}"
+                    module_name = f"toolkit.{self._tool_file.replace('.py', '')}"
                     tool_module = importlib.import_module(module_name)
                     
-                    # Execute based on tool name
-                    if self.name == "google_search":
+                    # Map Vietnamese tool names to execution methods
+                    if self.name == "tìm_kiếm_google":
                         return self._execute_google_search(tool_module, params)
                     elif self.name == "gmail":
                         return self._execute_gmail_tool(tool_module, params)
                     elif self.name == "jira":
                         return self._execute_jira_tool(tool_module, params)
+                    elif self.name == "tìm_kiếm_tri_thức":
+                        return self._execute_knowledge_search_tool(tool_module, params)
                     else:
                         # For tools that don't need credentials, use original implementation
                         return self._execute_generic_tool(tool_module, params)
@@ -232,6 +253,23 @@ class DynamicToolManager:
                 except Exception as e:
                     return f"❌ Error executing JIRA tool: {str(e)}"
             
+            def _execute_knowledge_search_tool(self, tool_module, params: Dict[str, Any]) -> str:
+                """Execute knowledge search tool (RAG) with dynamic configuration."""
+                try:
+                    from toolkit.rag_tool import RAGTool
+                    
+                    # Create RAG tool instance
+                    tool_instance = RAGTool()
+                    
+                    # Execute the knowledge search
+                    query = params.get("query", "")
+                    max_results = params.get("max_results", 5)
+                    
+                    return tool_instance._run(query, max_results)
+                    
+                except Exception as e:
+                    return f"❌ Error executing knowledge search tool: {str(e)}"
+            
             def _execute_generic_tool(self, tool_module, params: Dict[str, Any]) -> str:
                 """Execute generic tools that don't need special credential handling."""
                 # For tools like calendar, weather, etc. that don't need credentials
@@ -240,7 +278,7 @@ class DynamicToolManager:
                     tool_func = getattr(tool_module, self.name)
                     # Extract only non-credential parameters
                     filtered_params = {k: v for k, v in params.items() 
-                                     if not self.tool_parameters.get(k, {}).get("is_credential", False)}
+                                     if not self._tool_parameters.get(k, {}).get("is_credential", False)}
                     return tool_func(**filtered_params)
                 else:
                     return f"❌ Tool function {self.name} not found in module {tool_module}"

@@ -17,6 +17,8 @@ namespace AgentPlatform.API.DTOs
         
         public string[]? Tools { get; set; }
         
+        public string? ToolConfigs { get; set; }
+        
         public LlmConfigDto? LlmConfig { get; set; }
     }
     
@@ -37,6 +39,8 @@ namespace AgentPlatform.API.DTOs
 
         public string[]? Tools { get; set; }
 
+        public string? ToolConfigs { get; set; }
+
         public LlmConfigDto? LlmConfig { get; set; }
 
         public bool? IsActive { get; set; }
@@ -50,6 +54,7 @@ namespace AgentPlatform.API.DTOs
         public string? Description { get; set; }
         public string? Instructions { get; set; }
         public string[]? Tools { get; set; }
+        public string? ToolConfigs { get; set; }
         public LlmConfigDto? LlmConfig { get; set; }
         public bool IsActive { get; set; }
         public bool IsMainRouter { get; set; }
@@ -80,6 +85,9 @@ namespace AgentPlatform.API.DTOs
         
         [JsonPropertyName("tools")]
         public string[]? Tools { get; set; }
+        
+        [JsonPropertyName("tool_configs")]
+        public object? ToolConfigs { get; set; }
         
         [JsonPropertyName("llm_config")]
         public LlmConfigDto? LlmConfig { get; set; }

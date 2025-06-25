@@ -1,21 +1,11 @@
 [
   {
     "id": "knowledge_search_tool",
-    "name": "knowledge_search",
+    "name": "tìm_kiếm_tri_thức",
     "description": "Công cụ tìm kiếm thông tin từ cơ sở tri thức của agent sử dụng RAG. Giúp tìm kiếm và truy xuất thông tin từ các tài liệu đã được tải lên và xử lý.",
     "file": "rag_tool.py",
     "instruction": "Use this tool when you need to search for relevant information from the agent's knowledge base. This tool uses RAG (Retrieval-Augmented Generation) to find and retrieve information from uploaded and processed documents.",
     "parameters": {
-      "query": {
-        "type": "string",
-        "description": "Câu truy vấn để tìm thông tin liên quan",
-        "required": true
-      },
-      "agent_id": {
-        "type": "string",
-        "description": "Lọc kết quả theo ID agent cụ thể",
-        "required": false
-      },
       "max_results": {
         "type": "integer",
         "description": "Số lượng kết quả tối đa trả về",
@@ -26,16 +16,11 @@
   },
   {
     "id": "google_search_tool",
-    "name": "google_search",
+    "name": "tìm_kiếm_google",
     "description": "Công cụ tìm kiếm Google để tìm thông tin hiện tại trên internet và trả về các kết quả hàng đầu.",
     "file": "google_search_tool.py",
     "instruction": "Use this tool when you need to search for current information on the internet using Google search. Requires google_api_key and google_cse_id parameters.",
     "parameters": {
-      "query": {
-        "type": "string",
-        "description": "Chuỗi truy vấn tìm kiếm",
-        "required": true
-      },
       "num_results": {
         "type": "integer",
         "description": "Số lượng kết quả tìm kiếm trả về",
@@ -63,16 +48,6 @@
     "file": "gmail_tool.py",
     "instruction": "Use this unified Gmail tool for all Gmail operations including searching emails, sending emails, getting message details, and creating drafts. Uses action-based interface.",
     "parameters": {
-      "action": {
-        "type": "string",
-        "description": "Hành động Gmail cần thực hiện (search, send, get_message, create_draft)",
-        "required": true
-      },
-      "parameters": {
-        "type": "object",
-        "description": "Tham số cho hành động Gmail (ví dụ: {\"query\": \"from:example@gmail.com\", \"max_results\": 10})",
-        "required": true
-      },
       "gmail_credentials_path": {
         "type": "string",
         "description": "Đường dẫn đến file credentials Gmail JSON",

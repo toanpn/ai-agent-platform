@@ -1,16 +1,19 @@
 [
   {
     "agent_name": "HR_Agent",
-    "description": "Specialized agent for HR support tasks including JIRA issue management, knowledge base search, and Gmail communication.",
+    "description": "Specialized agent for HR support tasks including knowledge base search and Google search.",
     "tools": [
-      "google_search",
-      "knowledge_search",
-      "check_calendar"
+      "tìm_kiếm_google",
+      "tìm_kiếm_tri_thức"
     ],
     "tool_configs": {
-      "google_search": {
-        "google_api_key": "YOUR_GOOGLE_API_KEY_FOR_AGENT_1",
-        "google_cse_id": "YOUR_GOOGLE_CSE_ID_FOR_AGENT_1"
+      "tìm_kiếm_google": {
+        "google_api_key": "AIzaSyB3dGLjXqjb9_1hIFt4RxKctqf2GA3VZ5E",
+        "google_cse_id": "f18557e4b4de94ffe",
+        "num_results": 5
+      },
+      "tìm_kiếm_tri_thức": {
+        "max_results": 3
       }
     },
     "llm_config": {
@@ -20,25 +23,29 @@
   },
   {
     "agent_name": "PE_Agent",
-    "description": "Specialized agent for PE support tasks including JIRA issue management, knowledge base search, and Gmail communication.",
+    "description": "Specialized agent for PE support tasks including JIRA issue management, knowledge base search, Gmail communication, and Google search.",
     "tools": [
       "jira",
       "gmail",
-      "google_search",
-      "knowledge_search"
+      "tìm_kiếm_google",
+      "tìm_kiếm_tri_thức"
     ],
     "tool_configs": {
       "jira": {
-        "jira_base_url": "https://your-company.atlassian.net",
-        "jira_username": "it-support@company.com",
-        "jira_api_token": "YOUR_JIRA_API_TOKEN_FOR_IT_AGENT"
+        "jira_base_url": "https://your-domain.atlassian.net",
+        "jira_username": "your_email@company.com",
+        "jira_api_token": "your_jira_api_token_here"
       },
       "gmail": {
-        "gmail_credentials_path": "/path/to/pe-support-gmail-credentials.json"
+        "gmail_credentials_path": "/path/to/gmail/credentials.json"
       },
-      "google_search": {
-        "google_api_key": "YOUR_GOOGLE_API_KEY_FOR_IT_AGENT",
-        "google_cse_id": "YOUR_GOOGLE_CSE_ID_FOR_IT_AGENT"
+      "tìm_kiếm_google": {
+        "google_api_key": "AIzaSyB3dGLjXqjb9_1hIFt4RxKctqf2GA3VZ5E",
+        "google_cse_id": "f18557e4b4de94ffe",
+        "num_results": 5
+      },
+      "tìm_kiếm_tri_thức": {
+        "max_results": 5
       }
     },
     "llm_config": {

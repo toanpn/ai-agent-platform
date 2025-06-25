@@ -25,17 +25,9 @@ class AgentManager:
     def __init__(self):
         """Initialize the Agent Manager with dynamic tool manager."""
         self.dynamic_tool_manager = DynamicToolManager()
-        self.available_tools = self._build_tools_registry()  # Keep for backward compatibility
+        self.available_tools = [] # Keep for backward compatibility
         self.sub_agents = []
     
-    def _build_tools_registry(self) -> Dict[str, BaseTool]:
-        """Build a registry of all available tools from the toolkit for backward compatibility."""
-        tools_registry = {}
-        
-        # Register RAG tools
-        tools_registry["knowledge_lookup"] = rag_tool.knowledge_lookup
-        
-        return tools_registry
     
     def create_sub_agent(self, config: Dict[str, Any]) -> BaseTool:
         """
