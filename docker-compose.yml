@@ -2,11 +2,11 @@ services:
   # Database
   sqlserver:
     image: mcr.microsoft.com/mssql/server:2022-latest
-    container_name: agentplatform
+    container_name: agentplatform-sqlserver
     environment:
-      SA_PASSWORD: "YourStrong@Passw0rd"
-      ACCEPT_EULA: "Y"
-      MSSQL_PID: "Express"
+      SA_PASSWORD: "${SA_PASSWORD}"
+      ACCEPT_EULA: "${ACCEPT_EULA}"
+      MSSQL_PID: "${MSSQL_PID}"
     ports:
       - "1433:1433"
     volumes:
@@ -32,7 +32,7 @@ services:
       - AgentRuntime__BaseUrl=${AgentRuntime__BaseUrl}
       - ASPNETCORE_URLS=${ASPNETCORE_URLS}
     ports:
-      - "5001:80"
+      - "5000:80"
     depends_on:
       sqlserver:
         condition: service_healthy
