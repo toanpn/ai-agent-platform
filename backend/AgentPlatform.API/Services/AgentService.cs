@@ -4,6 +4,7 @@ using AgentPlatform.API.Data;
 using AgentPlatform.API.DTOs;
 using AgentPlatform.API.Models;
 using System.Text.Json;
+using AgentPlatform.API.Common;
 
 namespace AgentPlatform.API.Services
 {
@@ -189,20 +190,20 @@ namespace AgentPlatform.API.Services
                 return false;
             }
 
-            // get tool names and descriptions from database
-            var toolsFromDb = await _context.Tools
+            // get tool names and descriptions from Tools.cs static method Tools()
+            var isValidTools = ToolConst.Tools()
                 .Where(t => tools.Contains(t.Name))
-                .ToDictionaryAsync(t => t.Name, t => t.Description);
+                .ToDictionary(t => t.Name, t => t.Description);
 
-            if (toolsFromDb == null)
+            if (isValidTools == null)
             {
                 return false;
             }
 
-            // check tools exist in database
+            // check tools exist in Tools.cs
             foreach (var tool in tools)
             {
-                if (!toolsFromDb.ContainsKey(tool))
+                if (!isValidTools.ContainsKey(tool))
                 {
                     return false;
                 }

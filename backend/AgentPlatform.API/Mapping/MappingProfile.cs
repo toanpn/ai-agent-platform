@@ -24,8 +24,6 @@ namespace AgentPlatform.API.Mapping
             
             CreateMap<AgentFunction, AgentFunctionDto>();
             
-            CreateMap<Tool, ToolDto>();
-            
             CreateMap<ChatMessage, ChatMessageDto>();
             
             CreateMap<ChatSession, ChatSessionDto>()

@@ -1,4 +1,4 @@
-using AgentPlatform.API.Services;
+using AgentPlatform.API.Common;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -9,17 +9,14 @@ namespace AgentPlatform.API.Controllers
     [Authorize]
     public class ToolController : ControllerBase
     {
-        private readonly IToolService _toolService;
-
-        public ToolController(IToolService toolService)
+        public ToolController()
         {
-            _toolService = toolService;
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetTools()
+        public IActionResult GetTools()
         {
-            var tools = await _toolService.GetToolsAsync();
+            var tools = ToolConst.Tools();
             return Ok(tools);
         }
     }
