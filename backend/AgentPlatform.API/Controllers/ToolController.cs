@@ -1,6 +1,7 @@
-using AgentPlatform.API.Common;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using AgentPlatform.API.Services;
+using AgentPlatform.API.DTOs;
 
 namespace AgentPlatform.API.Controllers
 {
@@ -9,14 +10,17 @@ namespace AgentPlatform.API.Controllers
     [Authorize]
     public class ToolController : ControllerBase
     {
-        public ToolController()
+        private readonly IToolService _toolService;
+
+        public ToolController(IToolService toolService)
         {
+            _toolService = toolService;
         }
 
         [HttpGet]
-        public IActionResult GetTools()
+        public async Task<ActionResult<List<ToolDto>>> GetTools()
         {
-            var tools = ToolConst.Tools();
+            var tools = await _toolService.GetToolsAsync();
             return Ok(tools);
         }
     }

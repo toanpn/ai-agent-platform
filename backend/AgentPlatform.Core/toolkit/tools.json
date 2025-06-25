@@ -1,0 +1,42 @@
+[
+    {
+        "name": "jira_ticket_creator",
+        "description": "Creates a Jira ticket for technical support issues."
+    },
+    {
+        "name": "it_knowledge_base_search",
+        "description": "Searches the IT knowledge base for solutions."
+    },
+    {
+        "name": "policy_document_search",
+        "description": "Searches for HR policy documents."
+    },
+    {
+        "name": "leave_request_tool",
+        "description": "Handles leave requests and procedures."
+    },
+    {
+        "name": "google_search",
+        "description": "Performs a Google search for general information."
+    },
+    {
+        "name": "check_calendar",
+        "description": "Checks for calendar events and schedules."
+    },
+    {
+        "name": "check_weather",
+        "description": "Checks the current weather information."
+    },
+    {
+        "name": "adk_search",
+        "description": "Searches the internal knowledge base for relevant information."
+    },
+    {
+        "name": "adk_http_request",
+        "description": "Makes HTTP requests to external APIs."
+    },
+    {
+        "name": "adk_workflow",
+        "description": "Executes multi-agent workflows."
+    }
+]

@@ -4,7 +4,6 @@ using AgentPlatform.API.Data;
 using AgentPlatform.API.DTOs;
 using AgentPlatform.API.Models;
 using System.Text.Json;
-using AgentPlatform.API.Common;
 
 namespace AgentPlatform.API.Services
 {
@@ -13,13 +12,15 @@ namespace AgentPlatform.API.Services
         private readonly ApplicationDbContext _context;
         private readonly IMapper _mapper;
         private readonly IWebHostEnvironment _environment;
+        private readonly IToolService _toolService;
         private readonly string _agentsJsonPath;
 
-        public AgentService(ApplicationDbContext context, IMapper mapper, IWebHostEnvironment environment)
+        public AgentService(ApplicationDbContext context, IMapper mapper, IWebHostEnvironment environment, IToolService toolService)
         {
             _context = context;
             _mapper = mapper;
             _environment = environment;
+            _toolService = toolService;
             
             // Path to agents.json in AgentPlatform.Core project
             _agentsJsonPath = Path.Combine(_environment.ContentRootPath, "..", "AgentPlatform.Core", "agents.json");
@@ -190,20 +191,12 @@ namespace AgentPlatform.API.Services
                 return false;
             }
 
-            // get tool names and descriptions from Tools.cs static method Tools()
-            var isValidTools = ToolConst.Tools()
-                .Where(t => tools.Contains(t.Name))
-                .ToDictionary(t => t.Name, t => t.Description);
+            var availableTools = await _toolService.GetToolsAsync();
+            var availableToolNames = availableTools.Select(t => t.Name).ToHashSet();
 
-            if (isValidTools == null)
-            {
-                return false;
-            }
-
-            // check tools exist in Tools.cs
             foreach (var tool in tools)
             {
-                if (!isValidTools.ContainsKey(tool))
+                if (!availableToolNames.Contains(tool))
                 {
                     return false;
                 }
