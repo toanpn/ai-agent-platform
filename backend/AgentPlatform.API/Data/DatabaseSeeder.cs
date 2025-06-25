@@ -57,9 +57,6 @@ namespace AgentPlatform.API.Data
             // Seed User
             var adminUser = await SeedUser(context);
 
-            // Seed Tools
-            await SeedTools(context);
-
             // Seed Agents
             await SeedAgents(context, adminUser);
         }
@@ -85,38 +82,6 @@ namespace AgentPlatform.API.Data
             context.Users.Add(adminUser);
             await context.SaveChangesAsync();
             return adminUser;
-        }
-
-        private static async Task SeedTools(ApplicationDbContext context)
-        {
-            if (await context.Tools.AnyAsync())
-            {
-                return; // Tools have been seeded
-            }
-
-            var toolsJsonPath = Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "AgentPlatform.Core", "toolkit", "tools.json");
-            if (!File.Exists(toolsJsonPath))
-            {
-                // Handle case where file doesn't exist, maybe log an error
-                return;
-            }
-
-            var toolsJson = await File.ReadAllTextAsync(toolsJsonPath);
-            var toolList = JsonSerializer.Deserialize<List<ToolJson>>(toolsJson);
-
-            if (toolList != null)
-            {
-                foreach (var toolDef in toolList)
-                {
-                    var tool = new Tool
-                    {
-                        Name = toolDef.Name,
-                        Description = toolDef.Description
-                    };
-                    context.Tools.Add(tool);
-                }
-                await context.SaveChangesAsync();
-            }
         }
 
         private static async Task SeedAgents(ApplicationDbContext context, User adminUser)
