@@ -148,7 +148,7 @@ export class ChatService {
 			map((history) =>
 				history.sessions.map<Conversation>((session: ChatSessionDto) => ({
 					id: session.id.toString(),
-					title: session.title || `Session ${session.id}`,
+					title: session.title || '',
 					timestamp: new Date(session.createdAt),
 				})),
 			),
@@ -164,7 +164,7 @@ export class ChatService {
 			map((session) => {
 				const conversation: Conversation = {
 					id: session.id.toString(),
-					title: session.title || `Session ${session.id}`,
+					title: session.title || '',
 					timestamp: new Date(session.createdAt),
 					messages: (session.messages || []).map((m: ChatMessageDto) => this.mapMessageDto(m, session.id)),
 				};

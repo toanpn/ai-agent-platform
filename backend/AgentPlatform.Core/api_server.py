@@ -18,7 +18,7 @@ from werkzeug.utils import secure_filename
 
 # Import our custom modules
 from core.agent_manager import AgentManager
-from core.master_agent import MasterAgent, create_master_agent
+from core.master_agent import MasterAgent, create_master_agent, summarize_conversation_async
 from core.prompt_enhancer import enhance_prompt_async
 from core.rag_service import RAGService
 
@@ -909,6 +909,35 @@ def get_supported_formats():
         'max_file_size_mb': MAX_FILE_SIZE / 1024 / 1024,
         'additional_sources': ['web_urls']
     })
+
+
+@app.route('/v1/chat/summarize', methods=['POST'])
+async def summarize_chat():
+    """
+    Summarizes a chat conversation.
+    """
+    try:
+        data = request.get_json()
+        if not data or 'messages' not in data:
+            return jsonify({"success": False, "error": "Messages are required"}), 400
+
+        messages = data['messages']
+        
+        # Ensure system is initialized for logging/consistency, even if not directly used
+        if not system_manager:
+            return jsonify({"success": False, "error": "System not initialized"}), 503
+
+        summary = await summarize_conversation_async(messages)
+        
+        return jsonify({"summary": summary})
+
+    except Exception as e:
+        logger.error(f"Error in /v1/chat/summarize endpoint: {e}", exc_info=True)
+        return jsonify({
+            "success": False,
+            "error": "Internal Server Error",
+            "summary": None
+        }), 500
 
 
 if __name__ == '__main__':

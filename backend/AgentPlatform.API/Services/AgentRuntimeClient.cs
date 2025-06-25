@@ -91,6 +91,20 @@ namespace AgentPlatform.API.Services
         public string Observation { get; set; } = string.Empty;
     }
 
+    // DTO for summarization request
+    public class SummarizationRequest
+    {
+        [JsonPropertyName("messages")]
+        public List<MessageHistory> Messages { get; set; } = new();
+    }
+
+    // DTO for summarization response
+    public class SummarizationResponse
+    {
+        [JsonPropertyName("summary")]
+        public string Summary { get; set; } = string.Empty;
+    }
+
     public class AgentRuntimeClient : IAgentRuntimeClient
     {
         private readonly HttpClient _httpClient;
@@ -336,6 +350,42 @@ namespace AgentPlatform.API.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Unexpected error enhancing prompt");
+                return null;
+            }
+        }
+
+        public async Task<string?> GetSessionSummaryAsync(List<MessageHistory> messages)
+        {
+            try
+            {
+                _logger.LogInformation("Sending request to runtime service for session summary");
+
+                var request = new SummarizationRequest { Messages = messages };
+                var json = JsonSerializer.Serialize(request, _jsonOptions);
+                var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+                _logger.LogDebug("Summarization request payload: {Request}", json);
+
+                var response = await _httpClient.PostAsync("/v1/chat/summarize", content);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    _logger.LogError("Runtime service returned error on summarization: {StatusCode}, Content: {Content}",
+                        response.StatusCode, errorContent);
+                    return null;
+                }
+
+                var responseJson = await response.Content.ReadAsStringAsync();
+                _logger.LogDebug("Raw summarization response: {Response}", responseJson);
+
+                var summarizationResponse = JsonSerializer.Deserialize<SummarizationResponse>(responseJson, _jsonOptions);
+
+                return summarizationResponse?.Summary;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Unexpected error getting session summary from runtime service");
                 return null;
             }
         }

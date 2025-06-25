@@ -252,4 +252,38 @@ def create_master_agent(sub_agents_as_tools: List[BaseTool]) -> MasterAgent:
     if not sub_agents_as_tools:
         raise ValueError("At least one sub-agent must be provided")
     
-    return MasterAgent(sub_agents_as_tools) 
+    return MasterAgent(sub_agents_as_tools)
+
+async def summarize_conversation_async(messages: List[dict]) -> str:
+    """
+    Generates a concise summary for a given conversation history.
+
+    Args:
+        messages: A list of message dictionaries, e.g., [{"role": "user", "content": "..."}]
+
+    Returns:
+        A short string summarizing the conversation.
+    """
+    try:
+        # Format the conversation history for the prompt
+        history = "\n".join([f"{msg['role']}: {msg['content']}" for msg in messages])
+        
+        prompt_template = ChatPromptTemplate.from_messages([
+            ("system", "Based on the following conversation, create a short, descriptive title of 5 words or less. Do not use quotes.\n\n<conversation_history>"),
+            ("human", "{history}")
+        ])
+
+        llm = ChatGoogleGenerativeAI(model="gemini-2.0-flash", temperature=0.2)
+        
+        chain = prompt_template | llm
+        
+        # Invoke the chain with the conversation history
+        response = await chain.ainvoke({"history": history})
+        
+        # The response from the LLM will be an AIMessage object. We need to get its content.
+        summary = response.content.strip().replace('"', '')
+        
+        return summary
+    except Exception as e:
+        print(f"Error during conversation summarization: {e}")
+        return "New Chat" # Fallback title 
