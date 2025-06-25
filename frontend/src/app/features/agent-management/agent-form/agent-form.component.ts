@@ -51,6 +51,23 @@ export class AgentFormComponent implements OnInit {
 	saveError = '';
 	isEnhancingDescription = false;
 	
+	// Departments
+	departments: string[] = [
+		'IT',
+		'HR',
+		'General',
+		'AI Research',
+		'OM',
+		'CnB',
+		'L&D',
+		'IC',
+		'FnB',
+		'Retail',
+		'Employee',
+		'Booking',
+		'KMS',
+	];
+
 	// LLM Configuration
 	llmModels: string[] = ['gemini-2.0-flash'];
 
@@ -249,10 +266,7 @@ export class AgentFormComponent implements OnInit {
 	initForm(): void {
 		this.agentForm = this.fb.group({
 			name: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(50)]],
-			department: [
-				'',
-				[Validators.required, Validators.minLength(2), Validators.maxLength(50)],
-			],
+			department: ['', [Validators.required]],
 			description: ['', [Validators.maxLength(500)]],
 			instructions: ['', [Validators.maxLength(1000)]],
 			tools: [[]],
