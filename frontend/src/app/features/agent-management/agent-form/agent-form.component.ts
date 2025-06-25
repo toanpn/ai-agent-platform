@@ -50,7 +50,25 @@ export class AgentFormComponent implements OnInit {
 	loading = false;
 	saveError = '';
 	isEnhancingDescription = false;
+	isEnhancingInstruction = false;
 	
+	// Departments
+	departments: string[] = [
+		'IT',
+		'HR',
+		'General',
+		'AI Research',
+		'OM',
+		'CnB',
+		'L&D',
+		'IC',
+		'FnB',
+		'Retail',
+		'Employee',
+		'Booking',
+		'KMS',
+	];
+
 	// LLM Configuration
 	llmModels: string[] = ['gemini-2.0-flash'];
 
@@ -70,12 +88,14 @@ export class AgentFormComponent implements OnInit {
 
 	// Action subjects for declarative reactive patterns
 	private enhanceDescriptionTrigger$ = new Subject<string>();
+	private enhanceInstructionTrigger$ = new Subject<string>();
 	private createAgentTrigger$ = new Subject<CreateAgentRequest>();
 	private updateAgentTrigger$ = new Subject<{ id: number; request: UpdateAgentRequest }>();
 
 	ngOnInit(): void {
 		this.initForm();
 		this.setupEnhanceDescriptionHandler();
+		this.setupEnhanceInstructionHandler();
 		this.setupCreateAgentHandler();
 		this.setupUpdateAgentHandler();
 
@@ -101,15 +121,19 @@ export class AgentFormComponent implements OnInit {
 	 * Sets up the declarative handler for enhance description action
 	 */
 	private setupEnhanceDescriptionHandler(): void {
+		const descriptionControl = this.agentForm.get('description');
 		this.enhanceDescriptionTrigger$
 			.pipe(
-				tap(() => (this.isEnhancingDescription = true)),
+				tap(() => {
+					this.isEnhancingDescription = true
+					descriptionControl?.disable();
+				}),
 				exhaustMap((description) =>
 					this.chatService.enhancePrompt(description).pipe(
-						switchMap((enhancedPrompt) => {
-							const descriptionControl = this.agentForm.get('description');
-							descriptionControl?.setValue(enhancedPrompt);
+						switchMap((enhancedPromptResponse) => {
+							descriptionControl?.setValue(enhancedPromptResponse.user_facing_prompt);
 							this.isEnhancingDescription = false;
+							descriptionControl?.enable();
 							return this.translateService.get('AGENTS.DESCRIPTION_ENHANCED_SUCCESS');
 						}),
 						tap((message) => {
@@ -118,8 +142,50 @@ export class AgentFormComponent implements OnInit {
 						catchError((error) => {
 							console.error('Error enhancing description:', error);
 							this.isEnhancingDescription = false;
+							descriptionControl?.enable();
 							return this.translateService
 								.get('AGENTS.DESCRIPTION_ENHANCED_ERROR')
+								.pipe(
+									tap((errorMessage) => {
+										this.notificationService.showError(errorMessage);
+									}),
+								);
+						}),
+					),
+				),
+				takeUntilDestroyed(this.destroyRef),
+			)
+			.subscribe();
+	}
+
+	/**
+	 * Sets up the declarative handler for enhance instruction action
+	 */
+	private setupEnhanceInstructionHandler(): void {
+		const instructionControl = this.agentForm.get('instructions');
+		this.enhanceInstructionTrigger$
+			.pipe(
+				tap(() => {
+					this.isEnhancingInstruction = true;
+					instructionControl?.disable();
+				}),
+				exhaustMap((instruction) =>
+					this.chatService.enhancePrompt(instruction).pipe(
+						switchMap((enhancedPromptResponse) => {
+							instructionControl?.setValue(enhancedPromptResponse.user_facing_prompt);
+							this.isEnhancingInstruction = false;
+							instructionControl?.enable();
+							return this.translateService.get('AGENTS.INSTRUCTION_ENHANCED_SUCCESS');
+						}),
+						tap((message) => {
+							this.notificationService.showSuccess(message);
+						}),
+						catchError((error) => {
+							console.error('Error enhancing instruction:', error);
+							this.isEnhancingInstruction = false;
+							instructionControl?.enable();
+							return this.translateService
+								.get('AGENTS.INSTRUCTION_ENHANCED_ERROR')
 								.pipe(
 									tap((errorMessage) => {
 										this.notificationService.showError(errorMessage);
@@ -249,10 +315,7 @@ export class AgentFormComponent implements OnInit {
 	initForm(): void {
 		this.agentForm = this.fb.group({
 			name: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(50)]],
-			department: [
-				'',
-				[Validators.required, Validators.minLength(2), Validators.maxLength(50)],
-			],
+			department: ['', [Validators.required]],
 			description: ['', [Validators.maxLength(500)]],
 			instructions: ['', [Validators.maxLength(1000)]],
 			tools: [[]],
@@ -310,6 +373,21 @@ export class AgentFormComponent implements OnInit {
 		}
 
 		this.enhanceDescriptionTrigger$.next(currentDescription);
+	}
+
+	/**
+	 * Triggers the enhance instruction action
+	 * Uses declarative pattern with subject trigger
+	 */
+	enhanceInstruction(): void {
+		const instructionControl = this.agentForm.get('instructions');
+		const currentInstruction = instructionControl?.value?.trim();
+
+		if (!currentInstruction || this.isEnhancingInstruction) {
+			return;
+		}
+
+		this.enhanceInstructionTrigger$.next(currentInstruction);
 	}
 
 	/**

@@ -21,9 +21,3 @@ body {
 *:after {
 	box-sizing: inherit;
 }
-
-/* Focus styles for accessibility */
-:focus {
-	outline: 2px solid var(--color-primary);
-	outline-offset: 2px;
-} 

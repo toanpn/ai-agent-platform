@@ -1,26 +1,33 @@
-using AgentPlatform.API.Data;
+using System.Text.Json;
 using AgentPlatform.API.DTOs;
-using AgentPlatform.API.Models;
-using AutoMapper;
-using Microsoft.EntityFrameworkCore;
 
 namespace AgentPlatform.API.Services
 {
     public class ToolService : IToolService
     {
-        private readonly ApplicationDbContext _context;
-        private readonly IMapper _mapper;
+        private readonly IWebHostEnvironment _environment;
+        private readonly string _toolsJsonPath;
 
-        public ToolService(ApplicationDbContext context, IMapper mapper)
+        public ToolService(IWebHostEnvironment environment)
         {
-            _context = context;
-            _mapper = mapper;
+            _environment = environment;
+            _toolsJsonPath = Path.Combine(_environment.ContentRootPath, "..", "AgentPlatform.Core", "toolkit", "tools.json");
         }
 
         public async Task<List<ToolDto>> GetToolsAsync()
         {
-            var tools = await _context.Tools.ToListAsync();
-            return _mapper.Map<List<ToolDto>>(tools);
+            if (!File.Exists(_toolsJsonPath))
+            {
+                return [];
+            }
+            
+            var json = await File.ReadAllTextAsync(_toolsJsonPath);
+            var tools = JsonSerializer.Deserialize<List<ToolDto>>(json, new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            });
+
+            return tools ?? new List<ToolDto>();
         }
     }
 } 

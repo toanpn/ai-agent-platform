@@ -1,5 +1,6 @@
-<div class="app-container">
-	@if(user(); as user) {
+@let loggedUser = user();
+<div class="app-container" [class.logged-in]="!!loggedUser">
+	@if(loggedUser) {
 	<mat-toolbar color="primary" class="app-toolbar">
 		<span>{{ title | translate }}</span>
 		<span class="spacer"></span>
@@ -12,7 +13,7 @@
 		<app-language-selector></app-language-selector>
 
 		<!-- Theme Toggle Button -->
-		<button
+		<!-- <button
 			mat-icon-button
 			(click)="toggleTheme()"
 			[attr.aria-label]="'Switch to ' + (isDarkMode ? 'light' : 'dark') + ' theme'"
@@ -20,17 +21,17 @@
 			class="theme-toggle-btn"
 		>
 			<mat-icon>{{ isDarkMode ? 'light_mode' : 'dark_mode' }}</mat-icon>
-		</button>
+		</button> -->
 
 		<button mat-icon-button [matMenuTriggerFor]="menu">
 			<mat-icon>person</mat-icon>
 		</button>
 		<mat-menu #menu="matMenu">
 			<button mat-menu-item>
-				<span>{{ 'COMMON.WELCOME' | translate }}, {{ user.email }}</span>
+				<span>{{ 'COMMON.WELCOME' | translate }}, {{ loggedUser.email }}</span>
 			</button>
 			<div class="menu-divider"></div>
-			<button mat-menu-item disabled class="theme-info">
+			<!-- <button mat-menu-item disabled class="theme-info">
 				<mat-icon
 					>{{ currentTheme === 'auto' ? 'brightness_auto' : (isDarkMode ? 'dark_mode' :
 					'light_mode') }}</mat-icon
@@ -43,7 +44,7 @@
 					>{{ isDarkMode ? ('COMMON.SWITCH_TO_LIGHT' | translate) :
 					('COMMON.SWITCH_TO_DARK' | translate) }}</span
 				>
-			</button>
+			</button> -->
 			<div class="menu-divider"></div>
 			<button mat-menu-item (click)="logout()">
 				<mat-icon>exit_to_app</mat-icon>

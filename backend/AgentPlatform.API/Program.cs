@@ -68,9 +68,9 @@ builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IChatService, ChatService>();
 builder.Services.AddScoped<IAgentService, AgentService>();
-builder.Services.AddScoped<IToolService, ToolService>();
 builder.Services.AddScoped<IFileService, FileService>();
 builder.Services.AddScoped<IJwtService, JwtService>();
+builder.Services.AddSingleton<IToolService, ToolService>();
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();

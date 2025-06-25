@@ -31,17 +31,23 @@
 
 		<div class="form-group">
 			<label for="department">{{ 'AGENTS.DEPARTMENT' | translate }}</label>
-			<input type="text" id="department" formControlName="department" [placeholder]="'AGENTS.ENTER_DEPARTMENT' | translate" />
+			<mat-form-field appearance="outline" class="full-width">
+				<mat-select
+					id="department"
+					formControlName="department"
+					[placeholder]="'AGENTS.SELECT_DEPARTMENT' | translate"
+				>
+					<mat-option *ngFor="let department of departments" [value]="department">
+						{{ department }}
+					</mat-option>
+				</mat-select>
+			</mat-form-field>
 			<div
 				class="validation-error"
 				*ngIf="agentForm.get('department')?.invalid && agentForm.get('department')?.touched"
 			>
-				<p *ngIf="agentForm.get('department')?.errors?.['required']">{{ 'AGENTS.DEPARTMENT_REQUIRED' | translate }}</p>
-				<p *ngIf="agentForm.get('department')?.errors?.['minlength']">
-					{{ 'AGENTS.DEPARTMENT_MIN_LENGTH' | translate }}
-				</p>
-				<p *ngIf="agentForm.get('department')?.errors?.['maxlength']">
-					{{ 'AGENTS.DEPARTMENT_MAX_LENGTH' | translate }}
+				<p *ngIf="agentForm.get('department')?.errors?.['required']">
+					{{ 'AGENTS.DEPARTMENT_REQUIRED' | translate }}
 				</p>
 			</div>
 		</div>
@@ -123,7 +129,6 @@
 				formControlName="description"
 				[placeholder]="'AGENTS.DESCRIBE_AGENT' | translate"
 				rows="4"
-				[disabled]="isEnhancingDescription"
 			></textarea>
 			<div
 				class="validation-error"
@@ -138,7 +143,22 @@
 		</div>
 
 		<div class="form-group">
-			<label for="instructions">{{ 'AGENTS.INSTRUCTIONS' | translate }} ({{ 'AGENTS.OPTIONAL' | translate }})</label>
+			<div class="field-header">
+				<label for="instructions">{{ 'AGENTS.INSTRUCTIONS' | translate }} ({{ 'AGENTS.OPTIONAL' | translate }})</label>
+				<button
+					type="button"
+					mat-icon-button
+					color="accent"
+					class="enhance-button"
+					[disabled]="!agentForm.get('instructions')?.value?.trim() || isEnhancingInstruction"
+					(click)="enhanceInstruction()"
+					[matTooltip]="'AGENTS.ENHANCE_INSTRUCTION' | translate"
+					[attr.aria-label]="'AGENTS.ENHANCE_INSTRUCTION' | translate"
+				>
+					<mat-spinner *ngIf="isEnhancingInstruction" diameter="20" aria-hidden="true"></mat-spinner>
+					<mat-icon *ngIf="!isEnhancingInstruction" aria-hidden="true">auto_fix_high</mat-icon>
+				</button>
+			</div>
 			<textarea
 				id="instructions"
 				formControlName="instructions"

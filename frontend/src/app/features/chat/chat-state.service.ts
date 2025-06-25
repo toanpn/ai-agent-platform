@@ -28,8 +28,6 @@ export class ChatStateService {
 	readonly currentConversationId = computed(() => this.activeConversation()?.id);
 
 	constructor() {
-		this.loadInitialData();
-
 		// Effect to load messages when the active conversation changes
 		effect(() => {
 			const conversation = this.activeConversation();

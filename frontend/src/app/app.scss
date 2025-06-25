@@ -34,8 +34,11 @@
 .app-content {
 	flex: 1;
 	overflow-y: auto;
-	padding-top: var(--spacing-xxl); /* Adjust based on toolbar height */
 	background-color: var(--color-background);
+}
+
+.app-container.logged-in .app-content {
+	padding-top: var(--spacing-xxl);
 }
 
 .sidenav-container {

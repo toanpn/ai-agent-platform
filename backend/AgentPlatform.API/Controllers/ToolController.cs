@@ -1,6 +1,7 @@
-using AgentPlatform.API.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using AgentPlatform.API.Services;
+using AgentPlatform.API.DTOs;
 
 namespace AgentPlatform.API.Controllers
 {
@@ -17,7 +18,7 @@ namespace AgentPlatform.API.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetTools()
+        public async Task<ActionResult<List<ToolDto>>> GetTools()
         {
             var tools = await _toolService.GetToolsAsync();
             return Ok(tools);

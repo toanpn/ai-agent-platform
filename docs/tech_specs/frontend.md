@@ -147,6 +147,7 @@ The application will be broken down into the following key components, aligning 
         -   Supports multiple tool selection with tool descriptions
         -   Integrates with form validation and submission
         -   Maps existing agent tools when editing an agent
+    -   **Department Field**: In the agent form, the `Department` field is a dropdown (select box) with a fixed, client-side list of department options. This ensures data consistency for agent categorization.
 
 ## 6. Internationalization (i18n) Strategy
 

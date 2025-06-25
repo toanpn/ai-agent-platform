@@ -12,13 +12,15 @@ namespace AgentPlatform.API.Services
         private readonly ApplicationDbContext _context;
         private readonly IMapper _mapper;
         private readonly IWebHostEnvironment _environment;
+        private readonly IToolService _toolService;
         private readonly string _agentsJsonPath;
 
-        public AgentService(ApplicationDbContext context, IMapper mapper, IWebHostEnvironment environment)
+        public AgentService(ApplicationDbContext context, IMapper mapper, IWebHostEnvironment environment, IToolService toolService)
         {
             _context = context;
             _mapper = mapper;
             _environment = environment;
+            _toolService = toolService;
             
             // Path to agents.json in AgentPlatform.Core project
             _agentsJsonPath = Path.Combine(_environment.ContentRootPath, "..", "AgentPlatform.Core", "agents.json");
@@ -189,20 +191,12 @@ namespace AgentPlatform.API.Services
                 return false;
             }
 
-            // get tool names and descriptions from database
-            var toolsFromDb = await _context.Tools
-                .Where(t => tools.Contains(t.Name))
-                .ToDictionaryAsync(t => t.Name, t => t.Description);
+            var availableTools = await _toolService.GetToolsAsync();
+            var availableToolNames = availableTools.Select(t => t.Name).ToHashSet();
 
-            if (toolsFromDb == null)
-            {
-                return false;
-            }
-
-            // check tools exist in database
             foreach (var tool in tools)
             {
-                if (!toolsFromDb.ContainsKey(tool))
+                if (!availableToolNames.Contains(tool))
                 {
                     return false;
                 }

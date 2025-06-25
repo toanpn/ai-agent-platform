@@ -116,6 +116,14 @@ export interface ExecutionDetails {
 	totalSteps: number;
 }
 
+export interface PromptEnhancementResponseDto {
+	assigned_agents: string[];
+	key_details_extracted: string;
+	original_user_query: string;
+	summary: string;
+	user_facing_prompt: string;
+}
+
 /**
  * ChatService manages all chat-related operations including loading conversations,
  * sending messages, and managing conversation state. It is a stateless service
@@ -204,8 +212,8 @@ export class ChatService {
 	 * @param message The message text to enhance.
 	 * @returns An observable of the enhanced prompt.
 	 */
-	enhancePrompt(message: string): Observable<string> {
-		return this.api.post<{ enhancedPrompt: string }>('/Chat/enhance-prompt', {
+	enhancePrompt(message: string): Observable<PromptEnhancementResponseDto> {
+		return this.api.post<{ enhancedPrompt: PromptEnhancementResponseDto }>('/Chat/enhance-prompt', {
 			message: message,
 		}).pipe(
 			map(response => response.enhancedPrompt)

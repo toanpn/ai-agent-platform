@@ -49,7 +49,7 @@ export class ThemeService {
 		this.mediaQueryList.addEventListener('change', this.onSystemThemeChange.bind(this));
 
 		// Apply the initial theme
-		this.setTheme(initialTheme);
+        this.setTheme('light'); // only support light mode for now
 	}
 
 	/**
