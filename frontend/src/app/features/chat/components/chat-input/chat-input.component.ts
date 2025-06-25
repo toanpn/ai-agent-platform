@@ -98,8 +98,8 @@ export class ChatInputComponent implements OnInit {
 				tap(() => this.isEnhancing.set(true)),
 				exhaustMap((text) =>
 					this.chatService.enhancePrompt(text).pipe(
-						switchMap((enhancedPrompt) => {
-							this.messageText.set(enhancedPrompt);
+						switchMap((enhancedPromptResponse) => {
+							this.messageText.set(enhancedPromptResponse.user_facing_prompt);
 							this.isEnhancing.set(false);
 							return this.translateService.get('CHAT.PROMPT_ENHANCED_SUCCESS');
 						}),
