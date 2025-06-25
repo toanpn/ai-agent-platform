@@ -25,6 +25,8 @@ namespace AgentPlatform.API.Models
         
         public double? LlmTemperature { get; set; }
         
+        public string? ToolConfigs { get; set; }
+        
         public bool IsActive { get; set; } = true;
         
         public bool IsMainRouter { get; set; } = false;

@@ -1,22 +1,76 @@
 using AgentPlatform.API.Models;
 using BCrypt.Net;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text.Json;
+using System.Threading.Tasks;
+using System;
+using Microsoft.EntityFrameworkCore;
+using System.Text.Json.Serialization;
 
 namespace AgentPlatform.API.Data
 {
     public static class DatabaseSeeder
     {
+        private class AgentJson
+        {
+            [JsonPropertyName("agent_name")]
+            public string Name { get; set; }
+
+            [JsonPropertyName("description")]
+            public string Description { get; set; }
+
+            [JsonPropertyName("tools")]
+            public string[] Tools { get; set; }
+
+            [JsonPropertyName("tool_configs")]
+            public JsonElement ToolConfigs { get; set; }
+
+            [JsonPropertyName("llm_config")]
+            public LlmConfigJson LlmConfig { get; set; }
+        }
+
+        private class LlmConfigJson
+        {
+            [JsonPropertyName("model_name")]
+            public string ModelName { get; set; }
+
+            [JsonPropertyName("temperature")]
+            public double Temperature { get; set; }
+        }
+
+        private class ToolJson
+        {
+            [JsonPropertyName("name")]
+            public string Name { get; set; }
+
+            [JsonPropertyName("description")]
+            public string Description { get; set; }
+        }
+
         public static async Task SeedAsync(ApplicationDbContext context)
         {
             // Ensure database is created
             await context.Database.EnsureCreatedAsync();
 
-            // Check if we already have users
-            if (context.Users.Any())
+            // Seed User
+            var adminUser = await SeedUser(context);
+
+            // Seed Tools
+            await SeedTools(context);
+
+            // Seed Agents
+            await SeedAgents(context, adminUser);
+        }
+
+        private static async Task<User> SeedUser(ApplicationDbContext context)
+        {
+            if (await context.Users.AnyAsync())
             {
-                return; // Database has been seeded
+                return await context.Users.FirstAsync(u => u.Email == "admin@kiotviet.com");
             }
 
-            // Create default admin user
             var adminUser = new User
             {
                 Email = "admin@kiotviet.com",
@@ -30,215 +84,93 @@ namespace AgentPlatform.API.Data
 
             context.Users.Add(adminUser);
             await context.SaveChangesAsync();
-
-            // Create agents based on agents.json structure
-            var agents = new List<Agent>
-            {
-                new Agent
-                {
-                    Name = "IT_Support_Agent",
-                    Department = "IT",
-                    Description = "Useful for resolving technical support requests, troubleshooting software and hardware issues, and handling Jira-related problems. The input must be a complete question.",
-                    Instructions = "You are an IT support specialist. Help users with technical issues, troubleshoot problems, and create Jira tickets when needed.",
-                    ToolsArray = new[] { "jira_ticket_creator", "it_knowledge_base_search" },
-                    LlmModelName = "gemini-2.0-flash",
-                    LlmTemperature = 0.0,
-                    IsActive = true,
-                    IsMainRouter = false,
-                    CreatedById = adminUser.Id,
-                    CreatedAt = DateTime.UtcNow
-                },
-                new Agent
-                {
-                    Name = "HR_Agent",
-                    Department = "HR", 
-                    Description = "Useful for questions about HR policies, leave procedures, and recruitment information. The input must be a complete question.",
-                    Instructions = "You are an HR assistant. Help employees with HR policies, leave requests, and recruitment-related questions.",
-                    ToolsArray = new[] { "policy_document_search", "leave_request_tool" },
-                    LlmModelName = "gemini-2.0-flash",
-                    LlmTemperature = 0.7,
-                    IsActive = true,
-                    IsMainRouter = false,
-                    CreatedById = adminUser.Id,
-                    CreatedAt = DateTime.UtcNow
-                },
-                new Agent
-                {
-                    Name = "Search_Agent",
-                    Department = "General",
-                    Description = "Useful for searching for general information on the Internet using Google search. Use this agent when you need to find current information, news, guides, or answers to general questions that require web search.",
-                    Instructions = "You are a search specialist. Use Google search to find current information, news, guides, and answers to general questions.",
-                    ToolsArray = new[] { "google_search" },
-                    LlmModelName = "gemini-2.0-flash",
-                    LlmTemperature = 0.5,
-                    IsActive = true,
-                    IsMainRouter = false,
-                    CreatedById = adminUser.Id,
-                    CreatedAt = DateTime.UtcNow
-                },
-                new Agent
-                {
-                    Name = "Personal_Assistant_Agent",
-                    Department = "General",
-                    Description = "Useful for personal assistance tasks like checking calendar events, weather information, and scheduling. Use this agent when users need help with daily planning, meeting schedules, or weather updates.",
-                    Instructions = "You are a personal assistant. Help users with calendar management, weather information, and daily planning tasks.",
-                    ToolsArray = new[] { "check_calendar", "check_weather" },
-                    LlmModelName = "gemini-2.0-flash",
-                    LlmTemperature = 0.3,
-                    IsActive = true,
-                    IsMainRouter = false,
-                    CreatedById = adminUser.Id,
-                    CreatedAt = DateTime.UtcNow
-                },
-                new Agent
-                {
-                    Name = "General_Utility_Agent",
-                    Department = "General",
-                    Description = "A versatile agent that can handle various utility tasks including web searches, calendar checks, and weather information. Use this as a fallback when other agents don't match the request.",
-                    Instructions = "You are a versatile utility agent. Handle various tasks including web searches, calendar management, and weather information as a fallback option.",
-                    ToolsArray = new[] { "google_search", "check_calendar", "check_weather" },
-                    LlmModelName = "gemini-2.0-flash",
-                    LlmTemperature = 0.4,
-                    IsActive = true,
-                    IsMainRouter = true, // Set this as main router
-                    CreatedById = adminUser.Id,
-                    CreatedAt = DateTime.UtcNow
-                }
-            };
-
-            context.Agents.AddRange(agents);
-            await context.SaveChangesAsync();
-
-            // Keep the ADK-powered agent with multi-tool capabilities for demonstration
-            var adkAgent = new Agent
-            {
-                Name = "ADK Assistant",
-                Department = "AI Research",
-                Description = "An advanced AI assistant powered by Google ADK with multi-tool capabilities and workflow orchestration",
-                Instructions = @"You are an advanced AI assistant powered by Google's Agent Development Kit (ADK). 
-You have access to multiple tools and can orchestrate complex workflows:
-- Use built-in SearchTool for web searches
-- Leverage HttpTool for API interactions
-- Coordinate multi-step tasks using sequential or parallel workflows
-- Provide comprehensive research and analysis capabilities
-
-Always explain your reasoning and cite sources when providing information. 
-You can break down complex requests into multiple tool calls and synthesize results.",
-                ToolsArray = new[] { "adk_search", "adk_http_request", "adk_workflow" },
-                LlmModelName = "gemini-2.0-flash",
-                LlmTemperature = 0.2,
-                IsActive = true,
-                IsMainRouter = false,
-                CreatedById = adminUser.Id,
-                CreatedAt = DateTime.UtcNow
-            };
-
-            context.Agents.Add(adkAgent);
-            await context.SaveChangesAsync();
-
-            // Add ADK functions for the ADK agent
-            await AddAdkFunctions(context, adkAgent.Id);
-
-            // Seed available tools
-            await AddTools(context);
+            return adminUser;
         }
 
-        private static async Task AddTools(ApplicationDbContext context)
+        private static async Task SeedTools(ApplicationDbContext context)
         {
-            var toolNames = new Dictionary<string, string>
-                {
-                    { "jira_ticket_creator", "Creates a Jira ticket for technical support issues." },
-                    { "it_knowledge_base_search", "Searches the IT knowledge base for solutions." },
-                    { "policy_document_search", "Searches for HR policy documents." },
-                    { "leave_request_tool", "Handles leave requests and procedures." },
-                    { "google_search", "Performs a Google search for general information." },
-                    { "check_calendar", "Checks for calendar events and schedules." },
-                    { "check_weather", "Checks the current weather information." },
-                    { "adk_search", "Advanced web search using Google ADK." },
-                    { "adk_http_request", "Makes HTTP requests to external APIs." },
-                    { "adk_workflow", "Executes multi-agent workflows." }
-                };
+            if (await context.Tools.AnyAsync())
+            {
+                return; // Tools have been seeded
+            }
 
-            var tools = toolNames.Select(t => new Tool { Name = t.Key, Description = t.Value }).ToList();
-            context.Tools.AddRange(tools);
-            await context.SaveChangesAsync();
+            var toolsJsonPath = Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "AgentPlatform.Core", "toolkit", "tools.json");
+            if (!File.Exists(toolsJsonPath))
+            {
+                // Handle case where file doesn't exist, maybe log an error
+                return;
+            }
+
+            var toolsJson = await File.ReadAllTextAsync(toolsJsonPath);
+            var toolList = JsonSerializer.Deserialize<List<ToolJson>>(toolsJson);
+
+            if (toolList != null)
+            {
+                foreach (var toolDef in toolList)
+                {
+                    var tool = new Tool
+                    {
+                        Name = toolDef.Name,
+                        Description = toolDef.Description
+                    };
+                    context.Tools.Add(tool);
+                }
+                await context.SaveChangesAsync();
+            }
         }
 
-        private static async Task AddAdkFunctions(ApplicationDbContext context, int agentId)
+        private static async Task SeedAgents(ApplicationDbContext context, User adminUser)
         {
-            var functions = new List<AgentFunction>
+            if (await context.Agents.AnyAsync())
             {
-                new AgentFunction
-                {
-                    AgentId = agentId,
-                    Name = "adk_search",
-                    Description = "Advanced web search using Google ADK's built-in SearchTool with enhanced capabilities",
-                    Schema = @"{
-                        ""type"": ""object"",
-                        ""properties"": {
-                            ""query"": {""type"": ""string"", ""description"": ""Search query text""},
-                            ""max_results"": {""type"": ""integer"", ""description"": ""Maximum number of results to return (1-20)"", ""default"": 10},
-                            ""include_snippets"": {""type"": ""boolean"", ""description"": ""Include content snippets in results"", ""default"": true},
-                            ""filter_domains"": {""type"": ""array"", ""items"": {""type"": ""string""}, ""description"": ""Optional domain filters""}
-                        },
-                        ""required"": [""query""]
-                    }",
-                    EndpointUrl = null,
-                    HttpMethod = "POST",
-                    Headers = null,
-                    IsActive = true,
-                    CreatedAt = DateTime.UtcNow,
-                    UpdatedAt = DateTime.UtcNow
-                },
-                new AgentFunction
-                {
-                    AgentId = agentId,
-                    Name = "adk_http_request",
-                    Description = "Make HTTP requests to external APIs using ADK's HttpTool",
-                    Schema = @"{
-                        ""type"": ""object"",
-                        ""properties"": {
-                            ""url"": {""type"": ""string"", ""description"": ""Target URL for the HTTP request""},
-                            ""method"": {""type"": ""string"", ""enum"": [""GET"", ""POST"", ""PUT"", ""DELETE""], ""default"": ""GET""},
-                            ""headers"": {""type"": ""object"", ""description"": ""HTTP headers as key-value pairs""},
-                            ""body"": {""type"": ""object"", ""description"": ""Request body for POST/PUT requests""},
-                            ""timeout"": {""type"": ""integer"", ""description"": ""Request timeout in seconds"", ""default"": 30}
-                        },
-                        ""required"": [""url""]
-                    }",
-                    EndpointUrl = null,
-                    HttpMethod = "POST",
-                    Headers = null,
-                    IsActive = true,
-                    CreatedAt = DateTime.UtcNow,
-                    UpdatedAt = DateTime.UtcNow
-                },
-                new AgentFunction
-                {
-                    AgentId = agentId,
-                    Name = "adk_workflow",
-                    Description = "Execute multi-agent workflows (sequential, parallel, or loop) using ADK orchestration",
-                    Schema = @"{
-                        ""type"": ""object"",
-                        ""properties"": {
-                            ""workflow_type"": {""type"": ""string"", ""enum"": [""sequential"", ""parallel"", ""loop""], ""description"": ""Type of workflow to execute""},
-                            ""agents"": {""type"": ""array"", ""items"": {""type"": ""string""}, ""description"": ""List of agent names to include in workflow""},
-                            ""task"": {""type"": ""string"", ""description"": ""Task description for the workflow""},
-                            ""max_iterations"": {""type"": ""integer"", ""description"": ""Maximum iterations for loop workflows"", ""default"": 3}
-                        },
-                        ""required"": [""workflow_type"", ""agents"", ""task""]
-                    }",
-                    EndpointUrl = null,
-                    HttpMethod = "POST",
-                    Headers = null,
-                    IsActive = true,
-                    CreatedAt = DateTime.UtcNow,
-                    UpdatedAt = DateTime.UtcNow
-                }
-            };
+                return; // Agents have been seeded
+            }
 
-            context.AgentFunctions.AddRange(functions);
-            await context.SaveChangesAsync();
+            var agentsJsonPath = Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "AgentPlatform.Core", "agents.json");
+            if (!File.Exists(agentsJsonPath))
+            {
+                // Handle case where file doesn't exist, maybe log an error
+                return;
+            }
+
+            var agentsJson = await File.ReadAllTextAsync(agentsJsonPath);
+            var agentList = JsonSerializer.Deserialize<List<AgentJson>>(agentsJson);
+
+            if (agentList != null)
+            {
+                foreach (var agentDef in agentList)
+                {
+                    var agent = new Agent
+                    {
+                        Name = agentDef.Name,
+                        Description = agentDef.Description,
+                        Instructions = agentDef.Description, // Using description as instruction
+                        ToolsArray = agentDef.Tools,
+                        LlmModelName = agentDef.LlmConfig.ModelName,
+                        LlmTemperature = agentDef.LlmConfig.Temperature,
+                        ToolConfigs = agentDef.ToolConfigs.GetRawText(),
+                        IsActive = true,
+                        IsMainRouter = false, // Set a default, can be adjusted if logic is provided
+                        CreatedById = adminUser.Id,
+                        CreatedAt = DateTime.UtcNow,
+                        Department = GetDepartmentFromName(agentDef.Name)
+                    };
+                    context.Agents.Add(agent);
+                }
+                await context.SaveChangesAsync();
+            }
+        }
+
+        private static string GetDepartmentFromName(string agentName)
+        {
+            if (string.IsNullOrEmpty(agentName)) return "General";
+            
+            var parts = agentName.Split('_');
+            if (parts.Length > 1)
+            {
+                return parts[0];
+            }
+            return "General";
         }
     }
 } 

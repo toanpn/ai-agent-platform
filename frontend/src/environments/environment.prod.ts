@@ -2,8 +2,8 @@ export const environment = {
 	production: true,
 	hashbrown: {
 		config: {
-			baseUrl: '/api/hashbrown',
+			baseUrl: 'http://localhost:5001/api/hashbrown',
 		},
 	},
-	apiUrl: '/api',
+	apiUrl: 'http://localhost:5001/api',
 };

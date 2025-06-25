@@ -1,102 +1,278 @@
+"""
+JIRA Tool Module
+
+This module provides JIRA functionality using LangChain's JIRA toolkit.
+Based on: https://python.langchain.com/docs/integrations/tools/jira/
+"""
+
 import os
-import requests
-from langchain.tools import tool
-from typing import Optional
+import logging
+from typing import Optional, Type, List
+from langchain.tools import BaseTool
+from pydantic import BaseModel, Field
 
-@tool
-def jira_ticket_creator(issue_summary: str, issue_description: str, project_key: str = "IT") -> str:
-    """
-    Creates a new ticket in Jira.
-    Use this tool when a user wants to report a new IT issue.
-    Returns the ID of the newly created ticket, e.g., 'IT-1234'.
+logger = logging.getLogger(__name__)
+
+# Try to import JIRA toolkit
+try:
+    from langchain_community.agent_toolkits.jira.toolkit import JiraToolkit
+    from langchain_community.utilities.jira import JiraAPIWrapper
+    JIRA_AVAILABLE = True
+except ImportError:
+    JIRA_AVAILABLE = False
+    logger.warning("JIRA toolkit không khả dụng. Cài đặt với: pip install langchain-community atlassian-python-api")
+
+class JiraToolInput(BaseModel):
+    """Input schema for JIRA tool."""
+    action: str = Field(description="Hành động JIRA cần thực hiện (create_issue, search_issues, get_issue)")
+    parameters: dict = Field(description="Tham số cho hành động JIRA")
+
+class JiraTool(BaseTool):
+    """Unified JIRA tool for agents using LangChain's JiraToolkit."""
     
-    Args:
-        issue_summary: Brief title of the issue
-        issue_description: Detailed description of the issue
-        project_key: Jira project key (defaults to "IT")
+    name: str = "jira"
+    description: str = """
+    Công cụ JIRA tích hợp cho quản lý issues và projects.
+    Sử dụng khi cần:
+    - Tạo issues/tickets mới trong JIRA
+    - Tìm kiếm issues bằng JQL (JIRA Query Language)
+    - Lấy thông tin chi tiết của issues
+    - Lấy danh sách projects
+    - Thực hiện các thao tác JIRA khác
+    
+    Hướng dẫn sử dụng:
+    - Để tạo issue: action="create_issue", parameters={"summary": "tiêu đề", "description": "mô tả", "project": {"key": "PROJECT_KEY"}, "issuetype": {"name": "Task"}}
+    - Để tìm kiếm: action="search_issues", parameters={"jql": "project = KEY AND status = 'Open'"}
+    - Để lấy chi tiết issue: action="get_issue", parameters={"issue_key": "PROJECT-123"}
     """
-    try:
-        # Get Jira credentials from environment
-        jira_url = os.getenv("JIRA_BASE_URL")
-        jira_email = os.getenv("JIRA_EMAIL")
-        jira_token = os.getenv("JIRA_API_TOKEN")
+    args_schema: Type[BaseModel] = JiraToolInput
+    
+    def __init__(self, jira_base_url: str = None, jira_username: str = None, jira_api_token: str = None, **kwargs):
+        super().__init__(**kwargs)
+        self.jira_base_url = jira_base_url or os.getenv("JIRA_BASE_URL")
+        self.jira_username = jira_username or os.getenv("JIRA_USERNAME")
+        self.jira_api_token = jira_api_token or os.getenv("JIRA_API_TOKEN")
         
-        if not all([jira_url, jira_email, jira_token]):
-            # Mock response for demo purposes
-            print(f"Creating Jira ticket in project {project_key} with summary: {issue_summary}")
-            new_ticket_id = f"{project_key}-1235"
-            return f"Successfully created Jira ticket with ID: {new_ticket_id}"
-        
-        # Prepare the API request
-        url = f"{jira_url}/rest/api/3/issue"
-        auth = (jira_email, jira_token)
-        headers = {
-            "Accept": "application/json",
-            "Content-Type": "application/json"
-        }
-        
-        payload = {
-            "fields": {
-                "project": {"key": project_key},
-                "summary": issue_summary,
-                "description": {
-                    "type": "doc",
-                    "version": 1,
-                    "content": [
-                        {
-                            "type": "paragraph",
-                            "content": [
-                                {
-                                    "text": issue_description,
-                                    "type": "text"
-                                }
-                            ]
-                        }
-                    ]
-                },
-                "issuetype": {"name": "Task"}
-            }
-        }
-        
-        response = requests.post(url, json=payload, headers=headers, auth=auth)
-        
-        if response.status_code == 201:
-            ticket_data = response.json()
-            ticket_key = ticket_data.get("key")
-            return f"Successfully created Jira ticket with ID: {ticket_key}"
-        else:
-            return f"Failed to create Jira ticket. Status: {response.status_code}, Error: {response.text}"
+    def _run(self, action: str, parameters: dict) -> str:
+        """Execute JIRA action using the unified toolkit."""
+        try:
+            if not JIRA_AVAILABLE:
+                return "❌ JIRA toolkit không khả dụng. Cần cài đặt: pip install langchain-community atlassian-python-api"
             
-    except Exception as e:
-        return f"Error creating Jira ticket: {str(e)}"
+            # Check for JIRA configuration
+            if not all([self.jira_base_url, self.jira_username, self.jira_api_token]):
+                return self._mock_result(action, parameters)
+            
+            # Initialize JIRA API wrapper
+            jira = JiraAPIWrapper(
+                jira_base_url=self.jira_base_url,
+                jira_username=self.jira_username,
+                jira_api_token=self.jira_api_token,
+            )
+            
+            # Create JIRA toolkit
+            toolkit = JiraToolkit.from_jira_api_wrapper(jira)
+            tools = toolkit.get_tools()
+            
+            # Execute based on action
+            if action == "create_issue":
+                return self._create_issue(tools, parameters)
+            elif action == "search_issues":
+                return self._search_issues(tools, parameters)
+            elif action == "get_issue":
+                return self._get_issue(tools, parameters)
+            elif action == "get_projects":
+                return self._get_projects(tools, parameters)
+            else:
+                return f"❌ Hành động không được hỗ trợ: {action}. Các hành động khả dụng: create_issue, search_issues, get_issue, get_projects"
+            
+        except Exception as e:
+            logger.error(f"Error in JIRA tool: {e}")
+            return f"❌ Lỗi khi thực hiện JIRA action '{action}': {str(e)}"
+    
+    def _create_issue(self, tools: List[BaseTool], parameters: dict) -> str:
+        """Create a new JIRA issue."""
+        create_tool = None
+        for tool in tools:
+            if tool.name == "Create Issue":
+                create_tool = tool
+                break
+        
+        if not create_tool:
+            return "❌ Không tìm thấy công cụ tạo issue"
+        
+        try:
+            # Ensure required fields are present
+            if "summary" not in parameters:
+                return "❌ Thiếu trường 'summary' để tạo issue"
+            
+            # Set default values if not provided
+            if "project" not in parameters:
+                parameters["project"] = {"key": "IT"}
+            if "issuetype" not in parameters:
+                parameters["issuetype"] = {"name": "Task"}
+            if "priority" not in parameters:
+                parameters["priority"] = {"name": "Medium"}
+            
+            result = create_tool.run(parameters)
+            return f"✅ JIRA issue đã được tạo thành công!\n\n{result}"
+            
+        except Exception as e:
+            return f"❌ Lỗi khi tạo JIRA issue: {str(e)}"
+    
+    def _search_issues(self, tools: List[BaseTool], parameters: dict) -> str:
+        """Search JIRA issues using JQL."""
+        search_tool = None
+        for tool in tools:
+            if tool.name == "JQL Query":
+                search_tool = tool
+                break
+        
+        if not search_tool:
+            return "❌ Không tìm thấy công cụ tìm kiếm"
+        
+        try:
+            jql = parameters.get("jql", "")
+            if not jql:
+                return "❌ Thiếu truy vấn JQL để tìm kiếm"
+            
+            result = search_tool.run(jql)
+            return f"🔍 Kết quả tìm kiếm JIRA với JQL '{jql}':\n\n{result}"
+            
+        except Exception as e:
+            return f"❌ Lỗi khi tìm kiếm JIRA: {str(e)}"
+    
+    def _get_issue(self, tools: List[BaseTool], parameters: dict) -> str:
+        """Get JIRA issue details."""
+        # Use the generic API call tool for getting issue details
+        api_tool = None
+        for tool in tools:
+            if tool.name == "Catch all Jira API call":
+                api_tool = tool
+                break
+        
+        if not api_tool:
+            return "❌ Không tìm thấy công cụ API"
+        
+        try:
+            issue_key = parameters.get("issue_key", "")
+            if not issue_key:
+                return "❌ Thiếu issue_key để lấy thông tin issue"
+            
+            api_params = {
+                "function": "issue",
+                "args": [issue_key]
+            }
+            result = api_tool.run(api_params)
+            return f"🎫 Chi tiết JIRA issue {issue_key}:\n\n{result}"
+            
+        except Exception as e:
+            return f"❌ Lỗi khi lấy JIRA issue: {str(e)}"
+    
+    def _get_projects(self, tools: List[BaseTool], parameters: dict) -> str:
+        """Get all JIRA projects."""
+        projects_tool = None
+        for tool in tools:
+            if tool.name == "Get Projects":
+                projects_tool = tool
+                break
+        
+        if not projects_tool:
+            return "❌ Không tìm thấy công cụ lấy projects"
+        
+        try:
+            result = projects_tool.run("")
+            return f"📂 Danh sách JIRA projects:\n\n{result}"
+            
+        except Exception as e:
+            return f"❌ Lỗi khi lấy danh sách projects: {str(e)}"
+    
+    def _mock_result(self, action: str, parameters: dict) -> str:
+        """Return mock results when JIRA is not configured."""
+        if action == "create_issue":
+            summary = parameters.get("summary", "Test Issue")
+            project_key = parameters.get("project", {}).get("key", "IT")
+            issue_key = f"{project_key}-{hash(summary) % 9999 + 1000}"
+            
+            return f"""✅ JIRA issue mô phỏng đã được tạo thành công!
 
-@tool
-def it_knowledge_base_search(query: str) -> str:
-    """
-    Searches the IT knowledge base for solutions to common problems.
-    Use this to find instruction documents or troubleshooting guides.
+🎫 **Chi tiết issue:**
+Issue Key: {issue_key}
+Dự án: {project_key}
+Tóm tắt: {summary}
+Mô tả: {parameters.get('description', 'Không có mô tả')}
+Loại: {parameters.get('issuetype', {}).get('name', 'Task')}
+Ưu tiên: {parameters.get('priority', {}).get('name', 'Medium')}
+
+💡 **Lưu ý:** Để tạo JIRA issue thực, cần cấu hình JIRA_BASE_URL, JIRA_USERNAME, và JIRA_API_TOKEN"""
+            
+        elif action == "search_issues":
+            jql = parameters.get("jql", "")
+            return f"""🔍 Kết quả tìm kiếm JIRA mô phỏng với JQL '{jql}':
+
+🎫 **Issue 1: IT-1234**
+Tóm tắt: Sample bug report
+Trạng thái: In Progress
+Người được giao: john.doe@company.com
+Ưu tiên: High
+
+🎫 **Issue 2: IT-1235**
+Tóm tắt: Feature request for new functionality
+Trạng thái: To Do
+Người được giao: jane.smith@company.com
+Ưu tiên: Medium
+
+🎫 **Issue 3: IT-1236**
+Tóm tắt: System maintenance task
+Trạng thái: Done
+Người được giao: admin@company.com
+Ưu tiên: Low
+
+💡 **Lưu ý:** Để tìm kiếm JIRA thực, cần cấu hình JIRA_BASE_URL, JIRA_USERNAME, và JIRA_API_TOKEN"""
+            
+        elif action == "get_issue":
+            issue_key = parameters.get("issue_key", "IT-123")
+            return f"""🎫 Chi tiết JIRA issue mô phỏng {issue_key}:
+
+**Tóm tắt:** Sample Issue for Testing
+**Trạng thái:** In Progress
+**Loại:** Task
+**Ưu tiên:** Medium
+**Người được giao:** developer@company.com
+**Người báo cáo:** manager@company.com
+**Ngày tạo:** 2024-01-15 09:00
+**Ngày cập nhật:** 2024-01-16 14:30
+
+**Mô tả:**
+Đây là mô tả chi tiết của issue mẫu. Issue này bao gồm các yêu cầu cụ thể và cần được hoàn thành trong thời gian quy định.
+
+💡 **Lưu ý:** Để lấy JIRA issue thực, cần cấu hình JIRA_BASE_URL, JIRA_USERNAME, và JIRA_API_TOKEN"""
+            
+        elif action == "get_projects":
+            return f"""📂 Danh sách JIRA projects mô phỏng:
+
+**IT** - IT Support Project
+**SALES** - Sales Support Project  
+**DEV** - Development Project
+**QA** - Quality Assurance Project
+
+💡 **Lưu ý:** Để lấy danh sách projects thực, cần cấu hình JIRA_BASE_URL, JIRA_USERNAME, và JIRA_API_TOKEN"""
+        
+        else:
+            return f"❌ Hành động không được hỗ trợ: {action}"
     
-    Args:
-        query: Search query for the knowledge base
-    """
-    # Mock knowledge base data - in a real implementation, this would search a database
-    knowledge_base = {
-        "printer": "How to fix printer connection issues: 1. Check cable connections 2. Restart print spooler service 3. Update printer drivers",
-        "slow computer": "Computer performance troubleshooting: 1. Check for malware 2. Clear temporary files 3. Check disk space 4. Update drivers",
-        "wifi": "WiFi connection issues: 1. Restart router 2. Forget and reconnect to network 3. Update network drivers 4. Check for interference",
-        "password": "Password reset procedure: 1. Use self-service portal 2. Contact IT helpdesk 3. Verify identity with security questions",
-        "email": "Email configuration: 1. Use IMAP settings 2. Check server settings 3. Verify credentials 4. Test connection"
-    }
-    
-    # Simple keyword matching
-    query_lower = query.lower()
-    results = []
-    
-    for topic, solution in knowledge_base.items():
-        if topic in query_lower or any(word in query_lower for word in topic.split()):
-            results.append(f"Topic: {topic.title()}\nSolution: {solution}")
-    
-    if results:
-        return f"Found {len(results)} relevant articles:\n\n" + "\n\n".join(results)
-    else:
-        return f"No specific articles found for '{query}'. Please contact IT support for personalized assistance." 
+    async def _arun(self, action: str, parameters: dict) -> str:
+        """Async version of JIRA tool."""
+        return self._run(action, parameters)
+
+# Tool factory function
+def create_jira_tool(jira_base_url: str = None, jira_username: str = None, jira_api_token: str = None) -> JiraTool:
+    """Create a JIRA tool instance with configuration."""
+    return JiraTool(
+        jira_base_url=jira_base_url,
+        jira_username=jira_username,
+        jira_api_token=jira_api_token
+    )
+
+# Export the tool
+__all__ = ['JiraTool', 'create_jira_tool'] 

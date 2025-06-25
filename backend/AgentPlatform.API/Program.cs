@@ -53,8 +53,8 @@ builder.Services.AddSingleton<IProcessingStrategy, AsyncKeyLockProcessingStrateg
 // Add HttpClient
 builder.Services.AddHttpClient<IAgentRuntimeClient, AgentRuntimeClient>(client =>
 {
-    // Configure timeout - 30 seconds should be more than enough
-    client.Timeout = TimeSpan.FromSeconds(30);
+    // Increase timeout to 5 minutes for long-running agent processing
+    client.Timeout = TimeSpan.FromMinutes(5);
 });
 
 // Add AutoMapper
@@ -123,7 +123,6 @@ if (app.Environment.IsDevelopment())
 
 app.UseMiddleware<ErrorHandlingMiddleware>();
 app.UseIpRateLimiting();
-
 app.UseCors();
 app.UseAuthentication();
 app.UseAuthorization();
