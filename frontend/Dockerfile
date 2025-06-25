@@ -29,16 +29,16 @@ COPY --from=build /app/dist/chatbot-ui/browser /usr/share/nginx/html
 RUN echo 'server {' > /etc/nginx/conf.d/default.conf && \
     echo '    listen 80;' >> /etc/nginx/conf.d/default.conf && \
     echo '    server_name localhost;' >> /etc/nginx/conf.d/default.conf && \
-    echo '    root /usr/share/nginx/html;' >> /etc/nginx/conf.d/default.conf && \
-    echo '    index index.html;' >> /etc/nginx/conf.d/default.conf && \
-    echo '    location / {' >> /etc/nginx/conf.d/default.conf && \
-    echo '        try_files $uri $uri/ /index.html;' >> /etc/nginx/conf.d/default.conf && \
-    echo '    }' >> /etc/nginx/conf.d/default.conf && \
-    echo '    # Handle API calls (proxy to backend if needed)' >> /etc/nginx/conf.d/default.conf && \
+    echo '    # Handle API calls (proxy to backend)' >> /etc/nginx/conf.d/default.conf && \
     echo '    location /api/ {' >> /etc/nginx/conf.d/default.conf && \
     echo '        proxy_pass http://backend:5000/;' >> /etc/nginx/conf.d/default.conf && \
     echo '        proxy_set_header Host $host;' >> /etc/nginx/conf.d/default.conf && \
     echo '        proxy_set_header X-Real-IP $remote_addr;' >> /etc/nginx/conf.d/default.conf && \
+    echo '    }' >> /etc/nginx/conf.d/default.conf && \
+    echo '    location / {' >> /etc/nginx/conf.d/default.conf && \
+    echo '        root /usr/share/nginx/html;' >> /etc/nginx/conf.d/default.conf && \
+    echo '        index index.html;' >> /etc/nginx/conf.d/default.conf && \
+    echo '        try_files $uri $uri/ /index.html;' >> /etc/nginx/conf.d/default.conf && \
     echo '    }' >> /etc/nginx/conf.d/default.conf && \
     echo '}' >> /etc/nginx/conf.d/default.conf
 
