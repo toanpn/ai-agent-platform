@@ -41,7 +41,8 @@
     "ACTIVE": "Active",
     "INACTIVE": "Inactive",
     "OTHER": "other",
-    "OTHERS": "others"
+    "OTHERS": "others",
+    "RETRY": "Retry"
   },
   "AUTH": {
     "LOGIN": "Login",
@@ -208,6 +209,21 @@
     "INSTRUCTION_ENHANCED_SUCCESS": "Instruction enhanced successfully!",
     "INSTRUCTION_ENHANCED_ERROR": "Failed to enhance instruction.",
     "ENHANCE_INSTRUCTION": "Enhance instruction with AI",
+    "CONNECT": "Connect",
+    "DISCONNECT": "Disconnect",
+    "CONNECTED": "Connected",
+    "LOADING_TOOLS": "Loading available tools...",
+    "NO_TOOLS_AVAILABLE": "No tools available",
+    "NO_TOOLS_DESCRIPTION": "No tools are currently available for this agent.",
+    "REQUIRES_CONFIGURATION": "Requires configuration",
+    "TOOLS_CONFIG": {
+      "TITLE": "Tool Configuration",
+      "INSTRUCTION": "Please configure the required parameters for this tool:",
+      "FIELD_REQUIRED": "This field is required",
+      "SAVE_SUCCESS": "Tool configuration saved successfully",
+      "SAVE_ERROR": "Failed to save tool configuration",
+      "NO_CONFIG_NEEDED": "This tool is ready to use without additional configuration."
+    },
     "LLM": {
       "TITLE": "LLM Configuration",
       "MODEL": "LLM Model",
@@ -269,4 +285,4 @@
     "TIMEOUT": "Request timed out. Please try again.",
     "UNKNOWN_ERROR": "An unknown error occurred."
   }
-} 
+}

@@ -15,37 +15,19 @@ from langchain.tools import BaseTool, tool
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.prompts import ChatPromptTemplate
 
-# Import all available tools
-from toolkit import jira_tool, search_tool, utility_tools, rag_tool
+# Import the new dynamic tool manager
+from core.dynamic_tool_manager import DynamicToolManager
+
+# Import all available tools for backward compatibility
+from toolkit import jira_tool, rag_tool
 
 class AgentManager:
     def __init__(self):
-        """Initialize the Agent Manager with available tools registry."""
-        self.available_tools = self._build_tools_registry()
+        """Initialize the Agent Manager with dynamic tool manager."""
+        self.dynamic_tool_manager = DynamicToolManager()
+        self.available_tools = [] # Keep for backward compatibility
         self.sub_agents = []
     
-    def _build_tools_registry(self) -> Dict[str, BaseTool]:
-        """Build a registry of all available tools from the toolkit."""
-        tools_registry = {}
-        
-        # Register tools from jira_tool module
-        tools_registry["jira_ticket_creator"] = jira_tool.jira_ticket_creator
-        tools_registry["it_knowledge_base_search"] = jira_tool.it_knowledge_base_search
-        
-        # Register tools from search_tool module  
-        tools_registry["internet_search"] = search_tool.internet_search
-        tools_registry["policy_document_search"] = search_tool.policy_document_search
-        tools_registry["leave_request_tool"] = search_tool.leave_request_tool
-        
-        # Register tools from utility_tools module
-        tools_registry["google_search"] = utility_tools.google_search
-        tools_registry["check_calendar"] = utility_tools.check_calendar
-        tools_registry["check_weather"] = utility_tools.check_weather
-        
-        # Register RAG tools
-        tools_registry["knowledge_lookup"] = rag_tool.knowledge_lookup
-        
-        return tools_registry
     
     def create_sub_agent(self, config: Dict[str, Any]) -> BaseTool:
         """
@@ -61,18 +43,34 @@ class AgentManager:
         agent_name = config["agent_name"]
         description = config["description"]
         tool_names = config["tools"]
+        tool_configs = config.get("tool_configs", {})
         llm_config = config.get("llm_config", {})
         
-        # Get the actual tool objects from the registry
+        # Create dynamic tools for this agent using the new tool manager
         agent_tools = []
+        
+        # Use dynamic tool manager to create tools with agent-specific configurations
+        try:
+            dynamic_tools = self.dynamic_tool_manager.create_tools_for_agent(config)
+            agent_tools.extend(dynamic_tools)
+        except Exception as e:
+            print(f"Warning: Failed to create dynamic tools for agent '{agent_name}': {e}")
+        
+        # Fallback to legacy tools if needed
         for tool_name in tool_names:
             if tool_name in self.available_tools:
-                agent_tools.append(self.available_tools[tool_name])
-            else:
-                print(f"Warning: Tool '{tool_name}' not found in registry for agent '{agent_name}'")
+                # Check if we already have this tool from dynamic creation
+                existing_tool_names = [tool.name for tool in agent_tools]
+                if tool_name not in existing_tool_names:
+                    agent_tools.append(self.available_tools[tool_name])
+                    print(f"✓ Added legacy tool: {tool_name}")
+            elif tool_name not in [tool.name for tool in agent_tools]:
+                print(f"Warning: Tool '{tool_name}' not found in registry or dynamic tools for agent '{agent_name}'")
         
         if not agent_tools:
             raise ValueError(f"No valid tools found for agent '{agent_name}'")
+        
+        print(f"Agent '{agent_name}' configured with {len(agent_tools)} tools: {[tool.name for tool in agent_tools]}")
         
         # Initialize the LLM for the sub-agent
         try:
@@ -102,7 +100,11 @@ CRITICAL LANGUAGE REQUIREMENT:
 - You MUST respond to users in Vietnamese (tiếng Việt)
 - All your responses should be in Vietnamese language
 - This is a requirement for the user interface and user experience
-- Even if the user asks in English, respond in Vietnamese"""),
+- Even if the user asks in English, respond in Vietnamese
+
+AVAILABLE TOOLS:
+Your available tools are: {[tool.name for tool in agent_tools]}
+Each tool has specific parameters and capabilities. Use them appropriately based on the user's request."""),
             ("human", "{input}"),
             ("placeholder", "{agent_scratchpad}"),
         ])
@@ -180,24 +182,114 @@ CRITICAL LANGUAGE REQUIREMENT:
             raise RuntimeError(f"Failed to load agents from {config_path}: {e}")
     
     def get_available_tools(self) -> List[str]:
-        """Get list of available tool names."""
-        return list(self.available_tools.keys())
+        """Get list of available tool names from dynamic tool manager."""
+        dynamic_tools = self.dynamic_tool_manager.get_available_tools()
+        tool_names = [tool["name"] for tool in dynamic_tools]
+        
+        # Add legacy tools
+        legacy_tools = list(self.available_tools.keys())
+        tool_names.extend(legacy_tools)
+        
+        return tool_names
     
-    def get_available_tools_details(self) -> List[Dict[str, str]]:
-        """Get detailed information about available tools."""
-        tools_details = []
+    def get_available_tools_details(self) -> List[Dict[str, Any]]:
+        """Get detailed information about available tools from dynamic tool manager."""
+        dynamic_tools = self.dynamic_tool_manager.get_available_tools()
+        
+        # Add legacy tools
         for tool_name, tool_obj in self.available_tools.items():
-            tools_details.append({
+            dynamic_tools.append({
+                "id": f"legacy_{tool_name}",
                 "name": tool_name,
-                "description": getattr(tool_obj, 'description', 'No description available')
+                "description": getattr(tool_obj, 'description', 'No description available'),
+                "file": "legacy",
+                "parameters": {}
             })
-        return tools_details
+        
+        return dynamic_tools
     
     def get_loaded_agents(self) -> List[str]:
         """Get list of loaded agent names."""
         return [agent.name for agent in self.sub_agents]
     
     def reload_agents(self, config_path: str = "agents.json") -> List[BaseTool]:
-        """Reload agents from configuration file."""
+        """
+        Reload agents from configuration file.
+        
+        Args:
+            config_path: Path to the agents configuration file
+            
+        Returns:
+            List[BaseTool]: List of reloaded sub-agents wrapped as tools
+        """
         print("Reloading agents from configuration...")
-        return self.load_agents_from_config(config_path) 
+        
+        # Reload dynamic tool manager configuration
+        self.dynamic_tool_manager = DynamicToolManager()
+        
+        # Load agents
+        return self.load_agents_from_config(config_path)
+    
+    def validate_agent_config(self, config: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Validate agent configuration and return validation results.
+        
+        Args:
+            config: Agent configuration to validate
+            
+        Returns:
+            Dict containing validation results
+        """
+        validation_results = {
+            "valid": True,
+            "errors": [],
+            "warnings": [],
+            "tool_validation": {}
+        }
+        
+        # Check required fields
+        required_fields = ["agent_name", "description", "tools"]
+        for field in required_fields:
+            if field not in config:
+                validation_results["errors"].append(f"Missing required field: {field}")
+                validation_results["valid"] = False
+        
+        # Validate tools
+        if "tools" in config:
+            available_tool_names = [tool["name"] for tool in self.dynamic_tool_manager.get_available_tools()]
+            available_tool_names.extend(self.available_tools.keys())
+            
+            tool_configs = config.get("tool_configs", {})
+            
+            for tool_name in config["tools"]:
+                tool_validation = {"valid": True, "errors": [], "warnings": []}
+                
+                # Check if tool exists
+                if tool_name not in available_tool_names:
+                    tool_validation["errors"].append(f"Tool '{tool_name}' not found in available tools")
+                    tool_validation["valid"] = False
+                else:
+                    # Validate tool configuration
+                    tool_config = None
+                    for t in self.dynamic_tool_manager.tools_config:
+                        if t.get("name") == tool_name:
+                            tool_config = t
+                            break
+                    
+                    if tool_config:
+                        # Check required credential parameters
+                        required_credentials = []
+                        for param_name, param_config in tool_config.get("parameters", {}).items():
+                            if param_config.get("is_credential", False) and param_config.get("required", False):
+                                required_credentials.append(param_name)
+                        
+                        agent_tool_config = tool_configs.get(tool_name, {})
+                        for cred in required_credentials:
+                            if cred not in agent_tool_config:
+                                tool_validation["warnings"].append(f"Missing credential parameter '{cred}' for tool '{tool_name}'")
+                
+                validation_results["tool_validation"][tool_name] = tool_validation
+                if not tool_validation["valid"]:
+                    validation_results["valid"] = False
+        
+        return validation_results 

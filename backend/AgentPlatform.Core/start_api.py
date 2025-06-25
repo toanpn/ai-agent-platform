@@ -16,6 +16,7 @@ def main():
     # Initialize the system
     initialize_system()
     
+    
     # Get configuration
     port = int(os.getenv('PORT', 8000))
     debug = os.getenv('FLASK_ENV') == 'development'

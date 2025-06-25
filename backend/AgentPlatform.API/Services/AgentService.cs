@@ -58,6 +58,7 @@ namespace AgentPlatform.API.Services
                 Description = request.Description,
                 Instructions = request.Instructions,
                 ToolsArray = request.Tools ?? Array.Empty<string>(),
+                ToolConfigs = request.ToolConfigs,
                 LlmModelName = request.LlmConfig?.ModelName,
                 LlmTemperature = request.LlmConfig?.Temperature,
                 CreatedById = userId,
@@ -104,6 +105,9 @@ namespace AgentPlatform.API.Services
                 
             if (request.Tools != null)
                 agent.ToolsArray = request.Tools;
+                
+            if (request.ToolConfigs != null)
+                agent.ToolConfigs = request.ToolConfigs;
                 
             if (request.LlmConfig != null)
             {
