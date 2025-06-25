@@ -5,51 +5,23 @@
 	display: flex;
 	flex-direction: column;
 	border-radius: 16px;
-	box-shadow:
-		0 20px 40px rgba(0, 0, 0, 0.1),
-		0 8px 16px rgba(0, 0, 0, 0.06),
-		0 2px 8px rgba(0, 0, 0, 0.04);
-	backdrop-filter: blur(20px);
+	box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
 	border: 1px solid rgba(255, 255, 255, 0.1);
-	animation: dialogEnter 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+	animation: dialogEnter 0.3s ease;
 }
 
 @keyframes dialogEnter {
-	0% {
-		opacity: 0;
-		transform: scale(0.95) translateY(10px);
-	}
-	100% {
-		opacity: 1;
-		transform: scale(1) translateY(0);
-	}
+	0% { opacity: 0; transform: scale(0.95) translateY(10px); }
+	100% { opacity: 1; transform: scale(1) translateY(0); }
 }
 
 .dialog-header {
 	padding: 1.75rem 2rem 1.5rem 2rem;
-	background: linear-gradient(
-		135deg,
-		var(--primary-color) 0%,
-		color-mix(in srgb, var(--primary-color) 85%, #667eea) 50%,
-		color-mix(in srgb, var(--primary-color) 70%, #764ba2) 100%
-	);
+	background: linear-gradient(135deg, var(--primary-color) 0%, color-mix(in srgb, var(--primary-color) 85%, #667eea) 100%);
 	color: white;
 	position: relative;
 	overflow: hidden;
 	flex-shrink: 0;
-
-	&::before {
-		content: '';
-		position: absolute;
-		top: -40%;
-		right: -20%;
-		width: 200px;
-		height: 200px;
-		background: radial-gradient(circle, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.04) 70%, transparent 100%);
-		border-radius: 50%;
-		pointer-events: none;
-		animation: float 6s ease-in-out infinite;
-	}
 
 	.tool-info {
 		display: flex;
@@ -63,70 +35,41 @@
 			width: 2.25rem;
 			height: 2.25rem;
 			color: rgba(255, 255, 255, 0.95);
-			background: linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.1) 100%);
+			background: rgba(255, 255, 255, 0.2);
 			border-radius: 12px;
 			display: flex;
 			align-items: center;
 			justify-content: center;
-			backdrop-filter: blur(20px);
 			border: 1px solid rgba(255, 255, 255, 0.2);
-			box-shadow:
-				0 4px 16px rgba(0, 0, 0, 0.1),
-				inset 0 1px 0 rgba(255, 255, 255, 0.3);
 			transition: all 0.3s ease;
 		}
 
 		.tool-details {
 			flex: 1;
-
 			h1 {
 				margin: 0;
 				font-size: 1.5rem;
 				font-weight: 700;
 				color: white;
-				letter-spacing: -0.02em;
-				text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 				line-height: 1.2;
 			}
-
 			.tool-subtitle {
 				margin: 0.5rem 0 0 0;
 				font-size: 0.9rem;
 				color: rgba(255, 255, 255, 0.85);
 				font-weight: 400;
-				letter-spacing: 0.01em;
 			}
 		}
 	}
 }
 
-@keyframes float {
-	0%, 100% {
-		transform: translateY(0px) rotate(0deg);
-	}
-	50% {
-		transform: translateY(-15px) rotate(3deg);
-	}
-}
-
 .dialog-content {
 	padding: 1.75rem 2rem;
-	background: linear-gradient(135deg, var(--background-color) 0%, color-mix(in srgb, var(--background-color) 98%, var(--primary-color)) 100%);
+	background: var(--background-color);
 	position: relative;
 	flex: 1;
 	overflow-y: auto;
 	min-height: 0;
-
-	&::before {
-		content: '';
-		position: absolute;
-		top: 0;
-		left: 0;
-		right: 0;
-		bottom: 0;
-		background: radial-gradient(circle at 20% 80%, color-mix(in srgb, var(--primary-color) 2%, transparent) 0%, transparent 50%);
-		pointer-events: none;
-	}
 
 	.config-intro {
 		margin-bottom: 1.75rem;
@@ -139,7 +82,6 @@
 			font-size: 0.95rem;
 			line-height: 1.6;
 			font-weight: 500;
-			letter-spacing: 0.01em;
 		}
 
 		.tool-description {
@@ -147,16 +89,10 @@
 			align-items: flex-start;
 			gap: 0.75rem;
 			padding: 1.25rem;
-			background: linear-gradient(135deg,
-				color-mix(in srgb, var(--primary-color) 6%, transparent) 0%,
-				color-mix(in srgb, var(--primary-color) 3%, transparent) 50%,
-				color-mix(in srgb, var(--primary-color) 1%, transparent) 100%
-			);
+			background: color-mix(in srgb, var(--primary-color) 6%, transparent);
 			border-radius: 12px;
 			border: 1px solid color-mix(in srgb, var(--primary-color) 15%, transparent);
 			position: relative;
-			backdrop-filter: blur(10px);
-			box-shadow: 0 2px 8px rgba(var(--primary-color-rgb), 0.06);
 
 			&::before {
 				content: '';
@@ -165,9 +101,8 @@
 				top: 0;
 				bottom: 0;
 				width: 4px;
-				background: linear-gradient(135deg, var(--primary-color) 0%, color-mix(in srgb, var(--primary-color) 80%, #667eea) 100%);
+				background: var(--primary-color);
 				border-radius: 0 2px 2px 0;
-				box-shadow: 0 0 6px rgba(var(--primary-color-rgb), 0.2);
 			}
 
 			.info-icon {
@@ -175,7 +110,6 @@
 				font-size: 1.1rem;
 				margin-top: 0.1rem;
 				flex-shrink: 0;
-				filter: drop-shadow(0 1px 2px rgba(var(--primary-color-rgb), 0.2));
 			}
 
 			p {
@@ -201,60 +135,40 @@
 			width: 100%;
 
 			.mat-mdc-form-field-wrapper {
-				background: linear-gradient(135deg, var(--background-color-secondary) 0%, color-mix(in srgb, var(--background-color-secondary) 98%, white) 100%);
+				background: var(--background-color-secondary);
 				border-radius: 10px;
-				transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-				border: 1px solid color-mix(in srgb, var(--border-color) 40%, transparent);
-				box-shadow: 0 1px 4px rgba(0, 0, 0, 0.02);
+				transition: all 0.3s ease;
+				border: 1px solid var(--border-color);
 
 				&:hover {
-					background: linear-gradient(135deg,
-						color-mix(in srgb, var(--primary-color) 3%, var(--background-color-secondary)) 0%,
-						color-mix(in srgb, var(--primary-color) 1%, var(--background-color-secondary)) 100%
-					);
-					border-color: color-mix(in srgb, var(--primary-color) 25%, transparent);
-					box-shadow: 0 2px 8px rgba(var(--primary-color-rgb), 0.06);
+					background: color-mix(in srgb, var(--primary-color) 3%, var(--background-color-secondary));
+					border-color: var(--primary-color);
 					transform: translateY(-1px);
 				}
 			}
 
 			&.mat-focused .mat-mdc-form-field-wrapper {
-				background: linear-gradient(135deg,
-					color-mix(in srgb, var(--primary-color) 4%, var(--background-color-secondary)) 0%,
-					color-mix(in srgb, var(--primary-color) 2%, var(--background-color-secondary)) 100%
-				);
+				background: color-mix(in srgb, var(--primary-color) 4%, var(--background-color-secondary));
 				border-color: var(--primary-color);
-				box-shadow: 0 0 0 2px color-mix(in srgb, var(--primary-color) 12%, transparent),
-							0 4px 12px rgba(var(--primary-color-rgb), 0.1);
+				box-shadow: 0 0 0 2px color-mix(in srgb, var(--primary-color) 12%, transparent);
 				transform: translateY(-1px);
 			}
 
-			.mat-mdc-form-field-outline {
-				border-radius: 10px;
-			}
-
-			.mat-mdc-form-field-label {
-				font-weight: 500;
-				letter-spacing: 0.01em;
-			}
-
-			.mat-mdc-text-field-wrapper {
-				border-radius: 10px;
-			}
+			.mat-mdc-form-field-outline { border-radius: 10px; }
+			.mat-mdc-form-field-label { font-weight: 500; }
+			.mat-mdc-text-field-wrapper { border-radius: 10px; }
 		}
 
 		.required-indicator {
 			color: #ef4444;
 			font-weight: 700;
 			margin-left: 2px;
-			text-shadow: 0 1px 2px rgba(239, 68, 68, 0.2);
 		}
 
 		.credential-icon {
 			color: var(--text-color-secondary);
 			opacity: 0.8;
 			transition: all 0.2s ease;
-
 			&:hover {
 				opacity: 1;
 				color: var(--primary-color);
@@ -272,7 +186,6 @@
 			font-size: 0.8rem;
 			color: #ef4444;
 			font-weight: 500;
-			text-shadow: 0 1px 2px rgba(239, 68, 68, 0.1);
 		}
 	}
 }
@@ -284,34 +197,16 @@
 	justify-content: center;
 	padding: 2.5rem 2rem;
 	text-align: center;
-	background: linear-gradient(135deg,
-		color-mix(in srgb, var(--accent-color-success) 6%, transparent) 0%,
-		color-mix(in srgb, var(--accent-color-success) 3%, transparent) 50%,
-		color-mix(in srgb, var(--accent-color-success) 1%, transparent) 100%
-	);
+	background: color-mix(in srgb, var(--accent-color-success) 6%, transparent);
 	border-radius: 16px;
 	border: 1px solid color-mix(in srgb, var(--accent-color-success) 15%, transparent);
 	position: relative;
 	overflow: hidden;
-	backdrop-filter: blur(10px);
-	box-shadow: 0 4px 16px rgba(34, 197, 94, 0.08);
-
-	&::before {
-		content: '';
-		position: absolute;
-		top: -50%;
-		left: -50%;
-		width: 200%;
-		height: 200%;
-		background: radial-gradient(circle, color-mix(in srgb, var(--accent-color-success) 3%, transparent) 0%, transparent 70%);
-		animation: rotate 20s linear infinite;
-	}
 
 	.success-icon {
 		font-size: 3rem;
 		color: var(--accent-color-success);
 		margin-bottom: 1.25rem;
-		filter: drop-shadow(0 4px 8px rgba(34, 197, 94, 0.2));
 		animation: bounce 2s ease-in-out infinite;
 		position: relative;
 		z-index: 1;
@@ -325,47 +220,21 @@
 		line-height: 1.5;
 		position: relative;
 		z-index: 1;
-		letter-spacing: 0.01em;
 	}
-}
-
-@keyframes rotate {
-	0% { transform: rotate(0deg); }
-	100% { transform: rotate(360deg); }
 }
 
 @keyframes bounce {
-	0%, 20%, 50%, 80%, 100% {
-		transform: translateY(0);
-	}
-	40% {
-		transform: translateY(-8px);
-	}
-	60% {
-		transform: translateY(-4px);
-	}
+	0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+	40% { transform: translateY(-8px); }
+	60% { transform: translateY(-4px); }
 }
 
 .dialog-actions {
 	padding: 1.5rem 2rem 2rem 2rem;
-	background: linear-gradient(135deg, var(--background-color) 0%, color-mix(in srgb, var(--background-color) 98%, var(--primary-color)) 100%);
-	border-top: 1px solid color-mix(in srgb, var(--border-color) 25%, transparent);
+	background: var(--background-color);
+	border-top: 1px solid var(--border-color);
 	position: relative;
 	flex-shrink: 0;
-
-	&::before {
-		content: '';
-		position: absolute;
-		top: 0;
-		left: 2rem;
-		right: 2rem;
-		height: 1px;
-		background: linear-gradient(90deg,
-			transparent 0%,
-			color-mix(in srgb, var(--primary-color) 15%, transparent) 50%,
-			transparent 100%
-		);
-	}
 
 	.action-buttons {
 		display: flex;
@@ -381,27 +250,11 @@
 			border-radius: 10px;
 			font-weight: 600;
 			font-size: 0.9rem;
-			transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+			transition: all 0.3s ease;
 			min-width: 110px;
 			justify-content: center;
-			letter-spacing: 0.01em;
 			position: relative;
 			overflow: hidden;
-
-			&::before {
-				content: '';
-				position: absolute;
-				top: 0;
-				left: -100%;
-				width: 100%;
-				height: 100%;
-				background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent);
-				transition: left 0.5s ease;
-			}
-
-			&:hover::before {
-				left: 100%;
-			}
 
 			mat-icon {
 				font-size: 1rem;
@@ -410,75 +263,51 @@
 				transition: transform 0.2s ease;
 			}
 
-			&:hover mat-icon {
-				transform: scale(1.05);
-			}
+			&:hover mat-icon { transform: scale(1.05); }
 
 			&.cancel-button {
 				color: var(--text-color-secondary);
-				background: linear-gradient(135deg, transparent 0%, color-mix(in srgb, var(--background-color-secondary) 40%, transparent) 100%);
-				border: 1px solid color-mix(in srgb, var(--border-color) 50%, transparent);
-				backdrop-filter: blur(10px);
-
+				background: var(--background-color-secondary);
+				border: 1px solid var(--border-color);
 				&:hover {
-					background: linear-gradient(135deg, var(--background-color-secondary) 0%, color-mix(in srgb, var(--background-color-secondary) 80%, white) 100%);
+					background: var(--background-color-secondary);
 					border-color: var(--border-color);
 					color: var(--text-color-primary);
 					transform: translateY(-1px);
-					box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
 				}
 			}
 
 			&.disconnect-button {
 				color: white;
-				background: linear-gradient(135deg, #ef4444 0%, #dc2626 50%, #b91c1c 100%);
+				background: #ef4444;
 				border: none;
-				box-shadow: 0 2px 8px rgba(239, 68, 68, 0.25);
-
 				&:hover {
-					background: linear-gradient(135deg, #f87171 0%, #ef4444 50%, #dc2626 100%);
+					background: #f87171;
 					transform: translateY(-2px);
-					box-shadow: 0 4px 16px rgba(239, 68, 68, 0.3);
 				}
-
-				&:active {
-					transform: translateY(0px);
-				}
+				&:active { transform: translateY(0px); }
 			}
 
 			&.save-button {
 				color: white;
-				background: linear-gradient(135deg, var(--primary-color) 0%, color-mix(in srgb, var(--primary-color) 85%, #667eea) 50%, color-mix(in srgb, var(--primary-color) 70%, #764ba2) 100%);
+				background: var(--primary-color);
 				border: none;
-				box-shadow: 0 3px 12px rgba(var(--primary-color-rgb), 0.3);
-				position: relative;
-
 				&:hover:not(:disabled) {
-					background: linear-gradient(135deg,
-						color-mix(in srgb, var(--primary-color) 105%, white) 0%,
-						color-mix(in srgb, var(--primary-color) 90%, #667eea) 50%,
-						color-mix(in srgb, var(--primary-color) 75%, #764ba2) 100%
-					);
+					background: color-mix(in srgb, var(--primary-color) 110%, white);
 					transform: translateY(-2px);
-					box-shadow: 0 6px 20px rgba(var(--primary-color-rgb), 0.35);
 				}
-
-				&:active:not(:disabled) {
-					transform: translateY(0px);
-				}
-
+				&:active:not(:disabled) { transform: translateY(0px); }
 				&:disabled {
 					opacity: 0.5;
 					cursor: not-allowed;
 					transform: none;
-					box-shadow: 0 1px 4px rgba(var(--primary-color-rgb), 0.15);
 				}
 			}
 		}
 	}
 }
 
-// Enhanced responsive design
+// Responsive design
 @media (max-width: 600px) {
 	.dialog-container {
 		width: 100%;
@@ -490,61 +319,37 @@
 	}
 
 	@keyframes dialogEnterMobile {
-		0% {
-			opacity: 0;
-			transform: translateY(100%);
-		}
-		100% {
-			opacity: 1;
-			transform: translateY(0);
-		}
+		0% { opacity: 0; transform: translateY(100%); }
+		100% { opacity: 1; transform: translateY(0); }
 	}
 
 	.dialog-header {
 		padding: 1.5rem 1.5rem 1.25rem 1.5rem;
-
 		.tool-info {
 			gap: 1rem;
-
 			.tool-icon {
 				font-size: 2rem;
 				width: 2rem;
 				height: 2rem;
 			}
-
-			.tool-details h1 {
-				font-size: 1.35rem;
-			}
-
-			.tool-details .tool-subtitle {
-				font-size: 0.85rem;
-			}
+			.tool-details h1 { font-size: 1.35rem; }
+			.tool-details .tool-subtitle { font-size: 0.85rem; }
 		}
 	}
 
 	.dialog-content {
 		padding: 1.5rem;
-
-		.config-intro .instruction-text {
-			font-size: 0.9rem;
-		}
-
-		.config-intro .tool-description {
-			padding: 1rem;
-		}
+		.config-intro .instruction-text { font-size: 0.9rem; }
+		.config-intro .tool-description { padding: 1rem; }
 	}
 
-	.config-form {
-		gap: 1rem;
-	}
+	.config-form { gap: 1rem; }
 
 	.dialog-actions {
 		padding: 1.25rem 1.5rem 1.75rem 1.5rem;
-
 		.action-buttons {
 			flex-direction: column-reverse;
 			gap: 0.75rem;
-
 			button {
 				width: 100%;
 				min-width: unset;
@@ -555,14 +360,10 @@
 
 	.no-config-message {
 		padding: 2rem 1.5rem;
-
 		.success-icon {
 			font-size: 2.5rem;
 			margin-bottom: 1rem;
 		}
-
-		p {
-			font-size: 0.95rem;
-		}
+		p { font-size: 0.95rem; }
 	}
 }
