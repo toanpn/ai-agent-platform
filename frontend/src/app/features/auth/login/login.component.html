@@ -40,7 +40,7 @@
 								type="email"
 								name="login-email"
 								[(ngModel)]="loginCredentials.email"
-								placeholder="your@email.com"
+								placeholder="your@kiotviet.com"
 								required
 								email
 								#loginEmail="ngModel"
@@ -109,7 +109,7 @@
 			<div *ngIf="activeTab === 'register'" class="form-content">
 				<form (ngSubmit)="register()" #registerForm="ngForm">
 					<div class="form-field">
-						<label for="register-fullname">Full name</label>
+						<label for="register-fullname">Full Name</label>
 						<div class="input-wrapper">
 							<i class="icon-user"></i>
 							<input
@@ -132,7 +132,7 @@
 								type="email"
 								name="email"
 								[(ngModel)]="registerCredentials.email"
-								placeholder="your@email.com"
+								placeholder="your@kiotviet.com"
 								required
 								email
 								#email="ngModel"

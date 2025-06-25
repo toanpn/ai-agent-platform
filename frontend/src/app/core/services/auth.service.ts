@@ -61,6 +61,7 @@ export class AuthService {
 		return this.api.post<LoginResponse>('/auth/register', userData).pipe(
 			tap((response) => {
 				this.handleAuthSuccess(response);
+				this.chatState.initialize();
 			}),
 		);
 	}
