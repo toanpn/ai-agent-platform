@@ -74,5 +74,19 @@
       "model_name": "gemini-2.0-flash",
       "temperature": 0.2
     }
+  },
+  {
+    "agent_name": "Confluence_Agent",
+    "description": "Handles all interactions with Confluence. Use this agent to search, create, and update Confluence pages. It can retrieve page content and manage collaborative documents.",
+    "tools": [
+      "confluence_page_search",
+      "confluence_get_page_content",
+      "confluence_create_page",
+      "confluence_update_page"
+    ],
+    "llm_config": {
+      "model_name": "gemini-2.0-flash",
+      "temperature": 0.2
+    }
   }
 ]

@@ -16,7 +16,7 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.prompts import ChatPromptTemplate
 
 # Import all available tools
-from toolkit import jira_tool, search_tool, utility_tools, rag_tool
+from toolkit import jira_tool, search_tool, utility_tools, rag_tool, confluence_tool
 
 class AgentManager:
     def __init__(self):
@@ -31,6 +31,12 @@ class AgentManager:
         # Register tools from jira_tool module
         tools_registry["jira_ticket_creator"] = jira_tool.jira_ticket_creator
         tools_registry["it_knowledge_base_search"] = jira_tool.it_knowledge_base_search
+        
+        # Register tools from confluence_tool module
+        tools_registry["confluence_page_search"] = confluence_tool.confluence_page_search
+        tools_registry["confluence_get_page_content"] = confluence_tool.confluence_get_page_content
+        tools_registry["confluence_create_page"] = confluence_tool.confluence_create_page
+        tools_registry["confluence_update_page"] = confluence_tool.confluence_update_page
         
         # Register tools from search_tool module  
         tools_registry["internet_search"] = search_tool.internet_search
