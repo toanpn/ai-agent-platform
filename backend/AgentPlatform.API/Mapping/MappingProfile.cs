@@ -56,7 +56,7 @@ namespace AgentPlatform.API.Mapping
                 .ForMember(dest => dest.ToolConfigs, opt => opt.MapFrom<ToolConfigsValueResolver>())
                 .ForMember(dest => dest.LlmConfig, opt => opt.MapFrom(src => 
                     src.LlmModelName != null || src.LlmTemperature != null 
-                        ? new LlmConfigDto { ModelName = src.LlmModelName, Temperature = src.LlmTemperature }
+                        ? new AgentJsonLlmConfigDto { ModelName = src.LlmModelName, Temperature = src.LlmTemperature }
                         : null));
         }
     }

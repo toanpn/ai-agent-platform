@@ -3,16 +3,16 @@
     "agent_name": "HR_Agent",
     "description": "Specialized agent for HR support tasks including knowledge base search and Google search.",
     "tools": [
-      "tìm_kiếm_google",
-      "tìm_kiếm_tri_thức"
+      "google_search_tool",
+      "knowledge_search_tool"
     ],
     "tool_configs": {
-      "tìm_kiếm_google": {
+      "google_search_tool": {
         "google_api_key": "AIzaSyB3dGLjXqjb9_1hIFt4RxKctqf2GA3VZ5E",
         "google_cse_id": "f18557e4b4de94ffe",
         "num_results": 5
       },
-      "tìm_kiếm_tri_thức": {
+      "knowledge_search_tool": {
         "max_results": 3
       }
     },
@@ -25,26 +25,26 @@
     "agent_name": "PE_Agent",
     "description": "Specialized agent for PE support tasks including JIRA issue management, knowledge base search, Gmail communication, and Google search.",
     "tools": [
-      "jira",
-      "gmail",
-      "tìm_kiếm_google",
-      "tìm_kiếm_tri_thức"
+      "jira_tool",
+      "gmail_tool",
+      "google_search_tool",
+      "knowledge_search_tool"
     ],
     "tool_configs": {
-      "jira": {
+      "jira_tool": {
         "jira_base_url": "https://your-domain.atlassian.net",
         "jira_username": "your_email@company.com",
         "jira_api_token": "your_jira_api_token_here"
       },
-      "gmail": {
+      "gmail_tool": {
         "gmail_credentials_path": "/path/to/gmail/credentials.json"
       },
-      "tìm_kiếm_google": {
+      "google_search_tool": {
         "google_api_key": "AIzaSyB3dGLjXqjb9_1hIFt4RxKctqf2GA3VZ5E",
         "google_cse_id": "f18557e4b4de94ffe",
         "num_results": 5
       },
-      "tìm_kiếm_tri_thức": {
+      "knowledge_search_tool": {
         "max_results": 5
       }
     },

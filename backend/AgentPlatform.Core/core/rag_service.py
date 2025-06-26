@@ -143,7 +143,7 @@ class RAGService:
     def __init__(self, 
                  collection_name: str = "agent_knowledge_base",
                  embedding_model: str = "text-multilingual-embedding-002",
-                 persist_directory: str = "./chroma_db"):
+                 persist_directory: str = "/app/db"):
         """
         Initialize RAG service.
         

@@ -67,6 +67,16 @@ namespace AgentPlatform.API.DTOs
 
     public class LlmConfigDto
     {
+        [JsonPropertyName("modelName")]
+        public string? ModelName { get; set; }
+        
+        [JsonPropertyName("temperature")]
+        public double? Temperature { get; set; }
+    }
+
+    // LLM configuration for agents.json file synchronization (Python backend format)
+    public class AgentJsonLlmConfigDto
+    {
         [JsonPropertyName("model_name")]
         public string? ModelName { get; set; }
         
@@ -90,7 +100,7 @@ namespace AgentPlatform.API.DTOs
         public object? ToolConfigs { get; set; }
         
         [JsonPropertyName("llm_config")]
-        public LlmConfigDto? LlmConfig { get; set; }
+        public AgentJsonLlmConfigDto? LlmConfig { get; set; }
     }
 
     public class AgentFileDto

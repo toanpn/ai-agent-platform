@@ -301,32 +301,28 @@ class DynamicToolManager:
             List[BaseTool]: List of configured tools for the agent
         """
         tools = []
-        tool_names = agent_config.get("tools", [])
+        tool_ids = agent_config.get("tools", [])
         tool_configs = agent_config.get("tool_configs", {})
         
-        for tool_name in tool_names:
+        for tool_id in tool_ids:
             try:
-                # Find the tool ID by name
-                tool_id = None
-                for tool_config in self.tools_config:
-                    if tool_config.get("name") == tool_name:
-                        tool_id = tool_config.get("id")
-                        break
+                # Get tool configuration by ID
+                tool_config = self.get_tool_config(tool_id)
                 
-                if not tool_id:
-                    print(f"Warning: Tool '{tool_name}' not found in tools configuration")
+                if not tool_config:
+                    print(f"Warning: Tool '{tool_id}' not found in tools configuration")
                     continue
                 
-                # Get agent-specific configuration for this tool
-                agent_tool_config = tool_configs.get(tool_name, {})
+                # Get agent-specific configuration for this tool (using tool_id as key)
+                agent_tool_config = tool_configs.get(tool_id, {})
                 
                 # Create the dynamic tool
                 tool_instance = self.create_dynamic_tool(tool_id, agent_tool_config)
                 tools.append(tool_instance)
-                print(f"✓ Successfully created dynamic tool: {tool_name}")
+                print(f"✓ Successfully created dynamic tool: {tool_id} ({tool_config.get('name', 'unknown')})")
                 
             except Exception as e:
-                print(f"✗ Failed to create tool '{tool_name}': {e}")
+                print(f"✗ Failed to create tool '{tool_id}': {e}")
         
         return tools
     
