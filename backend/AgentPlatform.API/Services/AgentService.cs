@@ -253,6 +253,87 @@ namespace AgentPlatform.API.Services
             }
         }
 
+        public async Task SyncAgentsFromJsonAsync()
+        {
+            try
+            {
+                // Check if agents.json file exists
+                if (!File.Exists(_agentsJsonPath))
+                {
+                    throw new FileNotFoundException($"agents.json file not found at path: {_agentsJsonPath}");
+                }
+
+                // Read and deserialize agents.json
+                var jsonContent = await File.ReadAllTextAsync(_agentsJsonPath);
+                var agentJsonList = JsonSerializer.Deserialize<List<AgentJsonDto>>(jsonContent);
+
+                if (agentJsonList == null || !agentJsonList.Any())
+                {
+                    return;
+                }
+
+                // Get existing agents from database
+                var existingAgents = await _context.Agents.ToListAsync();
+                var existingAgentNames = existingAgents.Select(a => a.Name).ToHashSet();
+
+                // Process each agent from JSON
+                foreach (var agentJson in agentJsonList)
+                {
+                    if (string.IsNullOrEmpty(agentJson.AgentName))
+                        continue;
+
+                    // Check if agent already exists
+                    var existingAgent = existingAgents.FirstOrDefault(a => a.Name == agentJson.AgentName);
+
+                    if (existingAgent != null)
+                    {
+                        // Update existing agent
+                        existingAgent.Description = agentJson.Description;
+                        existingAgent.ToolsArray = agentJson.Tools ?? Array.Empty<string>();
+                        existingAgent.ToolConfigs = agentJson.ToolConfigs?.ToString();
+                        
+                        if (agentJson.LlmConfig != null)
+                        {
+                            existingAgent.LlmModelName = agentJson.LlmConfig.ModelName;
+                            existingAgent.LlmTemperature = agentJson.LlmConfig.Temperature;
+                        }
+                        
+                        existingAgent.IsActive = true;
+                        existingAgent.UpdatedAt = DateTime.UtcNow;
+                    }
+                    else
+                    {
+                        // Create new agent
+                        var newAgent = new Agent
+                        {
+                            Name = agentJson.AgentName,
+                            Department = "Imported", // Default department for imported agents
+                            Description = agentJson.Description,
+                            Instructions = null, // Not available in JSON format
+                            ToolsArray = agentJson.Tools ?? Array.Empty<string>(),
+                            ToolConfigs = agentJson.ToolConfigs?.ToString(),
+                            LlmModelName = agentJson.LlmConfig?.ModelName,
+                            LlmTemperature = agentJson.LlmConfig?.Temperature,
+                            IsActive = true,
+                            CreatedAt = DateTime.UtcNow,
+                            CreatedById = 1 // Default system user ID - you may want to adjust this
+                        };
+
+                        _context.Agents.Add(newAgent);
+                    }
+                }
+
+                // Save all changes
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                // Log the error and re-throw for the controller to handle
+                Console.WriteLine($"Failed to sync agents from JSON: {ex.Message}");
+                throw new InvalidOperationException($"Failed to sync agents from JSON: {ex.Message}", ex);
+            }
+        }
+
         public async Task<List<string>?> GetAgentToolsAsync(int agentId, int userId)
         {
             var agent = await _context.Agents

@@ -466,9 +466,7 @@ export class AgentFormComponent implements OnInit {
 				// Find the tool by ID
 				const tool = this.tools.find(t => t.id === config.toolId);
 				if (tool) {
-					// Use the tool ID without the '_tool' suffix as the key
-					const toolKey = tool.id.replace('_tool', '');
-					toolConfigsDict[toolKey] = config.configuration;
+					toolConfigsDict[tool.id] = config.configuration;
 				}
 			});
 			toolConfigsJson = JSON.stringify(toolConfigsDict);
