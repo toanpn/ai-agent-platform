@@ -1,11 +1,22 @@
-import { Component, OnInit, DestroyRef, inject } from '@angular/core';
+import { AfterViewInit, Component, OnInit, DestroyRef, inject, ViewChild } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { CommonModule } from '@angular/common';
+import { CommonModule, NgClass } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
+import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { TranslateModule } from '@ngx-translate/core';
+import { MatButtonModule } from '@angular/material/button';
+import { MatCardModule } from '@angular/material/card';
+import { MatIconModule } from '@angular/material/icon';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
+import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { AgentService, Agent } from '../../../core/services/agent.service';
-import { BehaviorSubject, Subject, EMPTY, merge } from 'rxjs';
-import { switchMap, tap, catchError, exhaustMap } from 'rxjs/operators';
+import { BehaviorSubject, Subject, EMPTY, merge, combineLatest, Observable } from 'rxjs';
+import { switchMap, tap, catchError, exhaustMap, map, startWith, debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
 interface AgentListAction {
 	type: 'LOAD_AGENTS' | 'REFRESH_AGENTS' | 'DELETE_AGENT';
@@ -15,11 +26,28 @@ interface AgentListAction {
 @Component({
 	selector: 'app-agent-list',
 	standalone: true,
-	imports: [CommonModule, RouterModule, TranslateModule],
+	imports: [
+		CommonModule,
+		RouterModule,
+		TranslateModule,
+		NgClass,
+		ReactiveFormsModule,
+		// Angular Material Modules
+		MatButtonModule,
+		MatCardModule,
+		MatIconModule,
+		MatTooltipModule,
+		MatFormFieldModule,
+		MatInputModule,
+		MatSelectModule,
+		MatProgressSpinnerModule,
+		MatPaginatorModule,
+		MatButtonToggleModule,
+	],
 	templateUrl: './agent-list.component.html',
 	styleUrls: ['./agent-list.component.scss'],
 })
-export class AgentListComponent implements OnInit {
+export class AgentListComponent implements OnInit, AfterViewInit {
 	private agentService = inject(AgentService);
 	private router = inject(Router);
 	private destroyRef = inject(DestroyRef);
@@ -30,12 +58,43 @@ export class AgentListComponent implements OnInit {
 	private deleteAgentAction$ = new Subject<number>();
 
 	// State subjects
-	agents$ = new BehaviorSubject<Agent[]>([]);
+	private masterAgents$ = new BehaviorSubject<Agent[]>([]);
+	filteredAgents$!: Observable<Agent[]>;
+	paginatedAgents$!: Observable<Agent[]>;
 	loading$ = new BehaviorSubject<boolean>(false);
+	viewMode$ = new BehaviorSubject<'grid' | 'list'>('grid');
+	
+	// Filter controls
+	departmentFilterControl = new FormControl('all');
+	searchControl = new FormControl('');
+	
+	// Data for filters
+	departments = ["IT", "HR", "General", "AI Research", "OM", "CnB", "L&D", "IC", "FnB", "Retail", "Employee", "Booking", "KMS"];
+	statuses = ['Public', 'Private'];
+
+	@ViewChild(MatPaginator) paginator!: MatPaginator;
 
 	ngOnInit(): void {
+		this.loadViewMode();
 		this.setupActionHandlers();
+		this.setupFiltering();
+		this.paginatedAgents$ = this.filteredAgents$.pipe(map(agents => agents.slice(0, 6)));
 		this.dispatch({ type: 'LOAD_AGENTS' });
+	}
+
+	ngAfterViewInit(): void {
+		this.paginatedAgents$ = combineLatest([
+			this.filteredAgents$,
+			this.paginator.page.pipe(startWith({ pageIndex: 0, pageSize: 6, length: 0 })),
+		]).pipe(
+			map(([agents]) => {
+				// Since this runs in AfterViewInit, paginator is available
+				const startIndex = this.paginator.pageIndex * this.paginator.pageSize;
+				const endIndex = startIndex + this.paginator.pageSize;
+				return agents.slice(startIndex, endIndex);
+			}),
+			takeUntilDestroyed(this.destroyRef)
+		);
 	}
 
 	/**
@@ -49,7 +108,7 @@ export class AgentListComponent implements OnInit {
 				switchMap(() =>
 					this.agentService.getAgents().pipe(
 						tap((agents) => {
-							this.agents$.next(agents);
+							this.masterAgents$.next(agents);
 							this.loading$.next(false);
 						}),
 						catchError((error) => {
@@ -70,9 +129,9 @@ export class AgentListComponent implements OnInit {
 					this.agentService.deleteAgent(agentId).pipe(
 						tap(() => {
 							// Optimistically remove agent from local state
-							const currentAgents = this.agents$.value;
+							const currentAgents = this.masterAgents$.value;
 							const updatedAgents = currentAgents.filter(agent => agent.id !== agentId);
-							this.agents$.next(updatedAgents);
+							this.masterAgents$.next(updatedAgents);
 							console.log('Agent deleted successfully');
 						}),
 						catchError((error) => {
@@ -85,6 +144,47 @@ export class AgentListComponent implements OnInit {
 				takeUntilDestroyed(this.destroyRef)
 			)
 			.subscribe();
+	}
+
+	private loadViewMode(): void {
+		const savedViewMode = localStorage.getItem('agent_view_mode') as 'grid' | 'list';
+		if (savedViewMode) {
+			this.viewMode$.next(savedViewMode);
+		}
+	}
+
+	setViewMode(mode: 'grid' | 'list'): void {
+		this.viewMode$.next(mode);
+		localStorage.setItem('agent_view_mode', mode);
+	}
+
+	private setupFiltering(): void {
+		this.filteredAgents$ = combineLatest([
+			this.masterAgents$,
+			this.departmentFilterControl.valueChanges.pipe(startWith('all')),
+			this.searchControl.valueChanges.pipe(startWith(''), debounceTime(300), distinctUntilChanged()),
+		]).pipe(
+			map(([agents, department, searchTerm]) => {
+				let filteredAgents = agents;
+				const lowerCaseSearchTerm = searchTerm?.toLowerCase() ?? '';
+
+				// Filter by department
+				if (department && department !== 'all') {
+					filteredAgents = filteredAgents.filter(agent => agent.department === department);
+				}
+
+				// Filter by search term
+				if (lowerCaseSearchTerm) {
+					filteredAgents = filteredAgents.filter(agent =>
+						agent.name.toLowerCase().includes(lowerCaseSearchTerm) ||
+						(agent.description && agent.description.toLowerCase().includes(lowerCaseSearchTerm))
+					);
+				}
+
+				return filteredAgents;
+			}),
+			takeUntilDestroyed(this.destroyRef)
+		);
 	}
 
 	/**
@@ -134,5 +234,13 @@ export class AgentListComponent implements OnInit {
 		if (confirm('AGENTS.CONFIRM_DELETE_AGENT')) {
 			this.dispatch({ type: 'DELETE_AGENT', payload: id });
 		}
+	}
+
+	/**
+	 * Returns a CSS class based on the department name for styling the avatar.
+	 */
+	getDepartmentClass(department: string): string {
+		if (!department) return '';
+		return `department-${department.toLowerCase()}`;
 	}
 }
