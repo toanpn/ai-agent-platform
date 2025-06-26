@@ -127,6 +127,7 @@ namespace AgentPlatform.API.Services
             _context.ChatMessages.Add(agentMessage);
             await _context.SaveChangesAsync();
 
+            string? sessionTitle = null;
             // Check if session needs summarization
             var messageCount = await _context.ChatMessages.CountAsync(m => m.ChatSessionId == session.Id);
             if (messageCount > 0 && messageCount % 5 == 0)
@@ -141,6 +142,7 @@ namespace AgentPlatform.API.Services
                 if (!string.IsNullOrEmpty(summary))
                 {
                     session.Title = summary;
+                    sessionTitle = summary;
                     session.UpdatedAt = DateTime.UtcNow;
                     await _context.SaveChangesAsync();
                 }
@@ -152,6 +154,7 @@ namespace AgentPlatform.API.Services
                 Response = mainResponse, // Use the determined main response
                 AgentName = agentName, // Use the determined agent name
                 SessionId = session.Id,
+                SessionTitle = sessionTitle,
                 Timestamp = DateTime.UtcNow,
                 Success = runtimeResponse.Success,
                 Error = runtimeResponse.Error,

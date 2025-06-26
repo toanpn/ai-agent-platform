@@ -88,6 +88,7 @@ export interface ChatResponseDto {
 	response: string;
 	agentName: string;
 	sessionId: number;
+	sessionTitle?: string;
 	timestamp: string;
 	success: boolean;
 	error?: string;
