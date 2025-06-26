@@ -12,10 +12,27 @@ export interface User {
 	createdAt: Date;
 }
 
+export interface ToolParameter {
+	type?: string;
+	description?: string;
+	required?: boolean;
+	default?: any;
+	is_credential?: boolean;
+}
+
 export interface Tool {
-	id: number;
+	id: string;
 	name: string;
 	description?: string;
+	file?: string;
+	instruction?: string;
+	parameters?: { [key: string]: ToolParameter };
+}
+
+export interface ToolConfig {
+	toolId: string;
+	enabled: boolean;
+	configuration: { [key: string]: string };
 }
 
 export interface AgentFile {
@@ -51,6 +68,7 @@ export interface Agent {
 	instructions?: string;
 	llmConfig?: LlmConfig;
 	tools?: string[];
+	toolConfigs?: string; // JSON string from backend
 	isActive: boolean;
 	isMainRouter: boolean;
 	createdBy: User;
@@ -67,6 +85,7 @@ export interface CreateAgentRequest {
 	instructions?: string;
 	llmConfig: LlmConfig;
 	tools?: string[];
+	toolConfigs?: string; // JSON string sent to backend
 }
 
 export interface UpdateAgentRequest {
@@ -76,6 +95,7 @@ export interface UpdateAgentRequest {
 	instructions?: string;
 	llmConfig?: LlmConfig;
 	tools?: string[];
+	toolConfigs?: string; // JSON string sent to backend
 	isActive?: boolean;
 }
 

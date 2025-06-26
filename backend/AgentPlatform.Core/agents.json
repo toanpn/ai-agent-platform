@@ -1,75 +1,53 @@
 [
   {
-    "agent_name": "IT_Support_Agent",
-    "description": "Useful for resolving technical support requests, troubleshooting software and hardware issues, and handling Jira-related problems. The input must be a complete question.",
-    "tools": [
-      "jira_ticket_creator",
-      "it_knowledge_base_search",
-      "knowledge_lookup"
-    ],
-    "llm_config": {
-      "model_name": "gemini-2.0-flash",
-      "temperature": 0
-    }
-  },
-  {
     "agent_name": "HR_Agent",
-    "description": "Useful for questions about HR policies, leave procedures, and recruitment information. The input must be a complete question.",
+    "description": "Specialized agent for HR support tasks including knowledge base search and Google search.",
     "tools": [
-      "policy_document_search",
-      "leave_request_tool",
-      "knowledge_lookup"
+      "tìm_kiếm_google",
+      "tìm_kiếm_tri_thức"
     ],
-    "llm_config": {
-      "model_name": "gemini-2.0-flash",
-      "temperature": 0.7
-    }
-  },
-  {
-    "agent_name": "Knowledge_Agent",
-    "description": "Specializes in answering questions using uploaded documents and knowledge base. Perfect for queries about company policies, procedures, manuals, and any information stored in the knowledge base. This agent can access and search through all uploaded documents and web content.",
-    "tools": [
-      "knowledge_lookup",
-      "google_search"
-    ],
-    "llm_config": {
-      "model_name": "gemini-2.0-flash",
-      "temperature": 0.3
-    }
-  },
-  {
-    "agent_name": "Search_Agent",
-    "description": "Useful for searching for general information on the Internet using Google search. Use this agent when you need to find current information, news, guides, or answers to general questions that require web search.",
-    "tools": [
-      "google_search"
-    ],
-    "llm_config": {
-      "model_name": "gemini-2.0-flash",
-      "temperature": 0.5
-    }
-  },
-  {
-    "agent_name": "General_Utility_Agent",
-    "description": "A versatile agent that can handle various utility tasks including web searches, calendar checks, and weather information. Use this as a fallback when other agents don't match the request.",
-    "tools": [
-      "google_search",
-      "check_calendar",
-      "check_weather",
-      "knowledge_lookup"
-    ],
+    "tool_configs": {
+      "tìm_kiếm_google": {
+        "google_api_key": "AIzaSyB3dGLjXqjb9_1hIFt4RxKctqf2GA3VZ5E",
+        "google_cse_id": "f18557e4b4de94ffe",
+        "num_results": 5
+      },
+      "tìm_kiếm_tri_thức": {
+        "max_results": 3
+      }
+    },
     "llm_config": {
       "model_name": "gemini-2.0-flash",
       "temperature": 0.4
     }
   },
   {
-    "agent_name": "ADK Assistant",
-    "description": "An advanced AI assistant powered by Google ADK with multi-tool capabilities and workflow orchestration",
+    "agent_name": "PE_Agent",
+    "description": "Specialized agent for PE support tasks including JIRA issue management, knowledge base search, Gmail communication, and Google search.",
     "tools": [
-      "adk_search",
-      "adk_http_request",
-      "adk_workflow"
+      "jira",
+      "gmail",
+      "tìm_kiếm_google",
+      "tìm_kiếm_tri_thức"
     ],
+    "tool_configs": {
+      "jira": {
+        "jira_base_url": "https://your-domain.atlassian.net",
+        "jira_username": "your_email@company.com",
+        "jira_api_token": "your_jira_api_token_here"
+      },
+      "gmail": {
+        "gmail_credentials_path": "/path/to/gmail/credentials.json"
+      },
+      "tìm_kiếm_google": {
+        "google_api_key": "AIzaSyB3dGLjXqjb9_1hIFt4RxKctqf2GA3VZ5E",
+        "google_cse_id": "f18557e4b4de94ffe",
+        "num_results": 5
+      },
+      "tìm_kiếm_tri_thức": {
+        "max_results": 5
+      }
+    },
     "llm_config": {
       "model_name": "gemini-2.0-flash",
       "temperature": 0.2
