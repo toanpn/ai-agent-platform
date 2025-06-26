@@ -248,6 +248,62 @@
 			</div>
 		</div>
 
+		<!-- Agent Files Section -->
+		<div class="files-section" *ngIf="isEditMode">
+			<h2>{{ 'AGENTS.FILES.TITLE' | translate }}</h2>
+			<div class="file-upload-area">
+				<input
+					type="file"
+					(change)="onFileSelected($event)"
+					#fileInput
+					style="display: none"
+					id="file-upload-input"
+				/>
+				<button *ngIf="!selectedFile" type="button" mat-stroked-button color="primary" (click)="fileInput.click()">
+					<mat-icon>attach_file</mat-icon>
+					{{ 'AGENTS.FILES.SELECT_FILE' | translate }}
+				</button>
+			</div>
+			<!-- Display for the newly selected file -->
+			<div *ngIf="selectedFile" class="selected-file-display">
+				<mat-icon class="file-icon">insert_drive_file</mat-icon>
+				<span class="file-name" [title]="selectedFile.name">{{ selectedFile.name }}</span>
+				<span class="file-size">({{ selectedFile.size | number }} bytes)</span>
+				<button
+					mat-icon-button
+					color="warn"
+					type="button"
+					(click)="removeSelectedFile(fileInput)"
+					[matTooltip]="'AGENTS.FILES.REMOVE_SELECTED' | translate"
+					[attr.aria-label]="'AGENTS.FILES.REMOVE_SELECTED' | translate"
+				>
+					<mat-icon>close</mat-icon>
+				</button>
+			</div>
+
+			<div class="file-list" *ngIf="agentFiles.length > 0">
+				<mat-list>
+					<mat-list-item *ngFor="let file of agentFiles">
+						<mat-icon matListItemIcon>description</mat-icon>
+						<div matListItemTitle>{{ file.fileName }}</div>
+						<div matListItemLine>{{ file.fileSize | number }} bytes</div>
+						<button
+							mat-icon-button
+							color="warn"
+							type="button"
+							(click)="deleteFile(file.id)"
+							[matTooltip]="'AGENTS.FILES.DELETE' | translate"
+						>
+							<mat-icon>delete</mat-icon>
+						</button>
+					</mat-list-item>
+				</mat-list>
+			</div>
+			<div class="empty-state" *ngIf="agentFiles.length === 0 && !selectedFile">
+				<p>{{ 'AGENTS.FILES.NO_FILES' | translate }}</p>
+			</div>
+		</div>
+
 		<div class="form-actions">
 			<button type="button" class="cancel-button" (click)="cancel()">{{ 'COMMON.CANCEL' | translate }}</button>
 			<button type="submit" class="save-button" [disabled]="agentForm.invalid || loading">

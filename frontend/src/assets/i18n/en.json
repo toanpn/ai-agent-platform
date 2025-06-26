@@ -182,7 +182,28 @@
     "DESCRIPTION_MAX_LENGTH": "Description cannot exceed 500 characters",
     "INSTRUCTIONS_MAX_LENGTH": "Instructions cannot exceed 1000 characters",
     "FUNCTIONS": "Functions",
-    "FILES": "Files",
+    "FILES": {
+      "TITLE": "Agent Files",
+      "SELECT_FILE": "Select File",
+      "UPLOAD": "Upload",
+      "SELECTED": "Selected",
+      "DELETE": "Delete file",
+      "NO_FILES": "No files have been uploaded for this agent yet.",
+      "UPLOAD_SUCCESS": "File uploaded successfully.",
+      "UPLOAD_ERROR": "Failed to upload file. Please try again.",
+      "DELETE_SUCCESS": "File deleted successfully.",
+      "DELETE_ERROR": "Failed to delete file. Please try again.",
+      "DELETE_CONFIRM_TITLE": "Confirm Deletion",
+      "DELETE_CONFIRM_TEXT": "Are you sure you want to delete this file? This action cannot be undone.",
+      "REMOVE_SELECTED": "Remove selected file",
+      "UPLOADING": "Uploading...",
+      "UPLOAD_FILES": "Upload Files",
+      "UPLOAD_TITLE": "Upload Documents",
+      "DRAG_AND_DROP": "Drag files here or click to browse",
+      "SUPPORTED_FORMATS": "Supported formats: PDF, DOC, DOCX, XLS, XLSX, PPT, TXT, CSV, Images, Code files",
+      "SIZE_LIMIT": "Max 50MB per file, 500MB total",
+      "BROWSE": "Browse Files"
+    },
     "CREATED_BY": "Created by",
     "LAST_UPDATED": "Last Updated",
     "MAIN_ROUTER": "Main Router",
@@ -242,7 +263,9 @@
       "TEMP_TOOLTIP_2": "Balanced between accuracy and creativity",
       "TEMP_TOOLTIP_3": "More creative, more diverse output",
       "TEMP_TOOLTIP_4": "Highly creative, high randomness, less predictable"
-    }
+    },
+    "BASIC_INFO": "Basic Information",
+    "TOOL_INTEGRATION": "Tool Integration"
   },
   "FILES": {
     "FILES": "Files",
@@ -265,7 +288,17 @@
     "UNSUPPORTED_FILE_TYPE": "Unsupported file type",
     "DRAG_AND_DROP": "Drag and drop files here, or click to select",
     "SELECT_FILES": "Select Files",
-    "TITLE": "Files"
+    "TITLE": "Files",
+    "SELECT_FILE": "Select File to Upload",
+    "SELECTED": "Selected",
+    "REMOVE_SELECTED": "Remove selected file",
+    "UPLOADING": "Uploading...",
+    "UPLOAD_SUCCESS": "File uploaded successfully.",
+    "UPLOAD_TITLE": "Upload Documents",
+    "DRAG_AND_DROP": "Drag files here or click to browse",
+    "SUPPORTED_FORMATS": "Supported formats: PDF, DOC, DOCX, XLS, XLSX, PPT, TXT, CSV, Images, Code files",
+    "SIZE_LIMIT": "Max 50MB per file, 500MB total",
+    "BROWSE": "Browse Files"
   },
   "NAVIGATION": {
     "HOME": "Home",

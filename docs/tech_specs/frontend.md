@@ -63,6 +63,7 @@ The project will be organized into feature modules to ensure a clean and scalabl
 │   │   │       ├── auth.service.ts
 │   │   │       ├── chat.service.ts
 │   │   │       ├── agent.service.ts
+│   │   │       ├── file.service.ts
 │   │   │       ├── hashbrown.service.ts
 │   │   │       ├── notification.service.ts
 │   │   │       ├── storage.service.ts
@@ -147,6 +148,12 @@ The application will be broken down into the following key components, aligning 
         -   Supports multiple tool selection with tool descriptions
         -   Integrates with form validation and submission
         -   Maps existing agent tools when editing an agent
+    -   **File Management:** The `AgentFormComponent` (in edit mode) allows for managing files associated with an agent:
+        -   Lists existing files with their name and size.
+        -   Provides a button to delete existing files. Deletions are queued and executed only upon saving the agent.
+        -   Allows a new file to be selected for upload.
+        -   Displays the selected file's name and size with an option to remove/cancel the selection before uploading.
+        -   Uploads the new file and processes deletions concurrently with the agent update when the form is saved.
     -   **Department Field**: In the agent form, the `Department` field is a dropdown (select box) with a fixed, client-side list of department options. This ensures data consistency for agent categorization.
 
 ## 6. Internationalization (i18n) Strategy
@@ -190,6 +197,9 @@ All communication with the backend will be centralized through the `AgentPlatfor
     -   `PUT /agents/{id}` - Update existing agent (includes Tools field)
     -   `DELETE /agents/{id}` - Delete agent
     -   `GET /tools` - Fetch available tools for selection
+-   **`FileService`**: Handles all agent-specific file operations:
+    -   `POST /api/file/upload/{agentId}` - Upload a new file for an agent.
+    -   `DELETE /api/file/{fileId}` - Delete an existing file.
 
 ### Data Flow Example: Creating an Agent with Tools
 
@@ -220,6 +230,11 @@ All communication with the backend will be centralized through the `AgentPlatfor
     -   Proper error handling and loading states for tools API calls.
     -   Integration with agent creation and editing workflows.
     -   Support for empty tool selection (sends empty array).
+-   **Agent File Management:**
+    -   In the "Edit Agent" screen, users can view a list of associated files.
+    -   Users can upload one new file per save operation. The UI shows the selected file and allows it to be removed before submission.
+    -   Users can queue existing files for deletion.
+    -   All file operations (upload, deletion) are executed atomically with the agent update via a `forkJoin` when the user saves the changes, ensuring data consistency.
 -   **Internationalization:**
     -   Vietnamese as the default language with English support.
     -   Language selector in the application toolbar.

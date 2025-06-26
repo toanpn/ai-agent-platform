@@ -12,9 +12,8 @@ import { MatSliderModule } from '@angular/material/slider';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { Subject } from 'rxjs';
+import { Subject, of, forkJoin } from 'rxjs';
 import { exhaustMap, tap, catchError, switchMap, finalize } from 'rxjs/operators';
-import { of } from 'rxjs';
 import {
 	AgentService,
 	CreateAgentRequest,
@@ -22,13 +21,24 @@ import {
 	Tool,
 	LlmConfig,
 	ToolConfig,
+	AgentFile,
 } from '../../../core/services/agent.service';
+import { FileService } from '../../../core/services/file.service';
 import { ChatService } from '../../../core/services/chat.service';
 import { NotificationService } from '../../../core/services/notification.service';
 import {
 	ToolConfigDialogComponent,
 	ToolConfigDialogData,
 } from '../tool-config-dialog/tool-config-dialog.component';
+import { MatListModule } from '@angular/material/list';
+import { Observable } from 'rxjs';
+
+interface UpdateAgentPayload {
+	id: number;
+	request: UpdateAgentRequest;
+	fileToUpload: File | null;
+	filesToDelete: number[];
+}
 
 @Component({
 	selector: 'app-agent-form',
@@ -46,6 +56,7 @@ import {
 		TranslateModule,
 		MatSliderModule,
 		MatDialogModule,
+		MatListModule,
 	],
 	templateUrl: './agent-form.component.html',
 	styleUrls: ['./agent-form.component.scss'],
@@ -58,6 +69,12 @@ export class AgentFormComponent implements OnInit {
 	saveError = '';
 	isEnhancingDescription = false;
 	isEnhancingInstruction = false;
+
+	// Files
+	agentFiles: AgentFile[] = [];
+	fileUploadLoading = false;
+	selectedFile: File | null = null;
+	private filesToDelete: number[] = [];
 
 	// Departments
 	departments: string[] = [
@@ -87,6 +104,7 @@ export class AgentFormComponent implements OnInit {
 
 	private fb = inject(FormBuilder);
 	private agentService = inject(AgentService);
+	private fileService = inject(FileService);
 	private chatService = inject(ChatService);
 	private notificationService = inject(NotificationService);
 	private translateService = inject(TranslateService);
@@ -100,7 +118,7 @@ export class AgentFormComponent implements OnInit {
 	private enhanceDescriptionTrigger$ = new Subject<string>();
 	private enhanceInstructionTrigger$ = new Subject<string>();
 	private createAgentTrigger$ = new Subject<CreateAgentRequest>();
-	private updateAgentTrigger$ = new Subject<{ id: number; request: UpdateAgentRequest }>();
+	private updateAgentTrigger$ = new Subject<UpdateAgentPayload>();
 
 	ngOnInit(): void {
 		this.initForm();
@@ -251,20 +269,43 @@ export class AgentFormComponent implements OnInit {
 					this.loading = true;
 					this.saveError = '';
 				}),
-				exhaustMap(({ id, request }) =>
-					this.agentService.updateAgent(id, request).pipe(
+				exhaustMap(({ id, request, fileToUpload, filesToDelete }) => {
+					const operations: Observable<any>[] = [];
+
+					// Agent update is the primary operation
+					operations.push(this.agentService.updateAgent(id, request));
+
+					// Add file upload operation if a file is selected
+					if (fileToUpload) {
+						operations.push(this.fileService.uploadFile(id, fileToUpload));
+					}
+
+					// Add file deletion operations if any files are marked for deletion
+					if (filesToDelete.length > 0) {
+						const deleteOps = filesToDelete.map(fileId => this.fileService.deleteFile(fileId));
+						operations.push(...deleteOps);
+					}
+
+					// If there are no operations, return an observable of null
+					if (operations.length === 0) {
+						return of(null);
+					}
+
+					return forkJoin(operations).pipe(
 						tap(() => {
 							this.loading = false;
-							this.router.navigate(['/agents', id]);
+							this.filesToDelete = []; // Clear the deletion queue
+							this.selectedFile = null; // Clear the selected file
+							this.router.navigate(['/agents']);
 						}),
 						catchError((error) => {
-							console.error('Error updating agent:', error);
+							console.error('Error updating agent or handling files:', error);
 							this.saveError = 'AGENTS.FAILED_UPDATE_AGENT';
 							this.loading = false;
 							return of(null);
 						}),
-					),
-				),
+					)
+				}),
 				takeUntilDestroyed(this.destroyRef),
 			)
 			.subscribe();
@@ -274,9 +315,8 @@ export class AgentFormComponent implements OnInit {
 		this.loading = true;
 		this.agentService
 			.getAgent(agentId)
-			.pipe(takeUntilDestroyed(this.destroyRef))
-			.subscribe({
-				next: (agent) => {
+			.pipe(
+				tap((agent) => {
 					this.agentForm.patchValue({
 						name: agent.name,
 						department: agent.department,
@@ -300,14 +340,18 @@ export class AgentFormComponent implements OnInit {
 					} else {
 						this.toolConfigs = [];
 					}
+					this.agentFiles = agent.files || [];
 					this.loading = false;
-				},
-				error: (error) => {
+				}),
+				catchError((error) => {
 					console.error('Error loading agent:', error);
 					this.saveError = 'AGENTS.FAILED_LOAD_AGENT';
 					this.loading = false;
-				},
-			});
+					return of(null);
+				}),
+				takeUntilDestroyed(this.destroyRef),
+			)
+			.subscribe();
 	}
 
 	/**
@@ -370,7 +414,13 @@ export class AgentFormComponent implements OnInit {
 		};
 
 		if (this.isEditMode && this.agentId) {
-			this.updateAgentTrigger$.next({ id: this.agentId, request: request });
+			const payload: UpdateAgentPayload = {
+				id: this.agentId,
+				request: request as UpdateAgentRequest,
+				fileToUpload: this.selectedFile,
+				filesToDelete: this.filesToDelete,
+			};
+			this.updateAgentTrigger$.next(payload);
 		} else {
 			this.createAgentTrigger$.next(request as CreateAgentRequest);
 		}
@@ -507,11 +557,15 @@ export class AgentFormComponent implements OnInit {
 	 * Get tool type from file name for display
 	 */
 	getToolTypeFromFile(fileName: string): string {
-		if (fileName.includes('gmail')) return 'Email';
-		if (fileName.includes('google_search')) return 'Search';
-		if (fileName.includes('jira')) return 'Project Management';
-		if (fileName.includes('rag')) return 'Knowledge Base';
-		return 'Tool';
+		const extension = fileName.split('.').pop()?.toLowerCase();
+		switch (extension) {
+			case 'json':
+				return 'JSON';
+			case 'py':
+				return 'Python';
+			default:
+				return 'Tool';
+		}
 	}
 
 	/**
@@ -557,5 +611,28 @@ export class AgentFormComponent implements OnInit {
 			return 'AGENTS.LLM.TEMP_TOOLTIP_4';
 		}
 		return '';
+	}
+
+	onFileSelected(event: Event): void {
+		const input = event.target as HTMLInputElement;
+		if (input.files && input.files.length > 0) {
+			this.selectedFile = input.files[0];
+		}
+	}
+
+	/**
+	 * Clears the selected file and resets the file input.
+	 * @param fileInput The file input element to reset.
+	 */
+	removeSelectedFile(fileInput: HTMLInputElement): void {
+		this.selectedFile = null;
+		fileInput.value = ''; // Reset the file input to allow re-selection of the same file
+	}
+
+	deleteFile(fileId: number): void {
+		this.agentFiles = this.agentFiles.filter(file => file.id !== fileId);
+		if (!this.filesToDelete.includes(fileId)) {
+			this.filesToDelete.push(fileId);
+		}
 	}
 }

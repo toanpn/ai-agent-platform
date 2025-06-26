@@ -12,16 +12,16 @@
 		h1 {
 			font-size: var(--font-size-xl);
 			font-weight: 500;
-			margin: 0;
+		margin: 0;
 			color: var(--color-text);
-		}
 	}
+}
 
 	.loading-indicator {
 		text-align: center;
 		padding: 40px 0;
 		color: var(--color-text-tertiary);
-	}
+}
 
 	.error-message {
 		background-color: var(--color-error-extralight);
@@ -38,16 +38,16 @@
 			margin-bottom: var(--spacing-lg);
 
 			.field-header {
-				display: flex;
-				align-items: center;
+	display: flex;
+	align-items: center;
 				justify-content: space-between;
 				margin-bottom: var(--spacing-sm);
 
 				label {
 					margin: 0;
-					font-weight: 500;
+	font-weight: 500;
 					color: var(--color-text-secondary);
-				}
+}
 
 				.enhance-button {
 					color: var(--color-primary-600);
@@ -72,12 +72,12 @@
 				transition: border-color 0.3s, background-color 0.3s;
 				background-color: var(--color-surface-variant);
 				color: var(--color-text);
-				&:focus {
-					outline: none;
+	&:focus {
+		outline: none;
 					border-color: var(--color-primary);
 					background-color: var(--color-surface);
-				}
-			}
+	}
+}
 
 			textarea { resize: vertical; }
 			.full-width { width: 100%; }
@@ -90,12 +90,12 @@
 			}
 			.validation-error { color: var(--color-error-dark); }
 			.helper-text { color: var(--color-text-tertiary); }
-		}
+}
 
-		.form-actions {
-			display: flex;
-			justify-content: flex-end;
-			gap: 1rem;
+.form-actions {
+	display: flex;
+	justify-content: flex-end;
+	gap: 1rem;
 			margin-top: 2rem;
 
 			button {
@@ -104,16 +104,16 @@
 				font-size: var(--font-size-sm);
 				cursor: pointer;
 				transition: background-color 0.3s;
-			}
+}
 
-			.cancel-button {
+.cancel-button {
 				background-color: var(--color-background-alt);
 				border: 1px solid var(--color-border);
 				color: var(--color-text);
 				&:hover { background-color: var(--color-background-alt-hover); }
-			}
+}
 
-			.save-button {
+.save-button {
 				background-color: var(--color-primary);
 				border: none;
 				color: var(--color-text-on-primary);
@@ -122,8 +122,8 @@
 					background-color: var(--color-primary-disabled);
 					color: var(--color-text-secondary);
 					cursor: not-allowed;
-				}
-			}
+		}
+	}
 		}
 	}
 }
@@ -419,6 +419,69 @@
 			align-items: flex-start;
 			gap: 0.5rem;
 		}
+	}
+}
+
+.files-section {
+	h2 {
+		font-size: 1.1rem;
+		font-weight: 600;
+		color: var(--text-color-primary);
+		margin-bottom: 1rem;
+		border-top: 1px solid var(--border-color);
+		padding-top: 1.5rem;
+	}
+
+	.file-upload-area {
+		margin-bottom: 1rem;
+	}
+
+	.selected-file-display {
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+		padding: 0.75rem 1rem;
+		background-color: var(--background-color-secondary);
+		border: 1px solid var(--border-color);
+		border-radius: 8px;
+		margin-bottom: 1rem;
+
+		.file-icon {
+			color: var(--text-color-secondary);
+		}
+
+		.file-name {
+			flex-grow: 1;
+			font-weight: 500;
+			white-space: nowrap;
+			overflow: hidden;
+			text-overflow: ellipsis;
+		}
+
+		.file-size {
+			font-size: 0.8rem;
+			color: var(--text-color-secondary);
+		}
+
+		button {
+			margin-left: auto;
+		}
+	}
+
+	.file-list {
+		margin-top: 1rem;
+		border: 1px solid var(--border-color);
+		border-radius: 8px;
+		overflow: hidden;
+	}
+
+	.empty-state {
+		text-align: center;
+		padding: 2rem;
+		color: var(--text-color-secondary);
+		background-color: var(--background-color-secondary);
+		border: 1px dashed var(--border-color);
+		border-radius: 8px;
 	}
 }
 

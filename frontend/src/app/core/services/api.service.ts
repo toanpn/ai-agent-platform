@@ -38,8 +38,13 @@ export class ApiService {
 	 * @param body Request body
 	 */
 	post<T>(endpoint: string, body: any): Observable<T> {
-		return this.http.post<T>(`${this.apiUrl}${endpoint}`, JSON.stringify(body), {
-			headers: this.createHeaders(),
+		let headers = new HttpHeaders();
+		if (!(body instanceof FormData)) {
+			headers = headers.set('Content-Type', 'application/json');
+		}
+
+		return this.http.post<T>(`${this.apiUrl}${endpoint}`, body, {
+			headers: headers,
 		});
 	}
 
