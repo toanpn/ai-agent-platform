@@ -56,7 +56,7 @@
 			<div class="tools-section-header">
 				<label for="tools">{{ 'AGENTS.TOOLS' | translate }}</label>
 				<span class="tools-count" *ngIf="tools.length > 0">
-					({{ toolConfigs.length }}/{{ tools.length }} {{ 'AGENTS.CONNECTED' | translate | lowercase }})
+					({{ connectedTools.length }}/{{ tools.length }} {{ 'AGENTS.CONNECTED' | translate | lowercase }})
 				</span>
 			</div>
 			<div class="tools-description">
@@ -92,12 +92,14 @@
 						*ngFor="let tool of tools; trackBy: trackByToolId"
 						class="tool-card"
 						[class.connected]="isToolConnected(tool.id)"
+						[class.configured]="isToolConnected(tool.id) && isToolProperlyConfigured(tool)"
 						[class.has-config]="hasRequiredConfig(tool)"
 						tabindex="0"
 						role="button"
 						[attr.aria-pressed]="isToolConnected(tool.id)"
 						[attr.aria-label]="getToolCardAriaLabel(tool)"
 						(click)="toggleToolConnection(tool)"
+						(dblclick)="debugToolStatus(tool)"
 						(keydown.enter)="toggleToolConnection(tool)"
 						(keydown.space)="$event.preventDefault(); toggleToolConnection(tool)"
 					>
@@ -121,7 +123,7 @@
 								{{ tool.description }}
 							</p>
 
-							<div class="tool-requirements" *ngIf="hasRequiredConfig(tool)">
+							<div class="tool-requirements" *ngIf="shouldShowRequiresConfig(tool)">
 								<mat-icon class="config-icon">settings</mat-icon>
 								<span class="config-text">{{ 'AGENTS.REQUIRES_CONFIGURATION' | translate }}</span>
 							</div>
