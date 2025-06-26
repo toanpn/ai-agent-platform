@@ -114,7 +114,7 @@ export class AgentFormComponent implements OnInit {
 	private dialog = inject(MatDialog);
 	private cdr = inject(ChangeDetectorRef);
 
-	// Action subjects for declarative reactive patterns
+	// Action subjects for declarative patterns
 	private enhanceDescriptionTrigger$ = new Subject<string>();
 	private enhanceInstructionTrigger$ = new Subject<string>();
 	private createAgentTrigger$ = new Subject<CreateAgentRequest>();
@@ -126,6 +126,8 @@ export class AgentFormComponent implements OnInit {
 		this.setupEnhanceInstructionHandler();
 		this.setupCreateAgentHandler();
 		this.setupUpdateAgentHandler();
+
+		// Load tools first, then check if we need to load agent data
 		this.loadTools();
 
 		// Check if we're in edit mode based on the URL
@@ -135,7 +137,8 @@ export class AgentFormComponent implements OnInit {
 			if (!isNaN(agentId)) {
 				this.agentId = agentId;
 				this.isEditMode = true;
-				this.loadAgent(agentId);
+				// Load agent after tools are loaded
+				this.loadAgentAfterTools(agentId);
 			} else {
 				this.saveError = 'AGENTS.INVALID_AGENT_ID';
 			}
@@ -330,9 +333,40 @@ export class AgentFormComponent implements OnInit {
 					// Parse toolConfigs from JSON string if it exists
 					if (agent.toolConfigs) {
 						try {
-							this.toolConfigs = typeof agent.toolConfigs === 'string'
+							const parsedConfigs = typeof agent.toolConfigs === 'string'
 								? JSON.parse(agent.toolConfigs)
 								: agent.toolConfigs;
+
+							// Convert from dictionary format {toolKey: {config}} to array format
+							this.toolConfigs = [];
+							if (parsedConfigs && typeof parsedConfigs === 'object') {
+								// Handle both old array format and new dictionary format
+								if (Array.isArray(parsedConfigs)) {
+									// Old format - keep as is
+									this.toolConfigs = parsedConfigs;
+								} else {
+									// New dictionary format - convert to array
+									Object.entries(parsedConfigs).forEach(([toolKey, config]) => {
+										// Find the tool by name, ID, or a key that matches
+										let tool = this.tools.find(t =>
+											t.name === toolKey ||
+											t.id === toolKey ||
+											t.id.replace('_tool', '') === toolKey ||
+											t.name.toLowerCase() === toolKey.toLowerCase()
+										);
+
+										if (tool) {
+											this.toolConfigs.push({
+												toolId: tool.id,
+												enabled: true,
+												configuration: config as { [key: string]: string }
+											});
+										} else {
+											console.warn(`Tool not found for key: ${toolKey}`);
+										}
+									});
+								}
+							}
 						} catch (error) {
 							console.warn('Failed to parse toolConfigs:', error);
 							this.toolConfigs = [];
@@ -381,6 +415,28 @@ export class AgentFormComponent implements OnInit {
 			});
 	}
 
+	/**
+	 * Load agent data after tools have been loaded
+	 */
+	private loadAgentAfterTools(agentId: number): void {
+		// Wait for tools to be loaded before loading agent
+		const checkToolsLoaded = () => {
+			if (!this.loadingTools && this.tools.length > 0) {
+				this.loadAgent(agentId);
+			} else if (!this.loadingTools && this.tools.length === 0 && !this.toolsError) {
+				// No tools available, but still load agent
+				this.loadAgent(agentId);
+			} else if (!this.loadingTools && this.toolsError) {
+				// Tools failed to load, but still load agent
+				this.loadAgent(agentId);
+			} else {
+				// Still loading tools, check again in 100ms
+				setTimeout(checkToolsLoaded, 100);
+			}
+		};
+		checkToolsLoaded();
+	}
+
 	initForm(): void {
 		this.agentForm = this.fb.group({
 			name: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(50)]],
@@ -401,12 +457,27 @@ export class AgentFormComponent implements OnInit {
 
 		this.loading = true;
 		const formValue = this.agentForm.value;
+
+		// Convert toolConfigs array back to dictionary format for backend
+		let toolConfigsJson: string | undefined = undefined;
+		if (this.toolConfigs.length > 0) {
+			const toolConfigsDict: { [toolKey: string]: { [key: string]: string } } = {};
+			this.toolConfigs.forEach(config => {
+				// Find the tool by ID
+				const tool = this.tools.find(t => t.id === config.toolId);
+				if (tool) {
+					toolConfigsDict[tool.id] = config.configuration;
+				}
+			});
+			toolConfigsJson = JSON.stringify(toolConfigsDict);
+		}
+
 		const request: CreateAgentRequest | UpdateAgentRequest = {
 			name: formValue.name,
 			department: formValue.department,
 			description: formValue.description,
 			instructions: formValue.instructions,
-			toolConfigs: this.toolConfigs.length > 0 ? JSON.stringify(this.toolConfigs) : undefined,
+			toolConfigs: toolConfigsJson,
 			llmConfig: {
 				modelName: formValue.llmConfig.modelName,
 				temperature: formValue.llmConfig.temperature,

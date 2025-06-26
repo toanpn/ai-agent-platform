@@ -25,7 +25,7 @@ class AgentManager:
     def __init__(self):
         """Initialize the Agent Manager with dynamic tool manager."""
         self.dynamic_tool_manager = DynamicToolManager()
-        self.available_tools = [] # Keep for backward compatibility
+        self.available_tools = {} # Keep for backward compatibility - changed to dict
         self.sub_agents = []
     
     
@@ -56,16 +56,22 @@ class AgentManager:
         except Exception as e:
             print(f"Warning: Failed to create dynamic tools for agent '{agent_name}': {e}")
         
-        # Fallback to legacy tools if needed
-        for tool_name in tool_names:
-            if tool_name in self.available_tools:
+        # Fallback to legacy tools if needed (now using tool IDs)
+        for tool_id in tool_names:
+            if tool_id in self.available_tools:
                 # Check if we already have this tool from dynamic creation
                 existing_tool_names = [tool.name for tool in agent_tools]
+                # Get the tool name from the tool config to check against existing tools
+                tool_config = self.dynamic_tool_manager.get_tool_config(tool_id)
+                tool_name = tool_config.get("name") if tool_config else tool_id
                 if tool_name not in existing_tool_names:
-                    agent_tools.append(self.available_tools[tool_name])
-                    print(f"✓ Added legacy tool: {tool_name}")
-            elif tool_name not in [tool.name for tool in agent_tools]:
-                print(f"Warning: Tool '{tool_name}' not found in registry or dynamic tools for agent '{agent_name}'")
+                    agent_tools.append(self.available_tools[tool_id])
+                    print(f"✓ Added legacy tool: {tool_id}")
+            elif tool_id not in [tool.name for tool in agent_tools]:
+                # Check if tool exists in dynamic tools by ID
+                tool_exists = any(tool_id == tool_config.get("id") for tool_config in self.dynamic_tool_manager.tools_config)
+                if not tool_exists:
+                    print(f"Warning: Tool '{tool_id}' not found in registry or dynamic tools for agent '{agent_name}'")
         
         if not agent_tools:
             raise ValueError(f"No valid tools found for agent '{agent_name}'")
@@ -182,25 +188,25 @@ Each tool has specific parameters and capabilities. Use them appropriately based
             raise RuntimeError(f"Failed to load agents from {config_path}: {e}")
     
     def get_available_tools(self) -> List[str]:
-        """Get list of available tool names from dynamic tool manager."""
+        """Get list of available tool IDs from dynamic tool manager."""
         dynamic_tools = self.dynamic_tool_manager.get_available_tools()
-        tool_names = [tool["name"] for tool in dynamic_tools]
+        tool_ids = [tool["id"] for tool in dynamic_tools]
         
         # Add legacy tools
         legacy_tools = list(self.available_tools.keys())
-        tool_names.extend(legacy_tools)
+        tool_ids.extend(legacy_tools)
         
-        return tool_names
+        return tool_ids
     
     def get_available_tools_details(self) -> List[Dict[str, Any]]:
         """Get detailed information about available tools from dynamic tool manager."""
         dynamic_tools = self.dynamic_tool_manager.get_available_tools()
         
         # Add legacy tools
-        for tool_name, tool_obj in self.available_tools.items():
+        for tool_id, tool_obj in self.available_tools.items():
             dynamic_tools.append({
-                "id": f"legacy_{tool_name}",
-                "name": tool_name,
+                "id": tool_id,
+                "name": tool_id,  # For legacy tools, ID and name are the same
                 "description": getattr(tool_obj, 'description', 'No description available'),
                 "file": "legacy",
                 "parameters": {}
@@ -256,25 +262,21 @@ Each tool has specific parameters and capabilities. Use them appropriately based
         
         # Validate tools
         if "tools" in config:
-            available_tool_names = [tool["name"] for tool in self.dynamic_tool_manager.get_available_tools()]
-            available_tool_names.extend(self.available_tools.keys())
+            available_tool_ids = [tool["id"] for tool in self.dynamic_tool_manager.get_available_tools()]
+            available_tool_ids.extend(self.available_tools.keys())
             
             tool_configs = config.get("tool_configs", {})
             
-            for tool_name in config["tools"]:
+            for tool_id in config["tools"]:
                 tool_validation = {"valid": True, "errors": [], "warnings": []}
                 
                 # Check if tool exists
-                if tool_name not in available_tool_names:
-                    tool_validation["errors"].append(f"Tool '{tool_name}' not found in available tools")
+                if tool_id not in available_tool_ids:
+                    tool_validation["errors"].append(f"Tool '{tool_id}' not found in available tools")
                     tool_validation["valid"] = False
                 else:
                     # Validate tool configuration
-                    tool_config = None
-                    for t in self.dynamic_tool_manager.tools_config:
-                        if t.get("name") == tool_name:
-                            tool_config = t
-                            break
+                    tool_config = self.dynamic_tool_manager.get_tool_config(tool_id)
                     
                     if tool_config:
                         # Check required credential parameters
@@ -283,12 +285,12 @@ Each tool has specific parameters and capabilities. Use them appropriately based
                             if param_config.get("is_credential", False) and param_config.get("required", False):
                                 required_credentials.append(param_name)
                         
-                        agent_tool_config = tool_configs.get(tool_name, {})
+                        agent_tool_config = tool_configs.get(tool_id, {})
                         for cred in required_credentials:
                             if cred not in agent_tool_config:
-                                tool_validation["warnings"].append(f"Missing credential parameter '{cred}' for tool '{tool_name}'")
+                                tool_validation["warnings"].append(f"Missing credential parameter '{cred}' for tool '{tool_id}'")
                 
-                validation_results["tool_validation"][tool_name] = tool_validation
+                validation_results["tool_validation"][tool_id] = tool_validation
                 if not tool_validation["valid"]:
                     validation_results["valid"] = False
         

@@ -1,7 +1,7 @@
 [
   {
     "id": "knowledge_search_tool",
-    "name": "tìm_kiếm_tri_thức",
+    "name": "Tài liệu nội bộ",
     "description": "Công cụ tìm kiếm thông tin từ cơ sở tri thức của agent sử dụng RAG. Giúp tìm kiếm và truy xuất thông tin từ các tài liệu đã được tải lên và xử lý.",
     "file": "rag_tool.py",
     "instruction": "Use this tool when you need to search for relevant information from the agent's knowledge base. This tool uses RAG (Retrieval-Augmented Generation) to find and retrieve information from uploaded and processed documents.",
@@ -16,7 +16,7 @@
   },
   {
     "id": "google_search_tool",
-    "name": "tìm_kiếm_google",
+    "name": "Tìm kiếm Google",
     "description": "Công cụ tìm kiếm Google để tìm thông tin hiện tại trên internet và trả về các kết quả hàng đầu.",
     "file": "google_search_tool.py",
     "instruction": "Use this tool when you need to search for current information on the internet using Google search. Requires google_api_key and google_cse_id parameters.",
@@ -43,7 +43,7 @@
   },
   {
     "id": "gmail_tool",
-    "name": "gmail",
+    "name": "Gmail",
     "description": "Công cụ Gmail tích hợp cho quản lý email. Hỗ trợ tìm kiếm emails, gửi emails, lấy nội dung email cụ thể, và tạo draft emails.",
     "file": "gmail_tool.py",
     "instruction": "Use this unified Gmail tool for all Gmail operations including searching emails, sending emails, getting message details, and creating drafts. Uses action-based interface.",
@@ -58,7 +58,7 @@
   },
   {
     "id": "jira_tool",
-    "name": "jira",
+    "name": "JIRA",
     "description": "Công cụ JIRA tích hợp cho quản lý issues và projects. Hỗ trợ tạo issues, tìm kiếm bằng JQL, lấy chi tiết issues và quản lý projects.",
     "file": "jira_tool.py",
     "instruction": "Use this unified JIRA tool for all JIRA operations including creating issues, searching with JQL, getting issue details, and managing projects. Based on LangChain's JiraToolkit.",
