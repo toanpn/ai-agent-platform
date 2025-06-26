@@ -234,6 +234,10 @@ namespace AgentPlatform.API.Migrations
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
+                    b.Property<string>("Summary")
+                        .HasMaxLength(4000)
+                        .HasColumnType("nvarchar(4000)");
+
                     b.Property<string>("Title")
                         .HasColumnType("nvarchar(max)");
 

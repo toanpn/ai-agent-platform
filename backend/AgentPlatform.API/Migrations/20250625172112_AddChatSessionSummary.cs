@@ -10,32 +10,20 @@ namespace AgentPlatform.API.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropTable(
-                name: "Tools");
+            migrationBuilder.AddColumn<string>(
+                name: "Summary",
+                table: "ChatSessions",
+                type: "nvarchar(4000)",
+                maxLength: 4000,
+                nullable: true);
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.CreateTable(
-                name: "Tools",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Name = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Tools", x => x.Id);
-                });
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Tools_Name",
-                table: "Tools",
-                column: "Name",
-                unique: true);
+            migrationBuilder.DropColumn(
+                name: "Summary",
+                table: "ChatSessions");
         }
     }
 }
