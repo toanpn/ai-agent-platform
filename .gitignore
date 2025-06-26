@@ -341,3 +341,6 @@ deploy.sh
 
 # Deployment secrets
 .env.deploy
+
+# Frontend public folder
+!frontend/public/
