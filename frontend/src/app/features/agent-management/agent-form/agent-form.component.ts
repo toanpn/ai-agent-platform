@@ -98,6 +98,7 @@ export class AgentFormComponent implements OnInit {
 
 	// Tools related properties
 	tools: Tool[] = [];
+	connectedTools: string[] = []; // Track which tools are connected
 	loadingTools = false;
 	toolsError = '';
 	toolConfigs: ToolConfig[] = [];
@@ -146,8 +147,9 @@ export class AgentFormComponent implements OnInit {
 			// Set default values for new agent
 			this.agentForm.get('llmConfig.modelName')?.setValue(this.llmModels[0]);
 			this.agentForm.get('llmConfig.temperature')?.setValue(0.7);
-			// Initialize empty toolConfigs for new agents
+			// Initialize empty toolConfigs and connectedTools for new agents
 			this.toolConfigs = [];
+			this.connectedTools = [];
 		}
 	}
 
@@ -374,6 +376,8 @@ export class AgentFormComponent implements OnInit {
 					} else {
 						this.toolConfigs = [];
 					}
+					// Load connected tools array
+					this.connectedTools = agent.tools || [];
 					this.agentFiles = agent.files || [];
 					this.loading = false;
 				}),
@@ -477,6 +481,7 @@ export class AgentFormComponent implements OnInit {
 			department: formValue.department,
 			description: formValue.description,
 			instructions: formValue.instructions,
+			tools: this.connectedTools.length > 0 ? this.connectedTools : undefined,
 			toolConfigs: toolConfigsJson,
 			llmConfig: {
 				modelName: formValue.llmConfig.modelName,
@@ -536,20 +541,24 @@ export class AgentFormComponent implements OnInit {
 	}
 
 	isToolConnected(toolId: string): boolean {
-		const config = this.toolConfigs.find(c => c.toolId === toolId);
-		return !!config && config.enabled;
+		return this.connectedTools.includes(toolId);
 	}
 
 	toggleToolConnection(tool: Tool): void {
+		const isCurrentlyConnected = this.isToolConnected(tool.id);
 		const existingConfigIndex = this.toolConfigs.findIndex(c => c.toolId === tool.id);
 		const needsConfig = tool.parameters && Object.keys(tool.parameters).length > 0;
 
-		if (existingConfigIndex > -1) {
+		if (isCurrentlyConnected) {
 			// It's connected. If it needs config, open dialog to edit. Otherwise, just disconnect.
 			if (needsConfig) {
 				this.openToolConfigDialog(tool, true);
 			} else {
-				this.toolConfigs.splice(existingConfigIndex, 1);
+				// Disconnect: remove from both connectedTools and toolConfigs
+				this.connectedTools = this.connectedTools.filter(toolId => toolId !== tool.id);
+				if (existingConfigIndex > -1) {
+					this.toolConfigs.splice(existingConfigIndex, 1);
+				}
 			}
 		} else {
 			// Not connected, so let's connect it
@@ -557,6 +566,7 @@ export class AgentFormComponent implements OnInit {
 				this.openToolConfigDialog(tool, false);
 			} else {
 				// No config needed, just add it directly
+				this.connectedTools.push(tool.id);
 				this.toolConfigs.push({
 					toolId: tool.id,
 					enabled: true,
@@ -587,10 +597,17 @@ export class AgentFormComponent implements OnInit {
 
 			if (result) {
 				if (result === 'DELETE') {
+					// Disconnect: remove from both connectedTools and toolConfigs
+					this.connectedTools = this.connectedTools.filter(toolId => toolId !== tool.id);
 					if (existingConfigIndex > -1) {
 						this.toolConfigs.splice(existingConfigIndex, 1);
 					}
 				} else {
+					// Connect: add to connectedTools if not already there
+					if (!this.connectedTools.includes(tool.id)) {
+						this.connectedTools.push(tool.id);
+					}
+
 					const newConfig = {
 						toolId: tool.id,
 						enabled: true,
@@ -622,6 +639,72 @@ export class AgentFormComponent implements OnInit {
 	hasRequiredConfig(tool: Tool): boolean {
 		if (!tool.parameters) return false;
 		return Object.values(tool.parameters).some(param => param.required || param.is_credential);
+	}
+
+	/**
+	 * Check if a connected tool is properly configured (has all required parameters filled)
+	 */
+	isToolProperlyConfigured(tool: Tool): boolean {
+		if (!this.hasRequiredConfig(tool)) return true; // No config needed
+
+		const toolConfig = this.toolConfigs.find(c => c.toolId === tool.id);
+		if (!toolConfig) return false;
+
+		// Check if all required parameters are filled
+		const requiredParams = Object.entries(tool.parameters || {})
+			.filter(([_, param]) => param.required || param.is_credential)
+			.map(([key, _]) => key);
+
+		return requiredParams.every(paramKey =>
+			toolConfig.configuration[paramKey] &&
+			toolConfig.configuration[paramKey].trim() !== ''
+		);
+	}
+
+	/**
+	 * Determine whether to show "Requires configuration" text
+	 */
+	shouldShowRequiresConfig(tool: Tool): boolean {
+		// Don't show if tool doesn't need config
+		if (!this.hasRequiredConfig(tool)) return false;
+
+		// Don't show if tool is connected and properly configured
+		if (this.isToolConnected(tool.id) && this.isToolProperlyConfigured(tool)) return false;
+
+		// Show if tool needs config and either not connected or not properly configured
+		return true;
+	}
+
+	/**
+	 * Debug method to check tool configuration status
+	 */
+	debugToolStatus(tool: Tool): void {
+		console.log(`=== Debug for ${tool.name} (${tool.id}) ===`);
+		console.log('Is connected:', this.isToolConnected(tool.id));
+		console.log('Has required config:', this.hasRequiredConfig(tool));
+		console.log('Is properly configured:', this.isToolProperlyConfigured(tool));
+		console.log('Should show requires config:', this.shouldShowRequiresConfig(tool));
+
+		const toolConfig = this.toolConfigs.find(c => c.toolId === tool.id);
+		console.log('Tool config found:', !!toolConfig);
+		if (toolConfig) {
+			console.log('Configuration:', toolConfig.configuration);
+		}
+
+		if (tool.parameters) {
+			const requiredParams = Object.entries(tool.parameters)
+				.filter(([_, param]) => param.required || param.is_credential)
+				.map(([key, _]) => key);
+			console.log('Required parameters:', requiredParams);
+
+			if (toolConfig) {
+				requiredParams.forEach(param => {
+					const value = toolConfig.configuration[param];
+					console.log(`${param}: "${value}" (filled: ${!!(value && value.trim())})`);
+				});
+			}
+		}
+		console.log('=== End Debug ===');
 	}
 
 	/**
