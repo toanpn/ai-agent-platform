@@ -11,6 +11,7 @@ using FluentValidation;
 using System.Text;
 using Serilog;
 using AspNetCoreRateLimit;
+using Microsoft.AspNetCore.HttpOverrides;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -101,6 +102,18 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
+// Add Forwarded Headers configuration
+builder.Services.Configure<ForwardedHeadersOptions>(options =>
+{
+    options.ForwardedHeaders = ForwardedHeaders.All;
+    // It's crucial to specify the known proxies or networks.
+    // For containerized environments, this might not be a fixed IP.
+    // Clearing KnownProxies and KnownNetworks is a security risk if not properly managed.
+    // In a controlled Docker environment, this is often acceptable.
+    options.KnownProxies.Clear();
+    options.KnownNetworks.Clear();
+});
+
 // Add CORS
 builder.Services.AddCors(options =>
 {
@@ -121,6 +134,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseForwardedHeaders();
 app.UseMiddleware<ErrorHandlingMiddleware>();
 app.UseIpRateLimiting();
 app.UseCors();
