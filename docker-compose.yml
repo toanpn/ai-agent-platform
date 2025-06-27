@@ -91,7 +91,8 @@ services:
       - agentplatform-network
 
   certbot:
-    image: certbot/certbot
+    build:
+      context: ./certbot
     container_name: agentplatform-certbot
     volumes:
       - certbot_conf:/etc/letsencrypt
@@ -99,7 +100,6 @@ services:
     environment:
       - DOMAIN=kiotviet.space
       - EMAIL=admin@kiotviet.space
-    entrypoint: ["/certbot-entrypoint.sh"]
 
 volumes:
   sqlserver_data:

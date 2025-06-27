@@ -24,10 +24,8 @@ COPY --from=build /app/dist/chatbot-ui/browser /usr/share/nginx/html
 
 # openssl is no longer needed as we are using Certbot
 
-# Copy custom nginx configuration and certbot script
+# Copy custom nginx configuration
 COPY nginx.conf /etc/nginx/conf.d/default.conf
-COPY certbot-entrypoint.sh /certbot-entrypoint.sh
-RUN chmod +x /certbot-entrypoint.sh
 
 # Expose ports 80 and 443
 EXPOSE 80
