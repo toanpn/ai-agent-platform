@@ -1,12 +1,25 @@
-import { Component, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import {
+	Component,
+	OnDestroy,
+} from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { Router } from '@angular/router';
+
+import {
+	finalize,
+	Subscription,
+} from 'rxjs';
+
 import { TranslateModule } from '@ngx-translate/core';
-import { AuthService, LoginRequest, RegisterRequest } from '../../../core/services/auth.service';
+
+import {
+	AuthService,
+	LoginRequest,
+	RegisterRequest,
+} from '../../../core/services/auth.service';
 import { NotificationService } from '../../../core/services/notification.service';
-import { finalize, Subscription } from 'rxjs';
 
 /**
  * LoginComponent handles user authentication through a login form.
@@ -34,11 +47,11 @@ export class LoginComponent implements OnDestroy {
 
 	/** User credentials from the registration form */
 	registerCredentials: RegisterRequest = {
-		username: '',
 		email: '',
 		password: '',
 		firstName: '',
 		lastName: '',
+		registrationKey: '',
 	};
 
 	/** Error message to display in the UI */
@@ -149,11 +162,10 @@ export class LoginComponent implements OnDestroy {
 	 */
 	private validateRegisterForm(): boolean {
 		if (
-			!this.registerCredentials.username ||
 			!this.registerCredentials.email ||
 			!this.registerCredentials.password ||
 			!this.registerCredentials.firstName ||
-			!this.registerCredentials.lastName
+			!this.registerCredentials.registrationKey
 		) {
 			this.registerError = 'AUTH.FILL_ALL_FIELDS';
 			this.notificationService.showWarning('AUTH.FILL_ALL_FIELDS');

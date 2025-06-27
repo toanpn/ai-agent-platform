@@ -182,6 +182,21 @@
 						</div>
 					</div>
 
+					<div class="form-field">
+						<label for="register-key">Register Key</label>
+						<div class="input-wrapper">
+							<i class="icon-key"></i>
+							<input
+								id="register-key"
+								type="text"
+								name="register-key"
+								[(ngModel)]="registerCredentials.registrationKey"
+								placeholder="Enter your register key"
+								required
+							/>
+						</div>
+					</div>
+
 					<button
 						type="submit"
 						class="button-primary"

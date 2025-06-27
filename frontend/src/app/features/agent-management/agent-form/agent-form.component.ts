@@ -1,37 +1,70 @@
-import { Component, OnInit, DestroyRef, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatTooltipModule } from '@angular/material/tooltip';
-import { MatSelectModule } from '@angular/material/select';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatSliderModule } from '@angular/material/slider';
-import { MatDialog, MatDialogModule } from '@angular/material/dialog';
-import { TranslateModule, TranslateService } from '@ngx-translate/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { Subject, of, forkJoin } from 'rxjs';
-import { exhaustMap, tap, catchError, switchMap, finalize } from 'rxjs/operators';
 import {
+	ChangeDetectorRef,
+	Component,
+	DestroyRef,
+	inject,
+	OnInit,
+} from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import {
+	FormBuilder,
+	FormGroup,
+	ReactiveFormsModule,
+	Validators,
+} from '@angular/forms';
+import { MatButtonModule } from '@angular/material/button';
+import {
+	MatDialog,
+	MatDialogModule,
+} from '@angular/material/dialog';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
+import { MatListModule } from '@angular/material/list';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatSelectModule } from '@angular/material/select';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { MatSliderModule } from '@angular/material/slider';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import {
+	ActivatedRoute,
+	Router,
+	RouterModule,
+} from '@angular/router';
+
+import {
+	forkJoin,
+	Observable,
+	of,
+	Subject,
+} from 'rxjs';
+import {
+	catchError,
+	exhaustMap,
+	switchMap,
+	tap,
+} from 'rxjs/operators';
+
+import {
+	TranslateModule,
+	TranslateService,
+} from '@ngx-translate/core';
+
+import {
+	AgentFile,
 	AgentService,
 	CreateAgentRequest,
-	UpdateAgentRequest,
 	Tool,
-	LlmConfig,
 	ToolConfig,
-	AgentFile,
+	UpdateAgentRequest,
 } from '../../../core/services/agent.service';
-import { FileService } from '../../../core/services/file.service';
 import { ChatService } from '../../../core/services/chat.service';
+import { FileService } from '../../../core/services/file.service';
 import { NotificationService } from '../../../core/services/notification.service';
 import {
 	ToolConfigDialogComponent,
 	ToolConfigDialogData,
 } from '../tool-config-dialog/tool-config-dialog.component';
-import { MatListModule } from '@angular/material/list';
-import { Observable } from 'rxjs';
 
 interface UpdateAgentPayload {
 	id: number;
@@ -57,6 +90,7 @@ interface UpdateAgentPayload {
 		MatSliderModule,
 		MatDialogModule,
 		MatListModule,
+		MatSlideToggleModule,
 	],
 	templateUrl: './agent-form.component.html',
 	styleUrls: ['./agent-form.component.scss'],
@@ -329,6 +363,7 @@ export class AgentFormComponent implements OnInit {
 							modelName: agent.llmConfig?.modelName || this.llmModels[0],
 							temperature: agent.llmConfig?.temperature ?? 0.7,
 						},
+						isPublic: agent.isPublic,
 					});
 					// Parse toolConfigs from JSON string if it exists
 					if (agent.toolConfigs) {
@@ -447,6 +482,7 @@ export class AgentFormComponent implements OnInit {
 				modelName: ['', Validators.required],
 				temperature: [0.7, [Validators.required, Validators.min(0), Validators.max(1)]],
 			}),
+			isPublic: [false]
 		});
 	}
 

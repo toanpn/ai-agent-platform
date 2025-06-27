@@ -29,6 +29,9 @@ namespace AgentPlatform.API.DTOs
         public string LastName { get; set; } = string.Empty;
         
         public string? Department { get; set; }
+
+        [Required]
+        public string RegistrationKey { get; set; } = string.Empty;
     }
 
     public class AuthResponseDto

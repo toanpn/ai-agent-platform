@@ -181,6 +181,9 @@
     "DEPARTMENT_REQUIRED": "Department is required",
     "DESCRIPTION_MAX_LENGTH": "Description cannot exceed 500 characters",
     "INSTRUCTIONS_MAX_LENGTH": "Instructions cannot exceed 1000 characters",
+    "SETTINGS_TITLE": "Settings",
+    "IS_PUBLIC": "Public Agent",
+    "IS_PUBLIC_HELP": "Public agents can be used by anyone in the organization.",
     "FUNCTIONS": "Functions",
     "FILES": {
       "TITLE": "Agent Files",

@@ -181,6 +181,9 @@
     "DEPARTMENT_REQUIRED": "Phòng ban là bắt buộc",
     "DESCRIPTION_MAX_LENGTH": "Mô tả không được vượt quá 500 ký tự",
     "INSTRUCTIONS_MAX_LENGTH": "Hướng dẫn không được vượt quá 1000 ký tự",
+    "SETTINGS_TITLE": "Cài đặt",
+    "IS_PUBLIC": "Agent công khai",
+    "IS_PUBLIC_HELP": "Agent công khai có thể được sử dụng bởi bất kỳ ai trong tổ chức.",
     "FUNCTIONS": "Chức Năng",
     "FILES": {
       "TITLE": "Tệp của Agent",

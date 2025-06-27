@@ -30,7 +30,9 @@ namespace AgentPlatform.API.Models
         public bool IsActive { get; set; } = true;
         
         public bool IsMainRouter { get; set; } = false;
-        
+
+        public bool IsPublic { get; set; } = false;
+
         public int CreatedById { get; set; }
         
         [ForeignKey("CreatedById")]

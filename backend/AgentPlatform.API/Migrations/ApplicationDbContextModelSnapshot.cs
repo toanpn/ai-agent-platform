@@ -55,6 +55,11 @@ namespace AgentPlatform.API.Migrations
                     b.Property<bool>("IsMainRouter")
                         .HasColumnType("bit");
 
+                    b.Property<bool>("IsPublic")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
                     b.Property<string>("LlmModelName")
                         .HasColumnType("nvarchar(max)");
 

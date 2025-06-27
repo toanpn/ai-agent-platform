@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AgentPlatform.API.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250626165608_AddLlmFieldsToAgent")]
-    partial class AddLlmFieldsToAgent
+    [Migration("20250627000326_AddIsPublicToAgent")]
+    partial class AddIsPublicToAgent
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -57,6 +57,11 @@ namespace AgentPlatform.API.Migrations
 
                     b.Property<bool>("IsMainRouter")
                         .HasColumnType("bit");
+
+                    b.Property<bool>("IsPublic")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
 
                     b.Property<string>("LlmModelName")
                         .HasColumnType("nvarchar(max)");

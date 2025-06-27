@@ -43,6 +43,7 @@ namespace AgentPlatform.API.Data
                 entity.Property(e => e.CreatedAt).HasDefaultValueSql("GETDATE()");
                 entity.HasOne(e => e.CreatedBy).WithMany().HasForeignKey(e => e.CreatedById)
                     .OnDelete(DeleteBehavior.Restrict);
+                entity.Property(e => e.IsPublic).HasDefaultValue(false);
                 entity.HasMany(e => e.Files).WithOne(f => f.Agent).HasForeignKey(f => f.AgentId);
                 entity.HasMany(e => e.Functions).WithOne(f => f.Agent).HasForeignKey(f => f.AgentId);
             });

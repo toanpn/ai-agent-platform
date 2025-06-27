@@ -32,7 +32,8 @@
 
   > .icon-user,
   > .icon-email,
-  > .icon-lock {
+  > .icon-lock,
+  > .icon-key {
     position: absolute;
     left: 1rem;
   }
@@ -51,6 +52,12 @@
 
   .icon-lock {
     background-image: url('/assets/icons/lock.svg');
+    width: 14px;
+    height: 16px;
+  }
+
+  .icon-key {
+    background-image: url('/assets/icons/key.svg');
     width: 14px;
     height: 16px;
   }

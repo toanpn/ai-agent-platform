@@ -76,7 +76,7 @@
 					</div>
 					<mat-card-title>{{ agent.name }}</mat-card-title>
 					<mat-card-subtitle>
-						<span class="status-tag public">
+						<span *ngIf="agent.isPublic" class="status-tag public">
 							{{ 'AGENTS.STATUS_PUBLIC' | translate }}
 						</span>
 					</mat-card-subtitle>

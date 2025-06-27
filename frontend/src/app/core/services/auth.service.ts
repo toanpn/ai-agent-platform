@@ -1,8 +1,17 @@
-import { Injectable, inject, signal } from '@angular/core';
-import { ApiService } from './api.service';
-import { Observable, tap } from 'rxjs';
-import { StorageService } from './storage.service';
+import {
+	inject,
+	Injectable,
+	signal,
+} from '@angular/core';
+
+import {
+	Observable,
+	tap,
+} from 'rxjs';
+
 import { ChatStateService } from '../../features/chat/chat-state.service';
+import { ApiService } from './api.service';
+import { StorageService } from './storage.service';
 
 export interface User {
 	id: string;
@@ -16,6 +25,7 @@ export interface RegisterRequest {
 	password: string;
 	firstName: string;
 	lastName: string;
+	registrationKey: string;
 }
 
 export interface LoginRequest {

@@ -27,6 +27,9 @@ namespace AgentPlatform.API.Data
             [JsonPropertyName("tool_configs")]
             public JsonElement ToolConfigs { get; set; }
 
+            [JsonPropertyName("is_public")]
+            public bool IsPublic { get; set; }
+
             [JsonPropertyName("llm_config")]
             public LlmConfigJson LlmConfig { get; set; }
         }
@@ -116,6 +119,7 @@ namespace AgentPlatform.API.Data
                         ToolConfigs = agentDef.ToolConfigs.GetRawText(),
                         IsActive = true,
                         IsMainRouter = false, // Set a default, can be adjusted if logic is provided
+                        IsPublic = agentDef.IsPublic,
                         CreatedById = adminUser.Id,
                         CreatedAt = DateTime.UtcNow,
                         Department = GetDepartmentFromName(agentDef.Name)

@@ -20,6 +20,8 @@ namespace AgentPlatform.API.DTOs
         public string? ToolConfigs { get; set; }
         
         public LlmConfigDto? LlmConfig { get; set; }
+        
+        public bool IsPublic { get; set; } = false;
     }
     
     public class SetToolsRequestDto
@@ -44,6 +46,8 @@ namespace AgentPlatform.API.DTOs
         public LlmConfigDto? LlmConfig { get; set; }
 
         public bool? IsActive { get; set; }
+
+        public bool? IsPublic { get; set; }
     }
 
     public class AgentDto
@@ -58,6 +62,7 @@ namespace AgentPlatform.API.DTOs
         public LlmConfigDto? LlmConfig { get; set; }
         public bool IsActive { get; set; }
         public bool IsMainRouter { get; set; }
+        public bool IsPublic { get; set; }
         public UserDto CreatedBy { get; set; } = null!;
         public DateTime CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
@@ -98,6 +103,9 @@ namespace AgentPlatform.API.DTOs
         
         [JsonPropertyName("tool_configs")]
         public object? ToolConfigs { get; set; }
+        
+        [JsonPropertyName("is_public")]
+        public bool IsPublic { get; set; }
         
         [JsonPropertyName("llm_config")]
         public AgentJsonLlmConfigDto? LlmConfig { get; set; }
