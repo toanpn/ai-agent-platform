@@ -22,13 +22,7 @@ FROM nginx:alpine AS production
 # Copy the built Angular application from the build stage
 COPY --from=build /app/dist/chatbot-ui/browser /usr/share/nginx/html
 
-# Install openssl and generate self-signed certificate for HTTPS
-RUN apk --no-cache add openssl && \
-    mkdir -p /etc/nginx/certs && \
-    openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
-    -keyout /etc/nginx/certs/nginx-selfsigned.key \
-    -out /etc/nginx/certs/nginx-selfsigned.crt \
-    -subj "/C=US/ST=CA/L=SF/O=KiotViet/CN=localhost"
+# openssl is no longer needed as we are using Certbot
 
 # Copy custom nginx configuration
 COPY nginx.conf /etc/nginx/conf.d/default.conf
