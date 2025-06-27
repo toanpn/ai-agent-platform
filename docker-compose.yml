@@ -84,8 +84,6 @@ services:
     depends_on:
       api:
         condition: service_started
-      certbot-init:
-        condition: service_completed_successfully
     volumes:
       - certbot_conf:/etc/letsencrypt
       - certbot_www:/var/www/certbot
@@ -98,18 +96,10 @@ services:
     volumes:
       - certbot_conf:/etc/letsencrypt
       - certbot_www:/var/www/certbot
-    depends_on:
-      certbot-init:
-        condition: service_completed_successfully
-    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
-
-  certbot-init:
-    image: certbot/certbot
-    container_name: agentplatform-certbot-init
-    volumes:
-      - certbot_conf:/etc/letsencrypt
-      - certbot_www:/var/www/certbot
-    entrypoint: "certbot certonly --webroot -w /var/www/certbot --email admin@kiotviet.space -d kiotviet.space --text --agree-tos"
+    environment:
+      - DOMAIN=kiotviet.space
+      - EMAIL=admin@kiotviet.space
+    entrypoint: ["/certbot-entrypoint.sh"]
 
 volumes:
   sqlserver_data:
