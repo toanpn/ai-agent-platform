@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AgentPlatform.API.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250625172112_AddChatSessionSummary")]
-    partial class AddChatSessionSummary
+    [Migration("20250627174432_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -68,6 +68,9 @@ namespace AgentPlatform.API.Migrations
                         .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("ToolConfigs")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Tools")
                         .HasColumnType("nvarchar(max)");
@@ -233,10 +236,6 @@ namespace AgentPlatform.API.Migrations
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
-
-                    b.Property<string>("Summary")
-                        .HasMaxLength(4000)
-                        .HasColumnType("nvarchar(4000)");
 
                     b.Property<string>("Title")
                         .HasColumnType("nvarchar(max)");
