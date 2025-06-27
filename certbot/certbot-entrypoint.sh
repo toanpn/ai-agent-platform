@@ -15,18 +15,21 @@ if [ -z "$EMAIL" ]; then
   exit 1
 fi
 
-# Path to the certificate
-live_path="/etc/letsencrypt/live/$DOMAIN"
+# Path to the certificate for the first domain
+first_domain=$(echo $DOMAIN | cut -d ',' -f 1)
+live_path="/etc/letsencrypt/live/$first_domain"
 
 # If certificate does not exist, obtain it
 if [ ! -d "$live_path" ]; then
-  echo "Certificate not found for $DOMAIN. Obtaining a new one..."
+  echo "Certificate not found for $first_domain. Obtaining a new one..."
+  # Convert comma-separated domains to -d arguments
+  domain_args=$(echo $DOMAIN | sed 's/,/ -d /g')
   certbot certonly --webroot -w /var/www/certbot \
     --email "$EMAIL" \
-    -d "$DOMAIN" \
+    -d $domain_args \
     --text --agree-tos --no-eff-email
 else
-  echo "Certificate for $DOMAIN already exists."
+  echo "Certificate for $first_domain already exists."
 fi
 
 # Start a loop to periodically renew the certificate

@@ -79,7 +79,7 @@ services:
       - NODE_ENV=${NODE_ENV}
       - ANGULAR_PORT=${ANGULAR_PORT}
     ports:
-      - "${ANGULAR_PORT}:80"
+      - "80:80"
       - "443:443"
     depends_on:
       api:
@@ -98,7 +98,7 @@ services:
       - certbot_conf:/etc/letsencrypt
       - certbot_www:/var/www/certbot
     environment:
-      - DOMAIN=kiotviet.space
+      - DOMAIN=kiotviet.space,www.kiotviet.space
       - EMAIL=admin@kiotviet.space
 
 volumes:
