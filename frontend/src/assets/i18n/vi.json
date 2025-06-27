@@ -196,7 +196,15 @@
       "DELETE_SUCCESS": "Tệp đã được xóa thành công.",
       "DELETE_ERROR": "Xóa tệp thất bại. Vui lòng thử lại.",
       "DELETE_CONFIRM_TITLE": "Xác nhận xóa",
-      "DELETE_CONFIRM_TEXT": "Bạn có chắc chắn muốn xóa tệp này không? Hành động này không thể hoàn tác."
+      "DELETE_CONFIRM_TEXT": "Bạn có chắc chắn muốn xóa tệp này không? Hành động này không thể hoàn tác.",
+      "UPLOAD_FILES": "Tải lên tệp",
+      "UPLOAD_TITLE": "Nạp tài liệu",
+      "DRAG_AND_DROP": "Kéo thả tệp vào đây hoặc ",
+      "BROWSE_LINK": "nhấn để duyệt",
+      "SUPPORTED_FORMATS": "Định dạng được hỗ trợ: PDF, DOC, DOCX, XLS, XLSX, PPT, TXT, CSV, Hình ảnh, Tệp mã",
+      "SIZE_LIMIT": "Tối đa 50MB mỗi tệp, tổng 500MB",
+      "BROWSE": "Duyệt tệp",
+      "PROCESSING": "Đang xử lý..."
     },
     "CREATED_BY": "Người tạo",
     "LAST_UPDATED": "Cập nhật lần cuối",
@@ -252,19 +260,14 @@
       "TITLE": "Cấu hình LLM",
       "MODEL": "Mô hình LLM",
       "TEMPERATURE": "Mức độ sáng tạo",
-      "TEMP_TOOLTIP_0": "Xác định, rất chính xác, không có yếu tố ngẫu nhiên",
-      "TEMP_TOOLTIP_1": "Chính xác hơn, ít sáng tạo hơn",
-      "TEMP_TOOLTIP_2": "Cân bằng giữa độ chính xác và sáng tạo",
-      "TEMP_TOOLTIP_3": "Sáng tạo hơn, đầu ra đa dạng hơn",
-      "TEMP_TOOLTIP_4": "Rất sáng tạo, độ ngẫu nhiên cao, khó đoán định"
+      "TEMPERATURE_TOOLTIPS": {
+        "CREATIVE": "Sáng tạo và ngẫu nhiên hơn",
+        "BALANCED": "Cân bằng giữa sáng tạo và logic",
+        "PRECISE": "Tập trung và logic hơn"
+      }
     },
     "BASIC_INFO": "Thông tin cơ bản",
-    "TOOL_INTEGRATION": "Tích hợp công cụ",
-    "UPLOAD_TITLE": "Nạp tài liệu",
-    "DRAG_AND_DROP": "Kéo thả tệp hoặc nhấn để duyệt",
-    "SUPPORTED_FORMATS": "Định dạng hỗ trợ: PDF, DOC, DOCX, XLS, XLSX, PPT, TXT, CSV, Hình ảnh, Tệp mã",
-    "SIZE_LIMIT": "Tối đa 50MB mỗi tệp, tổng cộng 500MB",
-    "BROWSE": "Duyệt tệp"
+    "TOOL_INTEGRATION": "Tích hợp công cụ"
   },
   "FILES": {
     "FILES": "Tệp",

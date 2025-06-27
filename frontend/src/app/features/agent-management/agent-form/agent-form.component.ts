@@ -13,6 +13,9 @@ import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Subject, of, forkJoin } from 'rxjs';
+import { TextFieldModule } from '@angular/cdk/text-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatListModule } from '@angular/material/list';
 import { exhaustMap, tap, catchError, switchMap, finalize } from 'rxjs/operators';
 import {
 	AgentService,
@@ -30,7 +33,6 @@ import {
 	ToolConfigDialogComponent,
 	ToolConfigDialogData,
 } from '../tool-config-dialog/tool-config-dialog.component';
-import { MatListModule } from '@angular/material/list';
 import { Observable } from 'rxjs';
 
 interface UpdateAgentPayload {
@@ -57,6 +59,8 @@ interface UpdateAgentPayload {
 		MatSliderModule,
 		MatDialogModule,
 		MatListModule,
+		TextFieldModule,
+		MatInputModule,
 	],
 	templateUrl: './agent-form.component.html',
 	styleUrls: ['./agent-form.component.scss'],
@@ -75,6 +79,7 @@ export class AgentFormComponent implements OnInit {
 	fileUploadLoading = false;
 	selectedFile: File | null = null;
 	private filesToDelete: number[] = [];
+	isDragging = false;
 
 	// Departments
 	departments: string[] = [
@@ -592,25 +597,35 @@ export class AgentFormComponent implements OnInit {
 	 * @returns A translated string explaining the temperature level.
 	 */
 	getTemperatureTooltip(value: number | null): string {
-		if (value === null) {
-			return '';
+		if (value === null) return '';
+		if (value === 0) return 'AGENTS.LLM.TEMPERATURE_TOOLTIPS.CREATIVE';
+		if (value > 0 && value <= 0.5) return 'AGENTS.LLM.TEMPERATURE_TOOLTIPS.BALANCED';
+		if (value > 0.5) return 'AGENTS.LLM.TEMPERATURE_TOOLTIPS.PRECISE';
+		return 'AGENTS.LLM.TEMPERATURE_TOOLTIPS.BALANCED';
+	}
+
+	onDragOver(event: DragEvent): void {
+		event.preventDefault();
+		event.stopPropagation();
+		this.isDragging = true;
+	}
+
+	onDragLeave(event: DragEvent): void {
+		event.preventDefault();
+		event.stopPropagation();
+		this.isDragging = false;
+	}
+
+	onDrop(event: DragEvent): void {
+		event.preventDefault();
+		event.stopPropagation();
+		this.isDragging = false;
+
+		const files = event.dataTransfer?.files;
+		if (files && files.length > 0) {
+			this.selectedFile = files[0];
+			this.cdr.detectChanges();
 		}
-		if (value === 0) {
-			return 'AGENTS.LLM.TEMP_TOOLTIP_0';
-		}
-		if (value >= 0.1 && value <= 0.3) {
-			return 'AGENTS.LLM.TEMP_TOOLTIP_1';
-		}
-		if (value >= 0.4 && value <= 0.6) {
-			return 'AGENTS.LLM.TEMP_TOOLTIP_2';
-		}
-		if (value >= 0.7 && value <= 0.9) {
-			return 'AGENTS.LLM.TEMP_TOOLTIP_3';
-		}
-		if (value === 1) {
-			return 'AGENTS.LLM.TEMP_TOOLTIP_4';
-		}
-		return '';
 	}
 
 	onFileSelected(event: Event): void {
@@ -630,9 +645,32 @@ export class AgentFormComponent implements OnInit {
 	}
 
 	deleteFile(fileId: number): void {
-		this.agentFiles = this.agentFiles.filter(file => file.id !== fileId);
-		if (!this.filesToDelete.includes(fileId)) {
-			this.filesToDelete.push(fileId);
+		this.filesToDelete.push(fileId);
+		this.agentFiles = this.agentFiles.filter((f) => f.id !== fileId);
+	}
+
+	formatFileSize(bytes: number, decimals = 2): string {
+		if (bytes === 0) return '0 Bytes';
+		const k = 1024;
+		const dm = decimals < 0 ? 0 : decimals;
+		const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+		const i = Math.floor(Math.log(bytes) / Math.log(k));
+		return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+	}
+
+	getIconForFile(fileName: string): string {
+		const extension = fileName.split('.').pop()?.toLowerCase();
+		switch (extension) {
+			case 'pdf':
+				return '/assets/icons/icon-pdf.svg';
+			case 'doc':
+			case 'docx':
+				return '/assets/icons/icon-word.svg';
+			case 'xls':
+			case 'xlsx':
+				return '/assets/icons/icon-excel.svg';
+			default:
+				return '/assets/icons/icon-file.svg'; // Default icon
 		}
 	}
 }

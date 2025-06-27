@@ -13,20 +13,18 @@
 
 	<form [formGroup]="agentForm" (ngSubmit)="onSubmit()" *ngIf="!loading || isEditMode">
 		<div class="form-group">
-			<label for="name">{{ 'AGENTS.AGENT_NAME' | translate }}</label>
-			<input type="text" id="name" formControlName="name" [placeholder]="'AGENTS.ENTER_AGENT_NAME' | translate" />
-			<div
-				class="validation-error"
-				*ngIf="agentForm.get('name')?.invalid && agentForm.get('name')?.touched"
-			>
-				<p *ngIf="agentForm.get('name')?.errors?.['required']">{{ 'AGENTS.NAME_REQUIRED' | translate }}</p>
-				<p *ngIf="agentForm.get('name')?.errors?.['minlength']">
-					{{ 'AGENTS.NAME_MIN_LENGTH' | translate }}
-				</p>
-				<p *ngIf="agentForm.get('name')?.errors?.['maxlength']">
-					{{ 'AGENTS.NAME_MAX_LENGTH' | translate }}
-				</p>
-			</div>
+			<label for="name">{{ 'AGENTS.AGENT_NAME' | translate }} *</label>
+			<mat-form-field appearance="outline" class="full-width">
+				<input
+					matInput
+					id="name"
+					formControlName="name"
+					[placeholder]="'AGENTS.ENTER_AGENT_NAME' | translate"
+				/>
+				<mat-error *ngIf="agentForm.get('name')?.hasError('required')">
+					{{ 'VALIDATION.REQUIRED' | translate }}
+				</mat-error>
+			</mat-form-field>
 		</div>
 
 		<div class="form-group">
@@ -41,17 +39,153 @@
 						{{ department }}
 					</mat-option>
 				</mat-select>
+				<mat-error *ngIf="agentForm.get('department')?.hasError('required')">
+					{{ 'VALIDATION.REQUIRED' | translate }}
+				</mat-error>
 			</mat-form-field>
-			<div
-				class="validation-error"
-				*ngIf="agentForm.get('department')?.invalid && agentForm.get('department')?.touched"
-			>
-				<p *ngIf="agentForm.get('department')?.errors?.['required']">
-					{{ 'AGENTS.DEPARTMENT_REQUIRED' | translate }}
-				</p>
+		</div>
+
+		
+
+		<div class="form-group">
+			<label for="description">{{ 'AGENTS.AGENT_DESCRIPTION' | translate }} ({{ 'AGENTS.OPTIONAL' | translate }})</label>
+			<div class="editable-field-container">
+				<mat-form-field appearance="outline" class="full-width editable-field">
+					<textarea
+						matInput
+						id="description"
+						formControlName="description"
+						rows="4"
+						maxlength="500"
+						cdkTextareaAutosize
+						#autosize="cdkTextareaAutosize"
+						cdkAutosizeMinRows="4"
+						cdkAutosizeMaxRows="10"
+					></textarea>
+					<mat-hint align="end">{{ agentForm.get('description')?.value?.length || 0 }} / 500</mat-hint>
+				</mat-form-field>
+				<button
+					*ngIf="agentForm.get('description')?.value"
+					mat-icon-button
+					type="button"
+					class="enhance-button"
+					(click)="enhanceDescription()"
+					[disabled]="isEnhancingDescription"
+					[title]="'AGENTS.ENHANCE_DESCRIPTION' | translate"
+				>
+					<mat-icon *ngIf="!isEnhancingDescription">auto_awesome</mat-icon>
+					<mat-progress-spinner *ngIf="isEnhancingDescription" diameter="20"></mat-progress-spinner>
+				</button>
+			</div>
+			<div class="helper-text">
+				<p>{{ 'AGENTS.DESCRIPTION_HELP' | translate }}</p>
 			</div>
 		</div>
 
+		<div class="form-group">
+			<label for="instructions">{{ 'AGENTS.INSTRUCTIONS' | translate }} ({{ 'AGENTS.OPTIONAL' | translate }})</label>
+			<div class="editable-field-container">
+				<mat-form-field appearance="outline" class="full-width editable-field">
+					<textarea
+						matInput
+						id="instructions"
+						formControlName="instructions"
+						rows="6"
+						cdkTextareaAutosize
+						#autosize2="cdkTextareaAutosize"
+						cdkAutosizeMinRows="6"
+						cdkAutosizeMaxRows="15"
+					></textarea>
+				</mat-form-field>
+				<button
+					*ngIf="agentForm.get('instructions')?.value"
+					mat-icon-button
+					type="button"
+					class="enhance-button"
+					(click)="enhanceInstruction()"
+					[disabled]="isEnhancingInstruction"
+					[title]="'AGENTS.ENHANCE_INSTRUCTIONS' | translate"
+				>
+					<mat-icon *ngIf="!isEnhancingInstruction">auto_awesome</mat-icon>
+					<mat-progress-spinner *ngIf="isEnhancingInstruction" diameter="20"></mat-progress-spinner>
+				</button>
+			</div>
+			<div class="helper-text">
+				<p>{{ 'AGENTS.INSTRUCTIONS_HELP' | translate }}</p>
+			</div>
+		</div>
+
+		<!-- Agent Files Section -->
+		<div class="files-section">
+			<h2 class="section-title">{{ 'AGENTS.FILES.UPLOAD_TITLE' | translate }}</h2>
+			<input
+				type="file"
+				(change)="onFileSelected($event)"
+				#fileInput
+				style="display: none"
+				id="file-upload-input"
+			/>
+	
+			<div
+				*ngIf="!selectedFile && agentFiles.length === 0"
+				class="file-upload-area"
+				(click)="fileInput.click()"
+				(dragover)="onDragOver($event)"
+				(dragleave)="onDragLeave($event)"
+				(drop)="onDrop($event)"
+				[class.dragging]="isDragging"
+			>
+				<img src="/assets/icons/icon-cloud-upload.svg" class="upload-icon" alt="upload icon" />
+				<p>
+					<span class="drag-drop-text">{{ 'AGENTS.FILES.DRAG_AND_DROP' | translate }}</span>
+				</p>
+				<div class="file-upload-details">
+					<p>{{ 'AGENTS.FILES.SUPPORTED_FORMATS' | translate }}</p>
+					<p>{{ 'AGENTS.FILES.SIZE_LIMIT' | translate }}</p>
+				</div>
+				<button type="button" class="browse-button">
+					{{ 'AGENTS.FILES.BROWSE' | translate }}
+				</button>
+			</div>
+	
+			<div class="file-list">
+				<!-- Display for the newly selected file -->
+				<div *ngIf="selectedFile" class="file-list-item processing">
+					<div class="file-info">
+						<img [src]="getIconForFile(selectedFile.name)" class="file-icon" alt="file icon" />
+						<div class="file-details">
+							<span class="file-name">{{ selectedFile.name }}</span>
+							<span class="file-size">{{ formatFileSize(selectedFile.size) }}</span>
+						</div>
+					</div>
+					<div class="file-status">
+						<button
+							class="remove-btn"
+							type="button"
+							(click)="removeSelectedFile(fileInput)"
+						>
+							<img src="/assets/icons/icon-close.svg" alt="remove" />
+						</button>
+					</div>
+				</div>
+	
+				<!-- Display for existing agent files -->
+				<div *ngFor="let file of agentFiles" class="file-list-item">
+					<div class="file-info">
+						<img [src]="getIconForFile(file.fileName)" class="file-icon" alt="file icon" />
+						<div class="file-details">
+							<span class="file-name">{{ file.fileName }}</span>
+							<span class="file-size">{{ formatFileSize(file.fileSize) }}</span>
+						</div>
+					</div>
+					<div class="file-actions">
+						<button class="remove-btn" type="button" (click)="deleteFile(file.id)">
+							<img src="/assets/icons/icon-close.svg" alt="delete" />
+						</button>
+					</div>
+				</div>
+			</div>
+		</div>
 		<div class="form-group">
 			<div class="tools-section-header">
 				<label for="tools">{{ 'AGENTS.TOOLS' | translate }}</label>
@@ -143,9 +277,8 @@
 				</div>
 			</div>
 		</div>
-
 		<div class="llm-config-section" formGroupName="llmConfig">
-			<h2>{{ 'AGENTS.LLM.TITLE' | translate }}</h2>
+			<h2 class="section-title">{{ 'AGENTS.LLM.TITLE' | translate }}</h2>
 			<div class="form-group">
 				<label for="llmModel">{{ 'AGENTS.LLM.MODEL' | translate }}</label>
 				<mat-form-field appearance="outline" class="full-width">
@@ -172,135 +305,6 @@
 				<div class="helper-text" *ngIf="agentForm.get('llmConfig.temperature')?.value !== null">
 					<p>{{ getTemperatureTooltip(agentForm.get('llmConfig.temperature')?.value) | translate }}</p>
 				</div>
-			</div>
-		</div>
-
-		<div class="form-group">
-			<div class="field-header">
-				<label for="description">{{ 'AGENTS.AGENT_DESCRIPTION' | translate }} ({{ 'AGENTS.OPTIONAL' | translate }})</label>
-				<button
-					type="button"
-					mat-icon-button
-					color="accent"
-					class="enhance-button"
-					[disabled]="!agentForm.get('description')?.value?.trim() || isEnhancingDescription"
-					(click)="enhanceDescription()"
-					[matTooltip]="'AGENTS.ENHANCE_DESCRIPTION' | translate"
-					[attr.aria-label]="'AGENTS.ENHANCE_DESCRIPTION' | translate"
-				>
-					<mat-spinner *ngIf="isEnhancingDescription" diameter="20" aria-hidden="true"></mat-spinner>
-					<mat-icon *ngIf="!isEnhancingDescription" aria-hidden="true">auto_fix_high</mat-icon>
-				</button>
-			</div>
-			<textarea
-				id="description"
-				formControlName="description"
-				[placeholder]="'AGENTS.DESCRIBE_AGENT' | translate"
-				rows="4"
-			></textarea>
-			<div
-				class="validation-error"
-				*ngIf="
-					agentForm.get('description')?.invalid && agentForm.get('description')?.touched
-				"
-			>
-				<p *ngIf="agentForm.get('description')?.errors?.['maxlength']">
-					{{ 'AGENTS.DESCRIPTION_MAX_LENGTH' | translate }}
-				</p>
-			</div>
-		</div>
-
-		<div class="form-group">
-			<div class="field-header">
-				<label for="instructions">{{ 'AGENTS.INSTRUCTIONS' | translate }} ({{ 'AGENTS.OPTIONAL' | translate }})</label>
-				<button
-					type="button"
-					mat-icon-button
-					color="accent"
-					class="enhance-button"
-					[disabled]="!agentForm.get('instructions')?.value?.trim() || isEnhancingInstruction"
-					(click)="enhanceInstruction()"
-					[matTooltip]="'AGENTS.ENHANCE_INSTRUCTION' | translate"
-					[attr.aria-label]="'AGENTS.ENHANCE_INSTRUCTION' | translate"
-				>
-					<mat-spinner *ngIf="isEnhancingInstruction" diameter="20" aria-hidden="true"></mat-spinner>
-					<mat-icon *ngIf="!isEnhancingInstruction" aria-hidden="true">auto_fix_high</mat-icon>
-				</button>
-			</div>
-			<textarea
-				id="instructions"
-				formControlName="instructions"
-				[placeholder]="'AGENTS.ENTER_INSTRUCTIONS' | translate"
-				rows="6"
-			></textarea>
-			<div
-				class="validation-error"
-				*ngIf="
-					agentForm.get('instructions')?.invalid && agentForm.get('instructions')?.touched
-				"
-			>
-				<p *ngIf="agentForm.get('instructions')?.errors?.['maxlength']">
-					{{ 'AGENTS.INSTRUCTIONS_MAX_LENGTH' | translate }}
-				</p>
-			</div>
-			<div class="helper-text">
-				<p>{{ 'AGENTS.INSTRUCTIONS_HELP' | translate }}</p>
-			</div>
-		</div>
-
-		<!-- Agent Files Section -->
-		<div class="files-section" *ngIf="isEditMode">
-			<h2>{{ 'AGENTS.FILES.TITLE' | translate }}</h2>
-			<div class="file-upload-area">
-				<input
-					type="file"
-					(change)="onFileSelected($event)"
-					#fileInput
-					style="display: none"
-					id="file-upload-input"
-				/>
-				<button *ngIf="!selectedFile" type="button" mat-stroked-button color="primary" (click)="fileInput.click()">
-					<mat-icon>attach_file</mat-icon>
-					{{ 'AGENTS.FILES.SELECT_FILE' | translate }}
-				</button>
-			</div>
-			<!-- Display for the newly selected file -->
-			<div *ngIf="selectedFile" class="selected-file-display">
-				<mat-icon class="file-icon">insert_drive_file</mat-icon>
-				<span class="file-name" [title]="selectedFile.name">{{ selectedFile.name }}</span>
-				<span class="file-size">({{ selectedFile.size | number }} bytes)</span>
-				<button
-					mat-icon-button
-					color="warn"
-					type="button"
-					(click)="removeSelectedFile(fileInput)"
-					[matTooltip]="'AGENTS.FILES.REMOVE_SELECTED' | translate"
-					[attr.aria-label]="'AGENTS.FILES.REMOVE_SELECTED' | translate"
-				>
-					<mat-icon>close</mat-icon>
-				</button>
-			</div>
-
-			<div class="file-list" *ngIf="agentFiles.length > 0">
-				<mat-list>
-					<mat-list-item *ngFor="let file of agentFiles">
-						<mat-icon matListItemIcon>description</mat-icon>
-						<div matListItemTitle>{{ file.fileName }}</div>
-						<div matListItemLine>{{ file.fileSize | number }} bytes</div>
-						<button
-							mat-icon-button
-							color="warn"
-							type="button"
-							(click)="deleteFile(file.id)"
-							[matTooltip]="'AGENTS.FILES.DELETE' | translate"
-						>
-							<mat-icon>delete</mat-icon>
-						</button>
-					</mat-list-item>
-				</mat-list>
-			</div>
-			<div class="empty-state" *ngIf="agentFiles.length === 0 && !selectedFile">
-				<p>{{ 'AGENTS.FILES.NO_FILES' | translate }}</p>
 			</div>
 		</div>
 

@@ -198,11 +198,13 @@
       "REMOVE_SELECTED": "Remove selected file",
       "UPLOADING": "Uploading...",
       "UPLOAD_FILES": "Upload Files",
-      "UPLOAD_TITLE": "Upload Documents",
-      "DRAG_AND_DROP": "Drag files here or click to browse",
+      "UPLOAD_TITLE": "Nạp tài liệu",
+      "DRAG_AND_DROP": "Drag files here or ",
+      "BROWSE_LINK": "click to browse",
       "SUPPORTED_FORMATS": "Supported formats: PDF, DOC, DOCX, XLS, XLSX, PPT, TXT, CSV, Images, Code files",
       "SIZE_LIMIT": "Max 50MB per file, 500MB total",
-      "BROWSE": "Browse Files"
+      "BROWSE": "Browse Files",
+      "PROCESSING": "Processing..."
     },
     "CREATED_BY": "Created by",
     "LAST_UPDATED": "Last Updated",
@@ -252,17 +254,20 @@
       "FIELD_REQUIRED": "This field is required",
       "SAVE_SUCCESS": "Tool configuration saved successfully",
       "SAVE_ERROR": "Failed to save tool configuration",
-      "NO_CONFIG_NEEDED": "This tool is ready to use without additional configuration."
+      "NO_CONFIG_NEEDED": "This tool is ready to use without additional configuration.",
+      "SAVE_CHANGES": "Save Changes",
+      "CANCEL": "Cancel",
+      "INVALID_JSON": "Invalid JSON format"
     },
     "LLM": {
       "TITLE": "LLM Configuration",
-      "MODEL": "LLM Model",
+      "MODEL": "Model",
       "TEMPERATURE": "Temperature",
-      "TEMP_TOOLTIP_0": "Deterministic, very accurate, no randomness",
-      "TEMP_TOOLTIP_1": "More accurate, less creative",
-      "TEMP_TOOLTIP_2": "Balanced between accuracy and creativity",
-      "TEMP_TOOLTIP_3": "More creative, more diverse output",
-      "TEMP_TOOLTIP_4": "Highly creative, high randomness, less predictable"
+      "TEMPERATURE_TOOLTIPS": {
+        "CREATIVE": "More creative and random",
+        "BALANCED": "Balanced creativity and determinism",
+        "PRECISE": "More focused and deterministic"
+      }
     },
     "BASIC_INFO": "Basic Information",
     "TOOL_INTEGRATION": "Tool Integration"
