@@ -67,6 +67,10 @@ jobs:
             # -- Deployment --
             export REMOTE_PROJECT_PATH=${{ secrets.REMOTE_PROJECT_PATH || '/opt/ai-agent-platform' }}
             sudo mkdir -p $REMOTE_PROJECT_PATH
+            
+            echo "Cleaning the deployment directory..."
+            sudo find $REMOTE_PROJECT_PATH -mindepth 1 -exec rm -rf {} +
+
             sudo mv /tmp/project.tar.gz $REMOTE_PROJECT_PATH/project.tar.gz
             cd $REMOTE_PROJECT_PATH
 
