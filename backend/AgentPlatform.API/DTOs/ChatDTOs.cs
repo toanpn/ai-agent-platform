@@ -35,6 +35,7 @@ namespace AgentPlatform.API.DTOs
         public string Response { get; set; } = string.Empty;
         public string AgentName { get; set; } = string.Empty;
         public int SessionId { get; set; }
+        public string? SessionTitle { get; set; }
         public DateTime Timestamp { get; set; }
         public bool Success { get; set; } = true;
         public string? Error { get; set; }

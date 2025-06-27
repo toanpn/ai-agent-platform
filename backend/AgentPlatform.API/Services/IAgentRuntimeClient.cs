@@ -6,6 +6,7 @@ namespace AgentPlatform.API.Services
     public interface IAgentRuntimeClient
     {
         Task<AgentRuntimeResponse> SendMessageAsync(AgentRuntimeRequest request);
+        Task<string?> GetSessionSummaryAsync(List<MessageHistory> messages);
         Task<PromptEnhancementResponseDto?> EnhancePromptAsync(string query);
         Task<bool> IsHealthyAsync();
     }

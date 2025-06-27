@@ -30,7 +30,7 @@
 	<div class="conversations-list">
         @let displayConversations = conversations();
 		<mat-nav-list>
-			@for (conversation of displayConversations; track conversation.id) {
+			@for (conversation of displayConversations; track conversation.id; let i = $index) {
 				<a
 					mat-list-item
 					(click)="onSelectConversation(conversation)"
@@ -38,7 +38,7 @@
 					<div class="conversation-item">
 						<mat-icon>chat</mat-icon>
 						<div class="conversation-details">
-							<div class="conversation-title">{{ conversation.title }}</div>
+							<div class="conversation-title">{{ conversation.title || 'Session ' + (i + 1) }}</div>
 							<div class="conversation-time">
 								{{ conversation.timestamp | date: 'short' }}
 							</div>

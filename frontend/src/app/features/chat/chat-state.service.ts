@@ -118,11 +118,18 @@ export class ChatStateService {
 			if (!conversationId) {
 				const newConversation = {
 					id: response.sessionId.toString(),
-					title: `Conversation ${response.sessionId}`,
+					title: response.sessionTitle || `Conversation #${response.sessionId}`,
 					timestamp: new Date(),
 				};
 				this.conversations.update((convos) => [newConversation, ...convos]);
 				this.activeConversation.set(newConversation);
+			} else if (response.sessionTitle) {
+				this.conversations.update((convos) =>
+					convos.map((c) => (c.id === conversationId ? { ...c, title: response.sessionTitle! } : c)),
+				);
+				if (this.activeConversation()?.id === conversationId) {
+					this.activeConversation.update((ac) => (ac ? { ...ac, title: response.sessionTitle! } : null));
+				}
 			}
 		} catch (error) {
 			this.notificationService.showError('Failed to send message.');

@@ -127,12 +127,34 @@ namespace AgentPlatform.API.Services
             _context.ChatMessages.Add(agentMessage);
             await _context.SaveChangesAsync();
 
+            string? sessionTitle = null;
+            // Check if session needs summarization
+            var messageCount = await _context.ChatMessages.CountAsync(m => m.ChatSessionId == session.Id);
+            if (messageCount > 0 && messageCount % 5 == 0)
+            {
+                var messagesForSummary = await _context.ChatMessages
+                    .Where(m => m.ChatSessionId == session.Id)
+                    .OrderBy(m => m.CreatedAt)
+                    .Select(m => new MessageHistory { Role = m.Role, Content = m.Content })
+                    .ToListAsync();
+
+                var summary = await _runtimeClient.GetSessionSummaryAsync(messagesForSummary);
+                if (!string.IsNullOrEmpty(summary))
+                {
+                    session.Title = summary;
+                    sessionTitle = summary;
+                    session.UpdatedAt = DateTime.UtcNow;
+                    await _context.SaveChangesAsync();
+                }
+            }
+
             // Map the enhanced runtime response to ChatResponseDto
             return new ChatResponseDto
             {
                 Response = mainResponse, // Use the determined main response
                 AgentName = agentName, // Use the determined agent name
                 SessionId = session.Id,
+                SessionTitle = sessionTitle,
                 Timestamp = DateTime.UtcNow,
                 Success = runtimeResponse.Success,
                 Error = runtimeResponse.Error,
