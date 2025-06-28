@@ -26,46 +26,72 @@ namespace AgentPlatform.API.Services
             _toolService = toolService;
             _logger = logger;
             
-            // Try multiple paths in order of preference
+            // Try multiple paths in order of preference with better Docker support
             var possiblePaths = new[]
             {
-                // Docker paths (production)
-                "/AgentPlatform.Core/agents.json",
-                "/app/AgentPlatform.Core/agents.json",
+                // Docker production paths (exact mount points)
+                "/AgentPlatform.Core/agents.json",     // Main API container mount
+                "/app/shared/agents.json",             // Shared volume mount (preferred)
+                "/app/AgentPlatform.Core/agents.json", // Agent-Core mount point
+                "/app/agents.json",                    // Legacy mount (if exists)
                 
                 // Local development paths
                 Path.Combine(_environment.ContentRootPath, "..", "AgentPlatform.Core", "agents.json"),
                 Path.Combine(Directory.GetCurrentDirectory(), "..", "AgentPlatform.Core", "agents.json"),
+                
+                // Configuration-based path
+                agentConfig.Value.AgentsJsonPath,
                 
                 // Fallback paths
                 Path.Combine(_environment.ContentRootPath, "AgentPlatform.Core", "agents.json"),
                 "agents.json"
             };
 
-            // Find the first existing path or use the first Docker path as default for production
-            _agentsJsonPath = possiblePaths.FirstOrDefault(File.Exists) ?? possiblePaths[0];
-            
-            _logger.LogInformation("Using agents.json path: {AgentsJsonPath}", _agentsJsonPath);
-            
-            // Create the file if it doesn't exist to ensure the path is valid
-            if (!File.Exists(_agentsJsonPath))
+            // Log all possible paths for debugging
+            _logger.LogInformation("Checking possible paths for agents.json:");
+            foreach (var path in possiblePaths)
             {
-                try
-                {
-                    var directory = Path.GetDirectoryName(_agentsJsonPath);
-                    if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory))
-                    {
-                        Directory.CreateDirectory(directory);
-                        _logger.LogInformation("Created directory: {Directory}", directory);
-                    }
-                    
-                    File.WriteAllText(_agentsJsonPath, "[]");
-                    _logger.LogInformation("Created empty agents.json file at: {AgentsJsonPath}", _agentsJsonPath);
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "Failed to create agents.json file at: {AgentsJsonPath}", _agentsJsonPath);
-                }
+                var exists = File.Exists(path);
+                var canAccess = CanAccessPath(path);
+                _logger.LogInformation("Path: {Path} - Exists: {Exists}, Accessible: {CanAccess}", path, exists, canAccess);
+            }
+
+            // Find the first existing and accessible path
+            _agentsJsonPath = possiblePaths.FirstOrDefault(path => File.Exists(path) && CanAccessPath(path)) 
+                              ?? possiblePaths[0]; // Fallback to first Docker path
+            
+            _logger.LogInformation("Selected agents.json path: {AgentsJsonPath}", _agentsJsonPath);
+            
+        }
+
+        private bool CanAccessPath(string path)
+        {
+            try
+            {
+                var directory = Path.GetDirectoryName(path);
+                if (string.IsNullOrEmpty(directory)) return true;
+                
+                // Check if we can access the directory
+                var dirInfo = new DirectoryInfo(directory);
+                return dirInfo.Exists || Directory.Exists(directory) || CanCreateDirectory(directory);
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        private bool CanCreateDirectory(string directory)
+        {
+            try
+            {
+                // Check parent directory permissions
+                var parent = Directory.GetParent(directory);
+                return parent != null && parent.Exists;
+            }
+            catch
+            {
+                return false;
             }
         }
 
@@ -261,61 +287,105 @@ namespace AgentPlatform.API.Services
 
         public async Task SyncAgentsJsonAsync()
         {
-            try
+            var maxRetries = 3;
+            var tempPath = _agentsJsonPath + ".tmp";
+            
+            for (int attempt = 1; attempt <= maxRetries; attempt++)
             {
-                // Get all active agents from database
-                var activeAgents = await _context.Agents
-                    .Where(a => a.IsActive)
-                    .ToListAsync();
-
-                // Convert to JSON format
-                var agentJsonList = _mapper.Map<List<AgentJsonDto>>(activeAgents);
-
-                // Serialize with proper formatting
-                var jsonOptions = new JsonSerializerOptions
+                try
                 {
-                    WriteIndented = true
-                };
+                    // Get all active agents from database
+                    var activeAgents = await _context.Agents
+                        .Where(a => a.IsActive)
+                        .ToListAsync();
 
-                var jsonContent = JsonSerializer.Serialize(agentJsonList, jsonOptions);
+                    // Convert to JSON format
+                    var agentJsonList = _mapper.Map<List<AgentJsonDto>>(activeAgents);
 
-                // Ensure directory exists
-                var directory = Path.GetDirectoryName(_agentsJsonPath);
-                if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory))
+                    // Serialize with proper formatting
+                    var jsonOptions = new JsonSerializerOptions
+                    {
+                        WriteIndented = true
+                    };
+
+                    var jsonContent = JsonSerializer.Serialize(agentJsonList, jsonOptions);
+
+                    // Ensure directory exists
+                    var directory = Path.GetDirectoryName(_agentsJsonPath);
+                    if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory))
+                    {
+                        _logger.LogInformation("Creating directory for sync: {Directory}", directory);
+                        Directory.CreateDirectory(directory);
+                    }
+
+                    // Validate path accessibility before writing
+                    if (!string.IsNullOrEmpty(directory))
+                    {
+                        var directoryInfo = new DirectoryInfo(directory);
+                        if (!directoryInfo.Exists)
+                        {
+                            _logger.LogError("Directory does not exist after creation attempt: {Directory}", directory);
+                            if (attempt < maxRetries)
+                            {
+                                await Task.Delay(1000 * attempt);
+                                continue;
+                            }
+                            return;
+                        }
+                    }
+
+                    // Write to temporary file first, then rename (atomic operation)
+                    await File.WriteAllTextAsync(tempPath, jsonContent);
+                    
+                    // Atomic move
+                    if (File.Exists(_agentsJsonPath))
+                    {
+                        File.Delete(_agentsJsonPath);
+                    }
+                    File.Move(tempPath, _agentsJsonPath);
+                    
+                    _logger.LogInformation("Successfully synced agents.json with {Count} agents (attempt {Attempt})", activeAgents.Count, attempt);
+                    return; // Success, exit retry loop
+                }
+                catch (UnauthorizedAccessException ex)
                 {
-                    _logger.LogInformation("Creating directory: {Directory}", directory);
-                    Directory.CreateDirectory(directory);
+                    _logger.LogWarning(ex, "Access denied when trying to write agents.json to: {AgentsJsonPath} (attempt {Attempt}/{MaxRetries})", _agentsJsonPath, attempt, maxRetries);
+                }
+                catch (DirectoryNotFoundException ex)
+                {
+                    _logger.LogWarning(ex, "Directory not found when trying to write agents.json to: {AgentsJsonPath} (attempt {Attempt}/{MaxRetries})", _agentsJsonPath, attempt, maxRetries);
+                }
+                catch (IOException ex)
+                {
+                    _logger.LogWarning(ex, "IO error when trying to write agents.json to: {AgentsJsonPath} (attempt {Attempt}/{MaxRetries})", _agentsJsonPath, attempt, maxRetries);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Failed to sync agents.json to path: {AgentsJsonPath} (attempt {Attempt}/{MaxRetries})", _agentsJsonPath, attempt, maxRetries);
                 }
 
-                // Check if file/directory is writable
-                var directoryInfo = new DirectoryInfo(directory ?? ".");
-                if (!directoryInfo.Exists)
+                // Clean up temp file if it exists
+                if (File.Exists(tempPath))
                 {
-                    _logger.LogError("Directory does not exist: {Directory}", directory);
-                    return;
+                    try
+                    {
+                        File.Delete(tempPath);
+                    }
+                    catch
+                    {
+                        // Ignore cleanup errors
+                    }
                 }
 
-                // Write to file
-                await File.WriteAllTextAsync(_agentsJsonPath, jsonContent);
-                _logger.LogInformation("Successfully synced agents.json with {Count} agents", activeAgents.Count);
+                // Wait before retry (except on last attempt)
+                if (attempt < maxRetries)
+                {
+                    await Task.Delay(1000 * attempt);
+                }
             }
-            catch (UnauthorizedAccessException ex)
-            {
-                _logger.LogError(ex, "Access denied when trying to write agents.json to: {AgentsJsonPath}. Check file/directory permissions.", _agentsJsonPath);
-            }
-            catch (DirectoryNotFoundException ex)
-            {
-                _logger.LogError(ex, "Directory not found when trying to write agents.json to: {AgentsJsonPath}", _agentsJsonPath);
-            }
-            catch (IOException ex)
-            {
-                _logger.LogError(ex, "IO error when trying to write agents.json to: {AgentsJsonPath}", _agentsJsonPath);
-            }
-            catch (Exception ex)
-            {
-                // Log the error but don't throw - JSON sync shouldn't break the main operations
-                _logger.LogError(ex, "Failed to sync agents.json to path: {AgentsJsonPath}", _agentsJsonPath);
-            }
+
+            // If we get here, all retries failed
+            _logger.LogError("Failed to sync agents.json after {MaxRetries} attempts. JSON sync is disabled until next operation.", maxRetries);
         }
 
         public async Task SyncAgentsFromJsonAsync()
