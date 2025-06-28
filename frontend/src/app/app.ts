@@ -9,7 +9,6 @@ import { TranslateModule } from '@ngx-translate/core';
 import { AuthService } from './core/services/auth.service';
 import { ThemeService } from './core/services/theme.service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { LanguagePickerComponent } from './shared/components/language-picker/language-picker.component';
 import { HeaderComponent } from './shared/components/header/header.component';
 
 /**
@@ -28,7 +27,6 @@ import { HeaderComponent } from './shared/components/header/header.component';
 		MatIconModule,
 		MatMenuModule,
 		TranslateModule,
-		LanguagePickerComponent,
 		HeaderComponent,
 	],
 	templateUrl: './app.html',

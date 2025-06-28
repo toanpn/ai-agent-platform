@@ -4,8 +4,6 @@ import { Observable, tap, of, catchError, concatMap, map } from 'rxjs';
 import { StorageService } from './storage.service';
 import { ChatStateService } from '../../features/chat/chat-state.service';
 import { Router } from '@angular/router';
-import { DestroyRef } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 export interface User {
 	id: number;
@@ -31,7 +29,6 @@ export class AuthService {
 	private storageService = inject(StorageService);
 	private router = inject(Router);
 	private chatState = inject(ChatStateService);
-	private destroyRef = inject(DestroyRef);
 
 	private currentUserSignal = signal<User | null>(null);
 	readonly currentUser = this.currentUserSignal.asReadonly();
@@ -40,16 +37,17 @@ export class AuthService {
 		// No longer calling initialization here
 	}
 
-	init(): Observable<User | null> {
+	init(): Observable<boolean | null> {
 		const token = this.storageService.getItem('authToken');
 		if (!token) {
 			return of(null);
 		}
 
 		return this.getCurrentUser().pipe(
-			tap((user) => {
+			concatMap((user) => {
 				this.currentUserSignal.set(this.formatUser(user));
 				this.chatState.initialize();
+				return this.router.navigate(['/chat']);
 			}),
 			catchError(() => {
 				this.logout();
