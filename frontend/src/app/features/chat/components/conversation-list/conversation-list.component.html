@@ -1,0 +1,14 @@
+<ul class="conversations-list">
+  @for (conversation of conversations(); track conversation.id) {
+    <li
+      class="conversation-item"
+      [class.active]="conversation.id === selectedConversation()?.id"
+      (click)="onSelectConversation(conversation)"
+    >
+      <div class="conversation-details">
+        <div class="conversation-title">{{ conversation.title || ('CHAT.NEW_CONVERSATION_TITLE' | translate) }}</div>
+        <div class="conversation-time">{{ conversation.timestamp | date: 'shortTime' }}</div>
+      </div>
+    </li>
+  }
+</ul> 

@@ -4,6 +4,7 @@ import { Observable, tap, of, catchError, concatMap, map } from 'rxjs';
 import { StorageService } from './storage.service';
 import { ChatStateService } from '../../features/chat/chat-state.service';
 import { Router } from '@angular/router';
+import { AgentStateService } from '../../features/chat/agent-state.service';
 
 export interface User {
 	id: number;
@@ -29,6 +30,7 @@ export class AuthService {
 	private storageService = inject(StorageService);
 	private router = inject(Router);
 	private chatState = inject(ChatStateService);
+	private agentState = inject(AgentStateService);
 
 	private currentUserSignal = signal<User | null>(null);
 	readonly currentUser = this.currentUserSignal.asReadonly();
@@ -47,6 +49,7 @@ export class AuthService {
 			tap((user) => {
 				this.currentUserSignal.set(this.formatUser(user));
 				this.chatState.initialize();
+				this.agentState.initialize().subscribe();
 			}),
 			map(() => true),
 			catchError(() => {
@@ -70,6 +73,7 @@ export class AuthService {
 			tap(({ user }) => {
 				this.currentUserSignal.set(this.formatUser(user));
 				this.chatState.initialize();
+				this.agentState.initialize().subscribe();
 			}),
 			map(({ response }) => response)
 		);
@@ -90,9 +94,10 @@ export class AuthService {
 					user,
 				}))
 			)),
-			tap(({ response, user }) => {
+			tap(({ user }) => {
 				this.currentUserSignal.set(this.formatUser(user));
 				this.chatState.initialize();
+				this.agentState.initialize().subscribe();
 			}),
 			map(({ response }) => response)
 		);
@@ -102,6 +107,7 @@ export class AuthService {
 		this.storageService.removeItem('authToken');
 		this.currentUserSignal.set(null);
 		this.chatState.destroy();
+		this.agentState.destroy();
 		this.router.navigate(['/auth/login']);
 	}
 

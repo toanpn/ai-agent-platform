@@ -11,7 +11,10 @@ namespace AgentPlatform.API.Services
         public ToolService(IWebHostEnvironment environment)
         {
             _environment = environment;
-            _toolsJsonPath = Path.Combine(_environment.ContentRootPath, "..", "AgentPlatform.Core", "toolkit", "tools.json");
+            // Use absolute path for Docker, fallback to relative for development
+            _toolsJsonPath = File.Exists("/AgentPlatform.Core/toolkit/tools.json") 
+                ? "/AgentPlatform.Core/toolkit/tools.json"
+                : Path.Combine(_environment.ContentRootPath, "..", "AgentPlatform.Core", "toolkit", "tools.json");
         }
 
         public async Task<List<ToolDto>> GetToolsAsync()

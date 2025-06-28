@@ -2,26 +2,27 @@ import { effect, inject, Injectable, signal, computed, DestroyRef } from '@angul
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { EMPTY, forkJoin, lastValueFrom } from 'rxjs';
 import { catchError, tap } from 'rxjs/operators';
-import { Agent, AgentService } from '../../core/services/agent.service';
+import { Agent } from '../../core/services/agent.service';
 import { ChatService, Conversation, Message } from '../../core/services/chat.service';
 import { NotificationService } from '../../core/services/notification.service';
 import { toObservable } from '@angular/core/rxjs-interop';
+import { AgentStateService } from './agent-state.service';
 
 @Injectable({
 	providedIn: 'root',
 })
 export class ChatStateService {
 	private chatService = inject(ChatService);
-	private agentService = inject(AgentService);
 	private notificationService = inject(NotificationService);
 	private destroyRef = inject(DestroyRef);
+	private agentState = inject(AgentStateService);
 
 	// State Signals
 	readonly conversations = signal<Conversation[]>([]);
 	readonly activeConversation = signal<Conversation | null>(null);
 	readonly messages = signal<Message[]>([]);
 	readonly isLoading = signal<boolean>(false);
-	readonly agents = signal<Agent[]>([]);
+	readonly agents = this.agentState.agents$;
 	readonly selectedAgent = signal<Agent | null>(null);
 
 	// Computed Signals
@@ -143,21 +144,18 @@ export class ChatStateService {
 
 	private loadInitialData(): void {
 		this.isLoading.set(true);
-		forkJoin({
-			agents: this.agentService.getAgents(),
-			conversations: this.chatService.loadConversations(),
-		})
+		this.chatService
+			.loadConversations()
 			.pipe(
 				catchError((error: Error) => {
-                    this.notificationService.showError('Failed to load initial data.');
-                    console.error('Failed to load initial data.', error);
+					this.notificationService.showError('Failed to load initial data.');
+					console.error('Failed to load initial data.', error);
 					return EMPTY;
 				}),
 				tap(() => this.isLoading.set(false)),
 				takeUntilDestroyed(this.destroyRef),
 			)
-			.subscribe(({ agents, conversations }) => {
-				this.agents.set(agents);
+			.subscribe(conversations => {
 				this.conversations.set(conversations);
 			});
 	}
@@ -184,7 +182,6 @@ export class ChatStateService {
 		this.activeConversation.set(null);
 		this.messages.set([]);
 		this.isLoading.set(false);
-		this.agents.set([]);
 		this.selectedAgent.set(null);
 	}
 

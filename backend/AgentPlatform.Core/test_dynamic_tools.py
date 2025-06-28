@@ -116,7 +116,7 @@ def test_agent_configuration():
                  }
              },
             "llm_config": {
-                "model_name": "gemini-2.0-flash",
+                "model_name": "gemini-2.5-flash",
                 "temperature": 0.2
             }
         }
@@ -170,7 +170,7 @@ def test_agent_configuration():
                  }
             },
             "llm_config": {
-                "model_name": "gemini-2.0-flash",
+                "model_name": "gemini-2.5-flash",
                 "temperature": 0.3
             }
         }

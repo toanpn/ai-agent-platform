@@ -91,7 +91,11 @@ namespace AgentPlatform.API.Data
                 return; // Agents have been seeded
             }
 
-            var agentsJsonPath = Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "AgentPlatform.Core", "agents.json");
+            // Try Docker path first, then fallback to development path
+            var dockerPath = "/AgentPlatform.Core/agents.json";
+            var developmentPath = Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "AgentPlatform.Core", "agents.json");
+            
+            var agentsJsonPath = File.Exists(dockerPath) ? dockerPath : developmentPath;
             if (!File.Exists(agentsJsonPath))
             {
                 // Handle case where file doesn't exist, maybe log an error
