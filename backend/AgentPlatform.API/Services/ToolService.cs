@@ -17,7 +17,7 @@ namespace AgentPlatform.API.Services
             // Try multiple paths in order of preference
             var possiblePaths = new[]
             {
-                // Docker paths
+                // Docker paths (production)
                 "/AgentPlatform.Core/toolkit/tools.json",
                 "/app/AgentPlatform.Core/toolkit/tools.json",
                 
@@ -30,14 +30,35 @@ namespace AgentPlatform.API.Services
                 "toolkit/tools.json"
             };
 
-            _toolsJsonPath = possiblePaths.FirstOrDefault(File.Exists) ?? possiblePaths[2]; // Default to local dev path
+            // Find the first existing path or use the first Docker path as default for production
+            _toolsJsonPath = possiblePaths.FirstOrDefault(File.Exists) ?? possiblePaths[0];
             
             _logger.LogInformation("Using tools.json path: {ToolsJsonPath}", _toolsJsonPath);
+            
+            // Create the file if it doesn't exist to ensure the path is valid
+            if (!File.Exists(_toolsJsonPath))
+            {
+                try
+                {
+                    var directory = Path.GetDirectoryName(_toolsJsonPath);
+                    if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory))
+                    {
+                        Directory.CreateDirectory(directory);
+                        _logger.LogInformation("Created directory: {Directory}", directory);
+                    }
+                    
+                    File.WriteAllText(_toolsJsonPath, "[]");
+                    _logger.LogInformation("Created empty tools.json file at: {ToolsJsonPath}", _toolsJsonPath);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Failed to create tools.json file at: {ToolsJsonPath}", _toolsJsonPath);
+                }
+            }
         }
 
         public async Task<List<ToolDto>> GetToolsAsync()
         {
-            
             if (!File.Exists(_toolsJsonPath))
             {
                 _logger.LogWarning("Tools JSON file not found at path: {ToolsJsonPath}, returning empty list", _toolsJsonPath);
@@ -53,22 +74,36 @@ namespace AgentPlatform.API.Services
                 });
 
                 var result = tools ?? new List<ToolDto>();
+                _logger.LogDebug("Successfully loaded {Count} tools from {ToolsJsonPath}", result.Count, _toolsJsonPath);
                 return result;
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                _logger.LogError(ex, "Access denied when reading tools.json from: {ToolsJsonPath}", _toolsJsonPath);
+                throw;
+            }
+            catch (JsonException ex)
+            {
+                _logger.LogError(ex, "Invalid JSON format in tools.json at: {ToolsJsonPath}", _toolsJsonPath);
+                throw;
+            }
+            catch (IOException ex)
+            {
+                _logger.LogError(ex, "IO error when reading tools.json from: {ToolsJsonPath}", _toolsJsonPath);
+                throw;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error reading or parsing tools JSON file from path: {ToolsJsonPath}", _toolsJsonPath);
+                _logger.LogError(ex, "Unexpected error reading or parsing tools JSON file from path: {ToolsJsonPath}", _toolsJsonPath);
                 throw;
             }
         }
 
         public async Task<string> GetToolsJsonContentAsync()
         {
-            _logger.LogDebug("Attempting to read tools JSON from path: {ToolsJsonPath}", _toolsJsonPath);
-            
             if (!File.Exists(_toolsJsonPath))
             {
-                throw new FileNotFoundException($"Tools JSON file not found at path: {_toolsJsonPath}. Please ensure the AgentPlatform.Core toolkit/tools.json file exists and the application has read permissions.");
+                throw new FileNotFoundException($"Tools JSON file not found at path: {_toolsJsonPath}");
             }
             
             try
@@ -76,9 +111,19 @@ namespace AgentPlatform.API.Services
                 var content = await File.ReadAllTextAsync(_toolsJsonPath);
                 return content;
             }
+            catch (UnauthorizedAccessException ex)
+            {
+                _logger.LogError(ex, "Access denied when reading tools.json from: {ToolsJsonPath}", _toolsJsonPath);
+                throw;
+            }
+            catch (IOException ex)
+            {
+                _logger.LogError(ex, "IO error when reading tools.json from: {ToolsJsonPath}", _toolsJsonPath);
+                throw;
+            }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error reading tools JSON file from path: {ToolsJsonPath}", _toolsJsonPath);
+                _logger.LogError(ex, "Unexpected error reading tools JSON file from path: {ToolsJsonPath}", _toolsJsonPath);
                 throw;
             }
         }
