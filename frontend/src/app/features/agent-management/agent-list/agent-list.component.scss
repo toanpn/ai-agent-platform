@@ -1,5 +1,6 @@
 @use 'sass:map';
 @use '@angular/material' as mat;
+@use 'agent-card' as agent;
 
 :host {
 	display: block;
@@ -222,6 +223,8 @@
 		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 		transform: translateY(-2px);
 	}
+
+	@include agent.apply-agent-card-styles('.mat-mdc-card-header');
 
 	.mat-mdc-card-header {
 		padding: 20px;
