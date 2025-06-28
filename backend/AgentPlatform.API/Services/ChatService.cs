@@ -46,7 +46,7 @@ namespace AgentPlatform.API.Services
                     UpdatedAt = DateTime.UtcNow,
                 };
                 _context.ChatSessions.Add(session);
-                // No need for SaveChangesAsync here, it will be saved with the message
+                await _context.SaveChangesAsync();
             }
 
             session.UpdatedAt = DateTime.UtcNow;

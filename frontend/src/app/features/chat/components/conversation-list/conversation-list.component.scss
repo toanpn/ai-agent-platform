@@ -112,4 +112,34 @@
 	to {
 		transform: rotate(360deg);
 	}
+}
+
+.delete-button {
+	display: none;
+	background: none;
+	border: none;
+	cursor: pointer;
+	padding: 0;
+	margin-left: 8px;
+
+	.icon-trash {
+		display: inline-block;
+		width: 16px;
+		height: 16px;
+		background-image: url('/assets/icons/trash.svg');
+		background-size: contain;
+		background-repeat: no-repeat;
+		background-color: var(--color-text-secondary);
+		mask-image: url('/assets/icons/trash.svg');
+		mask-size: contain;
+		mask-repeat: no-repeat;
+	}
+
+	&:hover .icon-trash {
+		background-color: var(--color-warn);
+	}
+}
+
+.conversation-item:hover .delete-button {
+	display: block;
 } 

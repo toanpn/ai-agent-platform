@@ -230,6 +230,24 @@ export class ChatStateService {
 		}
 	}
 
+	async deleteConversation(conversationId: string): Promise<void> {
+		try {
+			await lastValueFrom(this.chatService.deleteConversation(conversationId));
+
+			this.conversations.update((convos) => convos.filter((c) => c.id !== conversationId));
+
+			if (this.activeConversation()?.id === conversationId) {
+				this.activeConversation.set(null);
+				this.messages.set([]);
+			}
+
+			this.notificationService.showSuccess('Conversation deleted successfully.');
+		} catch (error) {
+			this.notificationService.showError('Failed to delete conversation.');
+			console.error('Failed to delete conversation', error);
+		}
+	}
+
 	// --- Public Data Loading ---
 	loadConversations(): void {
 		this.searchTrigger.next('');

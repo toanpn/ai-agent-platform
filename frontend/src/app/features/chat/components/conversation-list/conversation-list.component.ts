@@ -55,6 +55,11 @@ export class ConversationListComponent {
 		this.selectConversation.emit(conversation);
 	}
 
+	deleteConversation(conversationId: string, event: MouseEvent): void {
+		event.stopPropagation();
+		this.chatState.deleteConversation(conversationId);
+	}
+
 	@HostListener('scroll')
 	onScroll(): void {
 		const element = this.elementRef.nativeElement as HTMLElement;

@@ -232,6 +232,15 @@ export class ChatService {
 	}
 
 	/**
+	 * Deletes a conversation by its ID.
+	 * @param conversationId The ID of the conversation to delete.
+	 * @returns An observable that completes when the deletion is successful.
+	 */
+	deleteConversation(conversationId: string): Observable<void> {
+		return this.api.delete<void>(`/Chat/sessions/${conversationId}`);
+	}
+
+	/**
 	 * Enhance a prompt using the prompt enhancement API.
 	 * @param message The message text to enhance.
 	 * @returns An observable of the enhanced prompt.
