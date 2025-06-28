@@ -204,8 +204,34 @@ class DynamicToolManager:
                             elif "GOOGLE_CSE_ID" in os.environ:
                                 del os.environ["GOOGLE_CSE_ID"]
                 
+                # Try to find query from various possible parameter names
+                query = None
+                possible_query_keys = ["query", "q", "search_query", "search_term", "text", "input"]
+                
+                for key in possible_query_keys:
+                    if key in params and params[key]:
+                        query = params[key]
+                        break
+                
+                # If no query found in standard keys, look for any string value that might be the query
+                if not query:
+                    for key, value in params.items():
+                        if isinstance(value, str) and value.strip() and not key.endswith("_key") and not key.endswith("_id") and not key.endswith("_token"):
+                            query = value
+                            break
+                
+                # Final validation
+                if not query or not isinstance(query, str) or not query.strip():
+                    return f"❌ Lỗi: Không tìm thấy query để tìm kiếm. Params nhận được: {params}"
+                
+                num_results = params.get("num_results", 5)
+                if not isinstance(num_results, int) or num_results < 1:
+                    num_results = 5
+                
+                print(f"Debug: Using query: '{query.strip()}' with {num_results} results")
+                
                 tool_instance = ConfiguredGoogleSearchTool()
-                return tool_instance._run(params.get("query", ""), params.get("num_results", 5))
+                return tool_instance._run(query.strip(), num_results)
             
             def _execute_gmail_tool(self, tool_module, params: Dict[str, Any]) -> str:
                 """Execute unified Gmail tool with dynamic configuration."""
@@ -262,14 +288,37 @@ class DynamicToolManager:
                 try:
                     from toolkit.rag_tool import RAGTool
                     
+                    # Try to find query from various possible parameter names
+                    query = None
+                    possible_query_keys = ["query", "q", "search_query", "search_term", "text", "input"]
+                    
+                    for key in possible_query_keys:
+                        if key in params and params[key]:
+                            query = params[key]
+                            break
+                    
+                    # If no query found in standard keys, look for any string value that might be the query
+                    if not query:
+                        for key, value in params.items():
+                            if isinstance(value, str) and value.strip() and not key.endswith("_key") and not key.endswith("_id") and not key.endswith("_token"):
+                                query = value
+                                break
+                    
+                    # Final validation
+                    if not query or not isinstance(query, str) or not query.strip():
+                        return f"❌ Lỗi: Không tìm thấy query để tìm kiếm. Params nhận được: {params}"
+                    
+                    max_results = params.get("max_results", 5)
+                    if not isinstance(max_results, int) or max_results < 1:
+                        max_results = 5
+                    
+                    print(f"Debug: Knowledge search using query: '{query.strip()}' with {max_results} results")
+                    
                     # Create RAG tool instance
                     tool_instance = RAGTool()
                     
                     # Execute the knowledge search
-                    query = params.get("query", "")
-                    max_results = params.get("max_results", 5)
-                    
-                    return tool_instance._run(query, max_results)
+                    return tool_instance._run(query.strip(), max_results)
                     
                 except Exception as e:
                     return f"❌ Error executing knowledge search tool: {str(e)}"

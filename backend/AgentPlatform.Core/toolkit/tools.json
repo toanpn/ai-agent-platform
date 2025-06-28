@@ -21,6 +21,12 @@
     "file": "google_search_tool.py",
     "instruction": "Use this tool when you need to search for current information on the internet using Google search. Requires google_api_key and google_cse_id parameters.",
     "parameters": {
+      "query": {
+        "type": "string",
+        "description": "Từ khóa tìm kiếm trên Google",
+        "required": true,
+        "hidden": true
+      },
       "num_results": {
         "type": "integer",
         "description": "Số lượng kết quả tìm kiếm trả về",
