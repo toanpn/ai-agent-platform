@@ -25,9 +25,18 @@ namespace AgentPlatform.API.Services
             
             // Use configured path or fall back to relative path for development
             var configPath = agentConfig.Value.AgentsJsonPath;
-            _agentsJsonPath = Path.IsPathRooted(configPath) 
-                ? configPath 
-                : Path.Combine(_environment.ContentRootPath, configPath);
+            if (Path.IsPathRooted(configPath))
+            {
+                _agentsJsonPath = configPath;
+            }
+            else
+            {
+                // For Docker environment, try absolute path first, then fallback to relative
+                var dockerPath = "/AgentPlatform.Core/agents.json";
+                _agentsJsonPath = File.Exists(dockerPath) 
+                    ? dockerPath 
+                    : Path.Combine(_environment.ContentRootPath, configPath);
+            }
         }
 
         public async Task<List<AgentDto>> GetAgentsAsync(int userId)

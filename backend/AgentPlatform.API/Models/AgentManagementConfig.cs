@@ -4,6 +4,6 @@ namespace AgentPlatform.API.Models
     {
         public const string SectionName = "AgentManagement";
         
-        public string AgentsJsonPath { get; set; } = "../AgentPlatform.Core/agents.json";
+        public string AgentsJsonPath { get; set; } = "/AgentPlatform.Core/agents.json";
     }
 } 
