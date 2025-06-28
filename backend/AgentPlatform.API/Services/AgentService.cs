@@ -29,17 +29,20 @@ namespace AgentPlatform.API.Services
             // Try multiple paths in order of preference with better Docker support
             var possiblePaths = new[]
             {
-                // Docker production paths (exact mount points from docker-compose.yml)
-                "/AgentPlatform.Core/agents.json",                    // API container mount (preferred)
-                "/app/shared/agents.json",                            // Shared volume mount
-                "/app/AgentPlatform.Core/agents.json",               // Agent-Core mount point
+                // Configuration-based path (highest priority)
+                agentConfig.Value?.AgentsJsonPath,
+                
+                // Docker production paths (new mount points from docker-compose.yml)
+                "/app/agents.json",                                   // Direct file mount (most reliable)
+                "/app/AgentPlatform.Core/agents.json",               // Directory mount
+                "/app/shared/agents.json",                           // Shared volume mount
+                
+                // Legacy Docker paths (for backwards compatibility)
+                "/AgentPlatform.Core/agents.json",                   // Legacy mount point (may not exist)
                 
                 // Local development paths
                 Path.Combine(_environment.ContentRootPath, "..", "AgentPlatform.Core", "agents.json"),
                 Path.Combine(Directory.GetCurrentDirectory(), "..", "AgentPlatform.Core", "agents.json"),
-                
-                // Configuration-based path
-                agentConfig.Value?.AgentsJsonPath,
                 
                 // Fallback paths with explicit directory creation
                 Path.Combine(_environment.WebRootPath ?? _environment.ContentRootPath, "agents.json"),
