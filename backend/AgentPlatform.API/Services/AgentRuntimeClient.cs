@@ -548,5 +548,119 @@ namespace AgentPlatform.API.Services
                 return false;
             }
         }
+
+        public async Task<AgentSyncResponse?> SyncAgentsAsync(List<AgentJsonDto> agents)
+        {
+            try
+            {
+                _logger.LogInformation("Syncing {AgentCount} agents to Agent Core", agents.Count);
+                
+                var requestData = new { agents = agents };
+                var json = JsonSerializer.Serialize(requestData, _jsonOptions);
+                var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+                _logger.LogDebug("Agent sync payload: {Request}", json);
+                
+                var stopwatch = System.Diagnostics.Stopwatch.StartNew();
+                var response = await _httpClient.PostAsync("/api/agents/sync", content);
+                stopwatch.Stop();
+                
+                _logger.LogInformation("Agent sync responded in {ElapsedMs}ms with status {StatusCode}", 
+                    stopwatch.ElapsedMilliseconds, response.StatusCode);
+                
+                var responseJson = await response.Content.ReadAsStringAsync();
+                _logger.LogDebug("Agent sync response: {Response}", responseJson);
+                
+                if (!response.IsSuccessStatusCode)
+                {
+                    _logger.LogError("Agent sync failed: {StatusCode}, Content: {Content}", 
+                        response.StatusCode, responseJson);
+                    
+                    // Try to parse error from response
+                    try
+                    {
+                        var errorResponse = JsonSerializer.Deserialize<Dictionary<string, object>>(responseJson, _jsonOptions);
+                        var errorMessage = errorResponse?.ContainsKey("error") == true 
+                            ? errorResponse["error"].ToString() 
+                            : "Unknown error";
+                            
+                        return new AgentSyncResponse
+                        {
+                            Success = false,
+                            Error = errorMessage,
+                            Message = $"HTTP {response.StatusCode}: {errorMessage}"
+                        };
+                    }
+                    catch
+                    {
+                        return new AgentSyncResponse
+                        {
+                            Success = false,
+                            Error = $"HTTP {response.StatusCode}",
+                            Message = "Failed to sync agents to Agent Core"
+                        };
+                    }
+                }
+                
+                // Parse successful response
+                try
+                {
+                    var syncResponse = JsonSerializer.Deserialize<Dictionary<string, object>>(responseJson, _jsonOptions);
+                    
+                    var success = syncResponse?.ContainsKey("success") == true && 
+                                 syncResponse["success"] is JsonElement successElement && 
+                                 successElement.ValueKind == JsonValueKind.True;
+                    
+                    var message = syncResponse?.ContainsKey("message") == true 
+                        ? syncResponse["message"].ToString() 
+                        : "Agents synced successfully";
+                        
+                    var agentsSynced = 0;
+                    var agentsLoaded = 0;
+                    
+                    if (syncResponse?.ContainsKey("agents_synced") == true && 
+                        syncResponse["agents_synced"] is JsonElement syncedElement && 
+                        syncedElement.ValueKind == JsonValueKind.Number)
+                    {
+                        agentsSynced = syncedElement.GetInt32();
+                    }
+                    
+                    if (syncResponse?.ContainsKey("agents_loaded") == true && 
+                        syncResponse["agents_loaded"] is JsonElement loadedElement && 
+                        loadedElement.ValueKind == JsonValueKind.Number)
+                    {
+                        agentsLoaded = loadedElement.GetInt32();
+                    }
+                    
+                    return new AgentSyncResponse
+                    {
+                        Success = success,
+                        Message = message,
+                        AgentsSynced = agentsSynced,
+                        AgentsLoaded = agentsLoaded
+                    };
+                }
+                catch (JsonException ex)
+                {
+                    _logger.LogError(ex, "Failed to parse agent sync response: {Response}", responseJson);
+                    return new AgentSyncResponse
+                    {
+                        Success = false,
+                        Error = "Failed to parse response",
+                        Message = "Invalid response format from Agent Core"
+                    };
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Exception occurred while syncing agents");
+                return new AgentSyncResponse
+                {
+                    Success = false,
+                    Error = ex.Message,
+                    Message = "Exception occurred during agent sync"
+                };
+            }
+        }
     }
 } 

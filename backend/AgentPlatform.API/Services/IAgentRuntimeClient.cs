@@ -11,6 +11,7 @@ namespace AgentPlatform.API.Services
         Task<bool> IsHealthyAsync();
         Task<RagUploadResponse?> UploadFileForProcessingAsync(string filePath, int agentId, Dictionary<string, object>? metadata = null);
         Task<bool> DeleteAgentDocumentsAsync(string agentId);
+        Task<AgentSyncResponse?> SyncAgentsAsync(List<AgentJsonDto> agents);
     }
 
     // DTOs for RAG operations
@@ -29,5 +30,15 @@ namespace AgentPlatform.API.Services
         public string FileName { get; set; } = string.Empty;
         public long FileSize { get; set; }
         public string ProcessedAt { get; set; } = string.Empty;
+    }
+
+    // DTOs for Agent Sync operations
+    public class AgentSyncResponse
+    {
+        public bool Success { get; set; }
+        public string Message { get; set; } = string.Empty;
+        public int AgentsSynced { get; set; }
+        public int AgentsLoaded { get; set; }
+        public string? Error { get; set; }
     }
 } 

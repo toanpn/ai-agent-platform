@@ -677,6 +677,96 @@ def reload_agents_endpoint():
         }), 500
 
 
+@app.route('/api/agents/sync', methods=['POST'])
+def sync_agents():
+    """Sync agent configurations from the API service."""
+    try:
+        if not system_manager:
+            return jsonify({
+                "success": False,
+                "error": "System not initialized"
+            }), 500
+        
+        data = request.get_json()
+        
+        if not data or 'agents' not in data:
+            return jsonify({
+                "success": False,
+                "error": "Agents data is required"
+            }), 400
+        
+        agents_data = data['agents']
+        
+        # Validate agents data structure
+        if not isinstance(agents_data, list):
+            return jsonify({
+                "success": False,
+                "error": "Agents data must be an array"
+            }), 400
+        
+        # Validate each agent in the array
+        for agent in agents_data:
+            if not isinstance(agent, dict):
+                return jsonify({
+                    "success": False,
+                    "error": "Each agent must be an object"
+                }), 400
+            
+            if 'agent_name' not in agent:
+                return jsonify({
+                    "success": False,
+                    "error": "Each agent must have an 'agent_name' field"
+                }), 400
+        
+        # Write agents data to agents.json file
+        try:
+            # Ensure the directory exists
+            config_dir = os.path.dirname(system_manager.config_path)
+            if not os.path.exists(config_dir):
+                os.makedirs(config_dir, exist_ok=True)
+            
+            # Write to a temporary file first, then rename (atomic operation)
+            temp_path = system_manager.config_path + '.tmp'
+            
+            with open(temp_path, 'w', encoding='utf-8') as f:
+                json.dump(agents_data, f, indent=2, ensure_ascii=False)
+            
+            # Atomic rename
+            if os.path.exists(system_manager.config_path):
+                os.remove(system_manager.config_path)
+            os.rename(temp_path, system_manager.config_path)
+            
+            logger.info(f"✅ Successfully updated agents.json with {len(agents_data)} agents")
+            
+            # Reload the agents to reflect the changes
+            system_manager.reload_agents()
+            
+            # Get updated agent info
+            agent_info = system_manager.get_agent_info()
+            
+            return jsonify({
+                "success": True,
+                "message": f"Successfully synced {len(agents_data)} agents",
+                "agents_synced": len(agents_data),
+                "agents_loaded": agent_info['total_agents'],
+                "agents": agent_info['agents']
+            })
+            
+        except Exception as e:
+            logger.error(f"Error writing agents.json: {e}")
+            return jsonify({
+                "success": False,
+                "error": f"Failed to write agents configuration: {str(e)}"
+            }), 500
+        
+    except Exception as e:
+        logger.error(f"Error syncing agents: {e}")
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        }), 500
+
+
 @app.route('/api/test-file-monitoring', methods=['POST'])
 def test_file_monitoring():
     """Test endpoint to manually trigger file monitoring and check system status."""
