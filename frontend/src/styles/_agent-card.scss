@@ -1,0 +1,56 @@
+/*
+This file contains shared styles for agent cards, used across different components
+to ensure a consistent look and feel for agents based on their type.
+
+It should be imported into the component's SCSS file that uses the agent-card.
+*/
+
+@use 'sass:map';
+
+$agent-types: (
+	'marketing': ('color': 'purple', 'header-style': 'tag-bg'),
+	'finance': ('color': 'blue', 'header-style': 'tag-bg'),
+	'data': ('color': 'green', 'header-style': 'tag-bg'),
+	'hr': ('color': 'red', 'header-style': 'header-bg'),
+	'ld': ('color': 'lime', 'header-style': 'header-bg'),
+	'ic': ('color': 'emerald', 'header-style': 'header-bg'),
+	'om': ('color': 'orange', 'header-style': 'header-bg'),
+	'cnb': ('color': 'yellow', 'header-style': 'header-bg'),
+	'booking': ('color': 'pink', 'header-style': 'header-bg'),
+	'retail': ('color': 'indigo', 'header-style': 'header-bg'),
+	'fnb': ('color': 'cyan', 'header-style': 'header-bg'),
+	'it': ('color': 'sky', 'header-style': 'header-bg'),
+	'ai-research': ('color': 'teal', 'header-style': 'header-bg'),
+	'kms': ('color': 'gray', 'header-style': 'header-bg')
+);
+
+@mixin generate-agent-styles($header-selector) {
+	@each $type, $details in $agent-types {
+		$color: map-get($details, 'color');
+		$header-style: map-get($details, 'header-style');
+
+		&[data-agent-type='#{$type}'] {
+			border-color: var(--color-agent-#{$color}-tag-bg) !important;
+
+			#{$header-selector} {
+				@if $header-style == 'tag-bg' {
+					background-color: var(--color-agent-#{$color}-tag-bg);
+				} @else {
+					background-color: var(--color-agent-#{$color}-header-bg);
+				}
+				border-bottom-color: var(--color-agent-#{$color}-tag-bg);
+			}
+
+			.tag {
+				background-color: var(--color-agent-#{$color}-bg);
+				color: var(--color-agent-#{$color}-tag-text);
+			}
+		}
+	}
+}
+
+// This mixin will be included in the component stylesheets.
+// It applies the dynamic styles to the .agent-card selector.
+@mixin apply-agent-card-styles($header-selector) {
+	@include generate-agent-styles($header-selector);
+}

@@ -105,10 +105,10 @@
 				@if (agents.length > 0) {
 				<div [ngClass]="(viewMode$ | async) === 'grid' ? 'agent-grid' : 'agent-list'">
 					@for (agent of agents; track agent.id) {
-					<mat-card class="agent-card">
+					<mat-card class="agent-card" [attr.data-agent-type]="getAgentType(agent)">
 						<mat-card-header>
 							<div mat-card-avatar class="agent-avatar-wrapper">
-								<img src="assets/icons/sidebar/danh-sach-tro-ly.svg" alt="Agent Avatar" />
+								<img [src]="getAgentAvatar(agent)" alt="Agent Avatar" />
 							</div>
 							<div mat-card-title>{{ agent.name }}</div>
 							<div mat-card-subtitle>
