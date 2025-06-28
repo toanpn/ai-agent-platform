@@ -66,7 +66,9 @@ class DynamicToolManager:
         if not tool_config:
             raise ValueError(f"Tool configuration not found for tool ID: {tool_id}")
         
-        tool_name = tool_config["name"]
+        # Use tool_id instead of Vietnamese name for Gemini compatibility
+        tool_name = tool_id  # Changed from tool_config["name"] to tool_id
+        tool_display_name = tool_config["name"]  # Keep display name for reference
         tool_file = tool_config["file"]
         tool_description = tool_config["description"]
         tool_parameters = tool_config.get("parameters", {})
@@ -74,13 +76,14 @@ class DynamicToolManager:
         # Create dynamic tool class based on the tool configuration
         return self._create_tool_instance(
             tool_name=tool_name,
+            tool_display_name=tool_display_name,
             tool_file=tool_file,
             tool_description=tool_description,
             tool_parameters=tool_parameters,
             agent_config=agent_tool_config
         )
     
-    def _create_tool_instance(self, tool_name: str, tool_file: str, tool_description: str, 
+    def _create_tool_instance(self, tool_name: str, tool_display_name: str, tool_file: str, tool_description: str, 
                              tool_parameters: Dict[str, Any], agent_config: Dict[str, Any]) -> BaseTool:
         """Create a tool instance with dynamic configuration."""
         
@@ -125,12 +128,13 @@ class DynamicToolManager:
             description: str = tool_description
             args_schema: Type[BaseModel] = DynamicInputModel
             
-            def __init__(self, agent_config: Dict[str, Any], tool_file: str, tool_parameters: Dict[str, Any], **kwargs):
+            def __init__(self, agent_config: Dict[str, Any], tool_file: str, tool_parameters: Dict[str, Any], tool_display_name: str = None, **kwargs):
                 super().__init__(**kwargs)
                 # Store configuration in a way that doesn't conflict with Pydantic
                 object.__setattr__(self, '_agent_config', agent_config)
                 object.__setattr__(self, '_tool_file', tool_file)
                 object.__setattr__(self, '_tool_parameters', tool_parameters)
+                object.__setattr__(self, '_tool_display_name', tool_display_name or self.name)
                 
             def _run(self, **kwargs) -> str:
                 """Execute the tool with dynamic configuration."""
@@ -151,14 +155,14 @@ class DynamicToolManager:
                     module_name = f"toolkit.{self._tool_file.replace('.py', '')}"
                     tool_module = importlib.import_module(module_name)
                     
-                    # Map Vietnamese tool names to execution methods
-                    if self.name == "tìm_kiếm_google":
+                    # Map tool IDs to execution methods (using English IDs for Gemini compatibility)
+                    if self.name == "google_search_tool":
                         return self._execute_google_search(tool_module, params)
-                    elif self.name == "gmail":
+                    elif self.name == "gmail_tool":
                         return self._execute_gmail_tool(tool_module, params)
-                    elif self.name == "jira":
+                    elif self.name == "jira_tool":
                         return self._execute_jira_tool(tool_module, params)
-                    elif self.name == "tìm_kiếm_tri_thức":
+                    elif self.name == "knowledge_search_tool":
                         return self._execute_knowledge_search_tool(tool_module, params)
                     else:
                         # For tools that don't need credentials, use original implementation
@@ -288,7 +292,7 @@ class DynamicToolManager:
                 return self._run(**kwargs)
         
         # Return configured tool instance
-        return DynamicTool(agent_config, tool_file, tool_parameters)
+        return DynamicTool(agent_config, tool_file, tool_parameters, tool_display_name)
     
     def create_tools_for_agent(self, agent_config: Dict[str, Any]) -> List[BaseTool]:
         """
