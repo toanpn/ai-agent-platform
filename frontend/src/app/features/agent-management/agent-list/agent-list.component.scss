@@ -3,9 +3,76 @@
 
 :host {
 	display: block;
-	padding: 2rem;
-	background-color: #f3f4f6;
 	min-height: 100vh;
+	background-color: #f9fafb;
+}
+
+.agent-list-container {
+	display: flex;
+	min-height: 100vh;
+}
+
+.sidebar {
+	width: 260px;
+	background-color: #ffffff;
+	border-right: 1px solid #e5e7eb;
+	padding: 1rem;
+	display: flex;
+	flex-direction: column;
+	flex-shrink: 0;
+
+	.nav-menu {
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
+	}
+
+	.nav-item {
+		display: flex;
+		align-items: center;
+		padding: 0.75rem 1rem;
+		border-radius: 6px;
+		text-decoration: none;
+		color: #4b5563;
+		font-weight: 500;
+		transition: background-color 0.2s, color 0.2s;
+
+		img {
+			margin-right: 1rem;
+			width: 20px;
+			height: 20px;
+		}
+
+		&:hover {
+			background-color: #f3f4f6;
+		}
+
+		&.active {
+			background-color: #f0f9ff;
+			color: #0369a1;
+		}
+	}
+
+	.settings-section {
+		margin-top: auto;
+		padding-top: 1rem;
+		border-top: 1px solid #e5e7eb;
+
+		.settings-title {
+			font-size: 12px;
+			font-weight: 600;
+			color: #6b7280;
+			text-transform: uppercase;
+			letter-spacing: 0.05em;
+			padding: 0 1rem 0.5rem;
+		}
+	}
+}
+
+.main-content {
+	flex: 1;
+	padding: 2rem;
+	overflow-y: auto;
 }
 
 .agent-list-page {

@@ -1,115 +1,152 @@
-<div class="agent-list-page">
-	<!-- Header -->
-	<div class="page-header">
-		<div>
-			<h1>{{ 'AGENTS.LIST_TITLE' | translate }}</h1>
-			<p class="subtitle">{{ 'AGENTS.LIST_SUBTITLE' | translate }}</p>
+<div class="agent-list-container">
+	<aside class="sidebar">
+		<nav class="nav-menu">
+			<a routerLink="/agents" class="nav-item active">
+				<img src="assets/icons/sidebar/danh-sach-tro-ly.svg" alt="Danh sách trợ lý" />
+				<span>Danh sách trợ lý</span>
+			</a>
+			<a routerLink="/chat" class="nav-item">
+				<img src="assets/icons/sidebar/chat.svg" alt="Chat" />
+				<span>Chat</span>
+			</a>
+			<a routerLink="/knowledge" class="nav-item">
+				<img src="assets/icons/sidebar/kho-tri-thuc.svg" alt="Kho tri thức" />
+				<span>Kho tri thức</span>
+			</a>
+			<a routerLink="/team" class="nav-item">
+				<img src="assets/icons/sidebar/team.svg" alt="Team" />
+				<span>Team</span>
+			</a>
+		</nav>
+		<div class="settings-section">
+			<h3 class="settings-title">Settings</h3>
+			<nav class="nav-menu">
+				<a routerLink="/settings/general" class="nav-item">
+					<img src="assets/icons/sidebar/cai-dat-chung.svg" alt="Cài đặt chung" />
+					<span>Cài đặt chung</span>
+				</a>
+				<a routerLink="/settings/security" class="nav-item">
+					<img src="assets/icons/sidebar/bao-mat.svg" alt="Bảo mật" />
+					<span>Bảo mật</span>
+				</a>
+			</nav>
 		</div>
-		<button mat-flat-button color="primary" class="create-agent-btn" routerLink="/agents/new">
-			<mat-icon>add</mat-icon>
-			<span>{{ 'AGENTS.CREATE_AGENT' | translate }}</span>
-		</button>
-	</div>
+	</aside>
+	<main class="main-content">
+		<div class="agent-list-page">
+			<!-- Header -->
+			<div class="page-header">
+				<div>
+					<h1>{{ 'AGENTS.LIST_TITLE' | translate }}</h1>
+					<p class="subtitle">{{ 'AGENTS.LIST_SUBTITLE' | translate }}</p>
+				</div>
+				<button mat-flat-button color="primary" class="create-agent-btn" routerLink="/agents/new">
+					<mat-icon>add</mat-icon>
+					<span>{{ 'AGENTS.CREATE_AGENT' | translate }}</span>
+				</button>
+			</div>
 
-	<!-- Toolbar -->
-	<div class="toolbar">
-		<mat-form-field appearance="outline" class="search-field">
-			<mat-label>{{ 'AGENTS.SEARCH_PLACEHOLDER' | translate }}</mat-label>
-			<input matInput #searchInput [formControl]="searchControl"/>
-			<mat-icon matPrefix>search</mat-icon>
-		</mat-form-field>
+			<!-- Toolbar -->
+			<div class="toolbar">
+				<mat-form-field appearance="outline" class="search-field">
+					<mat-label>{{ 'AGENTS.SEARCH_PLACEHOLDER' | translate }}</mat-label>
+					<input matInput #searchInput [formControl]="searchControl"/>
+					<mat-icon matPrefix>search</mat-icon>
+				</mat-form-field>
 
-		<mat-form-field appearance="outline" class="filter-field">
-			<mat-label>{{ 'AGENTS.DEPARTMENT_FILTER_LABEL' | translate }}</mat-label>
-			<mat-select [formControl]="departmentFilterControl">
-				<mat-option value="all">{{ 'AGENTS.ALL_DEPARTMENTS' | translate }}</mat-option>
-				@for(dep of departments; track dep) {
-					<mat-option [value]="dep">{{ dep }}</mat-option>
-				}
-			</mat-select>
-		</mat-form-field>
+				<mat-form-field appearance="outline" class="filter-field">
+					<mat-label>{{ 'AGENTS.DEPARTMENT_FILTER_LABEL' | translate }}</mat-label>
+					<mat-select [formControl]="departmentFilterControl">
+						<mat-option value="all">{{ 'AGENTS.ALL_DEPARTMENTS' | translate }}</mat-option>
+						@for(dep of departments; track dep) {
+							<mat-option [value]="dep">{{ dep }}</mat-option>
+						}
+					</mat-select>
+				</mat-form-field>
 
-		<mat-form-field appearance="outline" class="filter-field">
-			<mat-label>{{ 'AGENTS.STATUS_FILTER_LABEL' | translate }}</mat-label>
-			<mat-select>
-				<mat-option value="all">{{ 'AGENTS.ALL_STATUSES' | translate }}</mat-option>
-				<!-- Add status options here -->
-			</mat-select>
-		</mat-form-field>
+				<mat-form-field appearance="outline" class="filter-field">
+					<mat-label>{{ 'AGENTS.STATUS_FILTER_LABEL' | translate }}</mat-label>
+					<mat-select>
+						<mat-option value="all">{{ 'AGENTS.ALL_STATUSES' | translate }}</mat-option>
+						<!-- Add status options here -->
+					</mat-select>
+				</mat-form-field>
 
-		<mat-button-toggle-group class="view-toggle" [value]="viewMode$ | async" (change)="setViewMode($event.value)">
-			<mat-button-toggle value="grid">
-				<mat-icon>grid_view</mat-icon>
-			</mat-button-toggle>
-			<mat-button-toggle value="list">
-				<mat-icon>list</mat-icon>
-			</mat-button-toggle>
-		</mat-button-toggle-group>
-	</div>
+				<mat-button-toggle-group class="view-toggle" [value]="viewMode$ | async" (change)="setViewMode($event.value)">
+					<mat-button-toggle value="grid">
+						<mat-icon>grid_view</mat-icon>
+					</mat-button-toggle>
+					<mat-button-toggle value="list">
+						<mat-icon>list</mat-icon>
+					</mat-button-toggle>
+				</mat-button-toggle-group>
+			</div>
 
-	<!-- Loading Indicator -->
-	@if (loading$ | async) {
-	<div class="loading-indicator">
-		<mat-progress-spinner mode="indeterminate" diameter="50"></mat-progress-spinner>
-	</div>
-	}
-
-	<!-- Empty State -->
-	@if ((filteredAgents$ | async)?.length === 0 && !(loading$ | async)) {
-	<div class="empty-state">
-		<p>{{ 'AGENTS.CREATE_FIRST_AGENT' | translate }}</p>
-		<button mat-raised-button color="primary" routerLink="/agents/new">
-			{{ 'AGENTS.CREATE_AGENT' | translate }}
-		</button>
-	</div>
-	}
-
-	<!-- Agent Container -->
-	@if (paginatedAgents$ | async; as agents) {
-		@if (agents.length > 0) {
-		<div [ngClass]="(viewMode$ | async) === 'grid' ? 'agent-grid' : 'agent-list'">
-			@for (agent of agents; track agent.id) {
-			<mat-card class="agent-card" [routerLink]="['/agents', agent.id]">
-				<mat-card-header>
-					<div mat-card-avatar class="agent-avatar" [ngClass]="getDepartmentClass(agent.department)">
-						<mat-icon>smart_toy</mat-icon>
-					</div>
-					<mat-card-title>{{ agent.name }}</mat-card-title>
-					<mat-card-subtitle>
-						<span class="status-tag public">
-							{{ 'AGENTS.STATUS_PUBLIC' | translate }}
-						</span>
-					</mat-card-subtitle>
-					<button mat-icon-button class="more-options-btn" (click)="$event.stopPropagation()">
-						<mat-icon>more_vert</mat-icon>
-					</button>
-				</mat-card-header>
-				<mat-card-content>
-					<p class="description">{{ agent.description }}</p>
-					<div class="metadata">
-						<div class="meta-item">
-							<span class="meta-label">{{'AGENTS.DEPARTMENT' | translate}}:</span>
-							<span class="meta-value">{{ agent.department }}</span>
-						</div>
-						<div class="meta-item">
-							<span class="meta-label">{{'COMMON.CREATED' | translate}}:</span>
-							<span class="meta-value">{{ agent.createdAt | date: 'mediumDate' }}</span>
-						</div>
-					</div>
-				</mat-card-content>
-			</mat-card>
+			<!-- Loading Indicator -->
+			@if (loading$ | async) {
+			<div class="loading-indicator">
+				<mat-progress-spinner mode="indeterminate" diameter="50"></mat-progress-spinner>
+			</div>
 			}
-		</div>
-		}
-	}
 
-	<!-- Pagination -->
-	<mat-paginator
-		class="paginator"
-		[length]="(filteredAgents$ | async)?.length"
-		[pageSize]="6"
-		[pageSizeOptions]="[6, 12, 24]"
-		aria-label="Select page"
-	>
-	</mat-paginator>
+			<!-- Empty State -->
+			@if ((filteredAgents$ | async)?.length === 0 && !(loading$ | async)) {
+			<div class="empty-state">
+				<p>{{ 'AGENTS.CREATE_FIRST_AGENT' | translate }}</p>
+				<button mat-raised-button color="primary" routerLink="/agents/new">
+					{{ 'AGENTS.CREATE_AGENT' | translate }}
+				</button>
+			</div>
+			}
+
+			<!-- Agent Container -->
+			@if (paginatedAgents$ | async; as agents) {
+				@if (agents.length > 0) {
+				<div [ngClass]="(viewMode$ | async) === 'grid' ? 'agent-grid' : 'agent-list'">
+					@for (agent of agents; track agent.id) {
+					<mat-card class="agent-card" [routerLink]="['/agents', agent.id]">
+						<mat-card-header>
+							<div mat-card-avatar class="agent-avatar" [ngClass]="getDepartmentClass(agent.department)">
+								<mat-icon>smart_toy</mat-icon>
+							</div>
+							<mat-card-title>{{ agent.name }}</mat-card-title>
+							<mat-card-subtitle>
+								<span class="status-tag public">
+									{{ 'AGENTS.STATUS_PUBLIC' | translate }}
+								</span>
+							</mat-card-subtitle>
+							<button mat-icon-button class="more-options-btn" (click)="$event.stopPropagation()">
+								<mat-icon>more_vert</mat-icon>
+							</button>
+						</mat-card-header>
+						<mat-card-content>
+							<p class="description">{{ agent.description }}</p>
+							<div class="metadata">
+								<div class="meta-item">
+									<span class="meta-label">{{'AGENTS.DEPARTMENT' | translate}}:</span>
+									<span class="meta-value">{{ agent.department }}</span>
+								</div>
+								<div class="meta-item">
+									<span class="meta-label">{{'COMMON.CREATED' | translate}}:</span>
+									<span class="meta-value">{{ agent.createdAt | date: 'mediumDate' }}</span>
+								</div>
+							</div>
+						</mat-card-content>
+					</mat-card>
+					}
+				</div>
+				}
+			}
+
+			<!-- Pagination -->
+			<mat-paginator
+				class="paginator"
+				[length]="(filteredAgents$ | async)?.length"
+				[pageSize]="6"
+				[pageSizeOptions]="[6, 12, 24]"
+				aria-label="Select page"
+			>
+			</mat-paginator>
+		</div>
+	</main>
 </div>
