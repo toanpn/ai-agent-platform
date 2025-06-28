@@ -44,7 +44,6 @@ export class ChatSidebarComponent {
 	);
 
 	// Inputs
-	conversations = input<Conversation[] | null>([]);
 	selectedConversation = input<Conversation | null>(null);
 
 	// Outputs

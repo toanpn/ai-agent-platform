@@ -20,14 +20,11 @@
 		</div>
 
 		<div class="conversations-list-container">
-			@if (conversations(); as convos) {
-				<app-conversation-list
-					[conversations]="convos"
-					[selectedConversation]="selectedConversation()"
-					(selectConversation)="onSelectConversation($event)"
-					(loadMore)="onLoadMoreConversations()"
-				></app-conversation-list>
-			}
+			<app-conversation-list
+				[selectedConversation]="selectedConversation()"
+				(selectConversation)="onSelectConversation($event)"
+				(loadMore)="onLoadMoreConversations()"
+			></app-conversation-list>
 		</div>
 	</div>
 </div>
