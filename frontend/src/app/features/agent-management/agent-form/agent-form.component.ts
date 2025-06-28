@@ -634,6 +634,7 @@ export class AgentFormComponent implements OnInit {
 				}
 			}
 			// If result is undefined, user cancelled, so we do nothing.
+			this.cdr.detectChanges();
 		});
 	}
 

@@ -17,6 +17,9 @@ import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { AgentService, Agent } from '../../../core/services/agent.service';
 import { BehaviorSubject, Subject, EMPTY, merge, combineLatest, Observable } from 'rxjs';
 import { switchMap, tap, catchError, exhaustMap, map, startWith, debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { MatDialog } from '@angular/material/dialog';
+import { ConfirmationDialogComponent, ConfirmationDialogData } from '../../../shared/components/confirmation-dialog/confirmation-dialog.component';
+import { MatMenuModule } from '@angular/material/menu';
 
 interface AgentListAction {
 	type: 'LOAD_AGENTS' | 'REFRESH_AGENTS' | 'DELETE_AGENT';
@@ -43,6 +46,7 @@ interface AgentListAction {
 		MatProgressSpinnerModule,
 		MatPaginatorModule,
 		MatButtonToggleModule,
+		MatMenuModule,
 	],
 	templateUrl: './agent-list.component.html',
 	styleUrls: ['./agent-list.component.scss'],
@@ -51,6 +55,7 @@ export class AgentListComponent implements OnInit, AfterViewInit {
 	private agentService = inject(AgentService);
 	private router = inject(Router);
 	private destroyRef = inject(DestroyRef);
+	private dialog = inject(MatDialog);
 
 	// Action subjects
 	private loadAgentsAction$ = new Subject<void>();
@@ -225,15 +230,28 @@ export class AgentListComponent implements OnInit, AfterViewInit {
 		this.dispatch({ type: 'REFRESH_AGENTS' });
 	}
 
-	/**
-	 * Delete an agent
-	 */
-	deleteAgent(id: number, event: Event): void {
-		event.stopPropagation();
-		
-		if (confirm('AGENTS.CONFIRM_DELETE_AGENT')) {
-			this.dispatch({ type: 'DELETE_AGENT', payload: id });
-		}
+	editAgent(id: number): void {
+		this.router.navigate(['/agents', 'edit', id]);
+	}
+
+	deleteAgent(id: number): void {
+		const dialogData: ConfirmationDialogData = {
+			title: 'AGENTS.CONFIRM_DELETE_AGENT',
+			message: 'AGENTS.CONFIRM_DELETE_AGENT_MESSAGE',
+			confirmButtonText: 'COMMON.DELETE',
+			cancelButtonText: 'COMMON.CANCEL',
+		};
+
+		const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
+			data: dialogData,
+			width: '400px',
+		});
+
+		dialogRef.afterClosed().subscribe(result => {
+			if (result) {
+				this.dispatch({ type: 'DELETE_AGENT', payload: id });
+			}
+		});
 	}
 
 	/**

@@ -168,12 +168,12 @@ The application will be broken down into the following key components, aligning 
         -   Supports multiple tool selection with tool descriptions
         -   Integrates with form validation and submission
         -   Maps existing agent tools when editing an agent
-    -   **File Management:** The `AgentFormComponent` (in edit mode) allows for managing files associated with an agent:
-        -   Lists existing files with their name and size.
-        -   Provides a button to delete existing files. Deletions are queued and executed only upon saving the agent.
-        -   Allows a new file to be selected for upload.
-        -   Displays the selected file's name and size with an option to remove/cancel the selection before uploading.
-        -   Uploads the new file and processes deletions concurrently with the agent update when the form is saved.
+    -   **Agent File Management:**
+        -   File management is available only in the "Edit Agent" screen.
+        -   Users can upload multiple files. Uploads are initiated immediately for each file upon selection.
+        -   Users can delete existing files. Deletions are executed immediately upon confirmation.
+        -   The UI provides real-time feedback on the status of each file operation, including progress indicators and the ability to retry failed uploads.
+        -   File operations are handled independently from the main form submission, which now only updates the agent's metadata.
     -   **Department Field**: In the agent form, the `Department` field is a dropdown (select box) with a fixed, client-side list of department options. This ensures data consistency for agent categorization.
 
 ## 7. Internationalization (i18n) Strategy
@@ -251,10 +251,11 @@ All communication with the backend will be centralized through the `AgentPlatfor
     -   Integration with agent creation and editing workflows.
     -   Support for empty tool selection (sends empty array).
 -   **Agent File Management:**
-    -   In the "Edit Agent" screen, users can view a list of associated files.
-    -   Users can upload one new file per save operation. The UI shows the selected file and allows it to be removed before submission.
-    -   Users can queue existing files for deletion.
-    -   All file operations (upload, deletion) are executed atomically with the agent update via a `forkJoin` when the user saves the changes, ensuring data consistency.
+    -   File management is available only in the "Edit Agent" screen.
+    -   Users can upload multiple files. Uploads are initiated immediately for each file upon selection.
+    -   Users can delete existing files. Deletions are executed immediately upon confirmation.
+    -   The UI provides real-time feedback on the status of each file operation, including progress indicators and the ability to retry failed uploads.
+    -   File operations are handled independently from the main form submission, which now only updates the agent's metadata.
 -   **Internationalization:**
     -   Vietnamese as the default language with English support.
     -   Language selector in the application toolbar.

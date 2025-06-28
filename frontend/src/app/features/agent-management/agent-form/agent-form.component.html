@@ -216,6 +216,7 @@
 
 							<button
 								*ngIf="upload.status === 'error'"
+								type="button"
 								mat-icon-button
 								(click)="retryUpload(upload)"
 								[title]="'Retry upload'"

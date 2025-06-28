@@ -2,32 +2,32 @@
 	<aside class="sidebar">
 		<nav class="nav-menu">
 			<a routerLink="/agents" class="nav-item active">
-				<img src="assets/icons/sidebar/danh-sach-tro-ly.svg" alt="Danh sách trợ lý" />
-				<span>Danh sách trợ lý</span>
+				<img src="assets/icons/sidebar/danh-sach-tro-ly.svg" [alt]="'SIDEBAR.AGENT_LIST' | translate" />
+				<span>{{ 'SIDEBAR.AGENT_LIST' | translate }}</span>
 			</a>
 			<a routerLink="/chat" class="nav-item">
-				<img src="assets/icons/sidebar/chat.svg" alt="Chat" />
-				<span>Chat</span>
+				<img src="assets/icons/sidebar/chat.svg" [alt]="'SIDEBAR.CHAT' | translate" />
+				<span>{{ 'SIDEBAR.CHAT' | translate }}</span>
 			</a>
 			<a routerLink="/knowledge" class="nav-item">
-				<img src="assets/icons/sidebar/kho-tri-thuc.svg" alt="Kho tri thức" />
-				<span>Kho tri thức</span>
+				<img src="assets/icons/sidebar/kho-tri-thuc.svg" [alt]="'SIDEBAR.KNOWLEDGE_BASE' | translate" />
+				<span>{{ 'SIDEBAR.KNOWLEDGE_BASE' | translate }}</span>
 			</a>
 			<a routerLink="/team" class="nav-item">
-				<img src="assets/icons/sidebar/team.svg" alt="Team" />
-				<span>Team</span>
+				<img src="assets/icons/sidebar/team.svg" [alt]="'SIDEBAR.TEAM' | translate" />
+				<span>{{ 'SIDEBAR.TEAM' | translate }}</span>
 			</a>
 		</nav>
 		<div class="settings-section">
-			<h3 class="settings-title">Settings</h3>
+			<h3 class="settings-title">{{ 'SIDEBAR.SETTINGS' | translate }}</h3>
 			<nav class="nav-menu">
 				<a routerLink="/settings/general" class="nav-item">
-					<img src="assets/icons/sidebar/cai-dat-chung.svg" alt="Cài đặt chung" />
-					<span>Cài đặt chung</span>
+					<img src="assets/icons/sidebar/cai-dat-chung.svg" [alt]="'SIDEBAR.GENERAL_SETTINGS' | translate" />
+					<span>{{ 'SIDEBAR.GENERAL_SETTINGS' | translate }}</span>
 				</a>
 				<a routerLink="/settings/security" class="nav-item">
-					<img src="assets/icons/sidebar/bao-mat.svg" alt="Bảo mật" />
-					<span>Bảo mật</span>
+					<img src="assets/icons/sidebar/bao-mat.svg" [alt]="'SIDEBAR.SECURITY' | translate" />
+					<span>{{ 'SIDEBAR.SECURITY' | translate }}</span>
 				</a>
 			</nav>
 		</div>
@@ -93,8 +93,9 @@
 			@if ((filteredAgents$ | async)?.length === 0 && !(loading$ | async)) {
 			<div class="empty-state">
 				<p>{{ 'AGENTS.CREATE_FIRST_AGENT' | translate }}</p>
-				<button mat-raised-button color="primary" routerLink="/agents/new">
-					{{ 'AGENTS.CREATE_AGENT' | translate }}
+				<button mat-flat-button color="primary" routerLink="/agents/new">
+					<mat-icon>add</mat-icon>
+					<span>{{ 'AGENTS.CREATE_AGENT' | translate }}</span>
 				</button>
 			</div>
 			}
@@ -104,20 +105,30 @@
 				@if (agents.length > 0) {
 				<div [ngClass]="(viewMode$ | async) === 'grid' ? 'agent-grid' : 'agent-list'">
 					@for (agent of agents; track agent.id) {
-					<mat-card class="agent-card" [routerLink]="['/agents', agent.id]">
+					<mat-card class="agent-card">
 						<mat-card-header>
-							<div mat-card-avatar class="agent-avatar" [ngClass]="getDepartmentClass(agent.department)">
-								<mat-icon>smart_toy</mat-icon>
+							<div mat-card-avatar class="agent-avatar-wrapper">
+								<img src="assets/icons/sidebar/danh-sach-tro-ly.svg" alt="Agent Avatar" />
 							</div>
-							<mat-card-title>{{ agent.name }}</mat-card-title>
-							<mat-card-subtitle>
+							<div mat-card-title>{{ agent.name }}</div>
+							<div mat-card-subtitle>
 								<span class="status-tag public">
 									{{ 'AGENTS.STATUS_PUBLIC' | translate }}
 								</span>
-							</mat-card-subtitle>
-							<button mat-icon-button class="more-options-btn" (click)="$event.stopPropagation()">
+							</div>
+							<button mat-icon-button class="more-options-btn" [matMenuTriggerFor]="agentMenu">
 								<mat-icon>more_vert</mat-icon>
 							</button>
+							<mat-menu #agentMenu="matMenu">
+								<button mat-menu-item (click)="editAgent(agent.id)">
+									<mat-icon>edit</mat-icon>
+									<span>{{ 'COMMON.EDIT' | translate }}</span>
+								</button>
+								<button mat-menu-item (click)="deleteAgent(agent.id)">
+									<mat-icon>delete</mat-icon>
+									<span>{{ 'COMMON.DELETE' | translate }}</span>
+								</button>
+							</mat-menu>
 						</mat-card-header>
 						<mat-card-content>
 							<p class="description">{{ agent.description }}</p>

@@ -212,6 +212,7 @@
     "AGENT_UPDATED": "Agent updated successfully",
     "AGENT_DELETED": "Agent deleted successfully",
     "CONFIRM_DELETE_AGENT": "Are you sure you want to delete this agent?",
+    "CONFIRM_DELETE_AGENT_MESSAGE": "This action cannot be undone. The agent will be permanently deleted.",
     "ENTER_AGENT_NAME": "Enter agent name",
     "ENTER_AGENT_DESCRIPTION": "Enter agent description",
     "SELECT_MODEL": "Select model",
@@ -418,5 +419,14 @@
     "TIMEOUT": "Request timed out. Please try again.",
     "UNKNOWN_ERROR": "An unknown error occurred.",
     "UNKNOWN": "An unknown error occurred."
+  },
+  "SIDEBAR": {
+    "AGENT_LIST": "Agent List",
+    "CHAT": "Chat",
+    "KNOWLEDGE_BASE": "Knowledge Base",
+    "TEAM": "Team",
+    "SETTINGS": "Settings",
+    "GENERAL_SETTINGS": "General Settings",
+    "SECURITY": "Security"
   }
 }

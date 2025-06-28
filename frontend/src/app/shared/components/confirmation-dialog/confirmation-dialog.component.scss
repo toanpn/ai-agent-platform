@@ -1,0 +1,13 @@
+:host {
+  display: block;
+  min-width: 300px;
+  max-width: 500px;
+}
+
+.mat-dialog-actions {
+  justify-content: flex-end;
+}
+
+button {
+  margin-left: 8px;
+} 

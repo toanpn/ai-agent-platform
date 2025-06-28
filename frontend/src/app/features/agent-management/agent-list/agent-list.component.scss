@@ -108,43 +108,59 @@
 
 .toolbar {
 	display: flex;
-	gap: 1rem;
-	align-items: center;
-	padding: 1rem;
-	background-color: #ffffff;
+	gap: 16px;
+	padding: 16px;
 	border-radius: 8px;
 	border: 1px solid #e5e7eb;
-	margin-bottom: 2rem;
+	background-color: #ffffff;
+	margin-bottom: 24px;
+	align-items: center;
 
-	.mat-mdc-form-field {
-		--mat-mdc-form-field-subscript-text-size: 0;
+	.search-field,
+	.filter-field {
+		flex: 1 1 auto;
 	}
 
 	.search-field {
-		flex: 1;
+		max-width: 400px;
 	}
 
 	.filter-field {
-		min-width: 200px;
+		max-width: 250px;
 	}
 
 	.view-toggle {
+		border-radius: 6px;
+		border: 1px solid #d1d5db;
+		overflow: hidden;
 		margin-left: auto;
 
-		.mat-button-toggle-group {
-			border: 1px solid #d1d5db;
-			border-radius: 6px;
-			height: 42px;
+		.mat-button-toggle-checked {
+			background-color: #f0f9ff;
+			color: #0369a1;
 		}
 
-		.mat-button-toggle {
-			background-color: #ffffff;
-			color: #6b7280;
+		.mat-button-toggle-button {
+			height: 42px;
 		}
-		
-		.mat-button-toggle-checked {
-			background-color: #e0f2fe;
-			color: #0284c7;
+	}
+
+	// Override Material component styles
+	::ng-deep {
+		.mat-mdc-form-field-subscript-wrapper {
+			display: none; // Hide the underline
+		}
+
+		.mat-mdc-text-field-wrapper {
+			border-radius: 6px !important;
+		}
+
+		.mdc-text-field--outlined .mdc-notched-outline__trailing {
+			border-radius: 0 6px 6px 0 !important;
+		}
+
+		.mdc-text-field--outlined .mdc-notched-outline__leading {
+			border-radius: 6px 0 0 6px !important;
 		}
 	}
 }
@@ -158,6 +174,10 @@
 	padding: 4rem;
 	color: #6b7280;
 	text-align: center;
+
+	button {
+		border-radius: 6px;
+	}
 }
 
 .agent-grid {
@@ -190,20 +210,21 @@
 }
 
 .agent-card {
+	cursor: pointer;
+	transition: all 0.2s ease-in-out;
 	background: #ffffff;
 	border-radius: 8px;
 	border: 1px solid #e5e7eb;
 	box-shadow: none;
 	padding: 0;
-	transition: box-shadow 0.2s ease-in-out;
 
 	&:hover {
 		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-		transform: none;
+		transform: translateY(-2px);
 	}
 
 	.mat-mdc-card-header {
-		padding: 1rem;
+		padding: 20px;
 		display: flex;
 		align-items: center;
 		width: 100%;
@@ -211,17 +232,15 @@
 		border-bottom: 1px solid #e5e7eb;
 
 		.mat-mdc-card-header-text {
-			margin: 0 0 0 1rem;
-		}
-		
-		.more-options-btn {
-			margin-left: auto;
-			flex-shrink: 0;
-			color: #6b7280;
+			flex-grow: 1;
+			margin: 0 12px;
+			display: flex;
+			flex-direction: column;
+			gap: 2px;
 		}
 	}
 
-	.agent-avatar {
+	.agent-avatar-wrapper {
 		width: 40px;
 		height: 40px;
 		border-radius: 50%;
@@ -229,20 +248,22 @@
 		align-items: center;
 		justify-content: center;
 		flex-shrink: 0;
+		background-color: #e0f2fe;
+		color: #111827;
+		margin-bottom: 0;
 
-		mat-icon {
-			color: inherit;
-			font-size: 20px;
+		img {
 			width: 20px;
 			height: 20px;
 		}
 	}
 
 	.mat-mdc-card-title {
-		font-size: 1rem;
+		font-size: 16px;
 		font-weight: 500;
 		color: #111827;
-		margin-bottom: 4px;
+		margin-bottom: 0;
+		padding-bottom: 5px;
 	}
 
 	.mat-mdc-card-subtitle {
@@ -253,7 +274,7 @@
 			padding: 2px 10px;
 			border-radius: 9999px;
 			font-size: 12px;
-			font-weight: 500;
+			font-weight: 400;
 			line-height: 1.5;
 
 			&.public {
@@ -268,8 +289,18 @@
 		}
 	}
 
+	.more-options-btn {
+		margin-left: auto;
+		flex-shrink: 0;
+		width: 36px;
+		height: 36px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+
 	.mat-mdc-card-content {
-		padding: 0 1rem 1rem;
+		padding: 20px;
 
 		.description {
 			font-size: 14px;
@@ -288,6 +319,10 @@
 			justify-content: space-between;
 			font-size: 14px;
 
+			.meta-item {
+				display: flex;
+			}
+
 			.meta-label {
 				color: #6b7280;
 				margin-right: 8px;
@@ -295,9 +330,20 @@
 
 			.meta-value {
 				color: #374151;
-				font-weight: 500;
+				font-weight: 400;
 			}
 		}
+	}
+}
+
+mat-card.agent-card {
+	padding: 0;
+	border-radius: 8px;
+	box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1) !important;
+
+	&:hover {
+		transform: translateY(-2px);
+		box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1) !important;
 	}
 }
 
@@ -305,4 +351,8 @@
 	background-color: #ffffff;
 	border-radius: 8px;
 	border: 1px solid #e5e7eb;
+
+	::ng-deep .mat-mdc-paginator-container {
+		justify-content: space-between;
+	}
 }
