@@ -6,6 +6,7 @@ functionality as REST endpoints for integration with the AgentPlatform.API.
 """
 
 import os
+import sys
 import json
 import logging
 import time
@@ -61,28 +62,102 @@ class AgentConfigHandler(FileSystemEventHandler):
     def __init__(self, system_manager: 'AgentSystemManager'):
         self.system_manager = system_manager
         self.last_modified = 0
+        self.config_filename = os.path.basename(system_manager.config_path)
+        self.config_path = system_manager.config_path
+        logger.info(f"🔍 File watcher initialized for: {self.config_path}")
+        logger.info(f"🔍 Watching for filename: {self.config_filename}")
+        
+    def _is_agents_config_file(self, file_path: str) -> bool:
+        """Check if the file path represents our agents configuration file."""
+        try:
+            # Get the filename from the path
+            filename = os.path.basename(file_path)
+            
+            # Check if it's the agents.json file (or our specific config file)
+            if filename == self.config_filename:
+                return True
+            
+            # Also check if the full path matches (for absolute path comparisons)
+            if os.path.abspath(file_path) == os.path.abspath(self.config_path):
+                return True
+                
+            # Handle temporary files created during atomic operations (common in Docker)
+            if filename.startswith(self.config_filename) and ('.tmp' in filename or '.temp' in filename):
+                return False  # Don't trigger on temp files
+                
+            return False
+        except Exception as e:
+            logger.debug(f"Error checking file path {file_path}: {e}")
+            return False
         
     def on_modified(self, event):
-        """Called when the agents.json file is modified."""
+        """Called when a file is modified."""
         if event.is_directory:
             return
             
-        # Check if it's the agents.json file
-        if event.src_path.endswith('agents.json'):
-            # Prevent multiple rapid reloads
-            current_time = time.time()
-            if current_time - self.last_modified < 2:  # 2 second cooldown
+        logger.debug(f"🔍 File modified: {event.src_path}")
+        
+        if self._is_agents_config_file(event.src_path):
+            self._handle_config_change("modified", event.src_path)
+    
+    def on_created(self, event):
+        """Called when a file is created."""
+        if event.is_directory:
+            return
+            
+        logger.debug(f"🔍 File created: {event.src_path}")
+        
+        # In Docker, files are often created new rather than modified
+        if self._is_agents_config_file(event.src_path):
+            self._handle_config_change("created", event.src_path)
+    
+    def on_moved(self, event):
+        """Called when a file is moved (including atomic renames)."""
+        if event.is_directory:
+            return
+            
+        logger.debug(f"🔍 File moved: {event.src_path} -> {event.dest_path}")
+        
+        # Handle atomic file operations (temp file -> final file)
+        if hasattr(event, 'dest_path') and self._is_agents_config_file(event.dest_path):
+            self._handle_config_change("moved", event.dest_path)
+    
+    def _handle_config_change(self, event_type: str, file_path: str):
+        """Handle configuration file changes with debouncing."""
+        # Prevent multiple rapid reloads
+        current_time = time.time()
+        if current_time - self.last_modified < 2:  # 2 second cooldown
+            logger.debug(f"🔍 Ignoring {event_type} event due to cooldown: {file_path}")
+            return
+        self.last_modified = current_time
+        
+        logger.info(f"📁 Configuration file {event_type}: {file_path}")
+        logger.info("🔄 Reloading agents...")
+        
+        try:
+            # Add a small delay to ensure file is fully written (especially important in Docker)
+            time.sleep(0.5)
+            
+            # Verify file exists and is readable
+            if not os.path.exists(self.config_path):
+                logger.warning(f"⚠️  Config file not found after {event_type} event: {self.config_path}")
                 return
-            self.last_modified = current_time
             
-            logger.info(f"📁 Configuration file changed: {event.src_path}")
-            logger.info("🔄 Reloading agents...")
-            
+            # Verify file is not empty and has valid content
             try:
-                self.system_manager.reload_agents()
-                logger.info("✅ System reloaded successfully!")
+                with open(self.config_path, 'r', encoding='utf-8') as f:
+                    content = f.read().strip()
+                    if not content:
+                        logger.warning(f"⚠️  Config file is empty after {event_type} event, waiting for content...")
+                        return
             except Exception as e:
-                logger.error(f"❌ Failed to reload system: {e}")
+                logger.warning(f"⚠️  Cannot read config file after {event_type} event: {e}")
+                return
+            
+            self.system_manager.reload_agents()
+            logger.info("✅ System reloaded successfully!")
+        except Exception as e:
+            logger.error(f"❌ Failed to reload system after {event_type} event: {e}")
 
 def init_rag_service():
     """Initialize the RAG service."""
@@ -167,13 +242,29 @@ class AgentSystemManager:
             if not config_dir:
                 config_dir = '.'
             
+            # Convert to absolute path for consistency
+            config_dir = os.path.abspath(config_dir)
+            
+            logger.info(f"👁️  Starting file monitoring...")
+            logger.info(f"👁️  Config file path: {self.config_path}")
+            logger.info(f"👁️  Monitoring directory: {config_dir}")
+            logger.info(f"👁️  Config file exists: {os.path.exists(self.config_path)}")
+            logger.info(f"👁️  Directory exists: {os.path.exists(config_dir)}")
+            
+            # Check if directory exists
+            if not os.path.exists(config_dir):
+                logger.error(f"❌ Monitoring directory does not exist: {config_dir}")
+                return
+            
             self.observer.schedule(event_handler, path=config_dir, recursive=False)
             self.observer.start()
             
             logger.info("👁️  File monitoring started - agents.json changes will trigger automatic reload")
+            logger.info(f"👁️  Watching for file changes in: {config_dir}")
             
         except Exception as e:
             logger.warning(f"⚠️  Warning: Could not start file monitoring: {e}")
+            logger.warning(f"⚠️  File monitoring will be disabled. Manual reload will be required.")
     
     def stop_monitoring(self):
         """Stop file monitoring."""
@@ -300,7 +391,8 @@ def debug_info():
         "environment": {
             "google_api_key_present": bool(os.getenv('GOOGLE_API_KEY')),
             "config_file_exists": os.path.exists("agents.json"),
-            "current_directory": os.getcwd()
+            "current_directory": os.getcwd(),
+            "python_path": sys.path
         },
         "system_manager": {
             "initialized": system_manager is not None,
@@ -309,11 +401,46 @@ def debug_info():
         }
     }
     
-    if system_manager and system_manager.master_agent:
-        debug_info["master_agent"] = {
-            "sub_agents_count": len(system_manager.master_agent.sub_agents),
-            "sub_agent_names": [agent.name for agent in system_manager.master_agent.sub_agents]
+    if system_manager:
+        # Add file monitoring information
+        debug_info["file_monitoring"] = {
+            "observer_active": system_manager.observer is not None and system_manager.observer.is_alive() if system_manager.observer else False,
+            "config_path": system_manager.config_path,
+            "config_path_absolute": os.path.abspath(system_manager.config_path),
+            "config_file_exists": os.path.exists(system_manager.config_path),
+            "config_dir": os.path.dirname(system_manager.config_path),
+            "config_dir_exists": os.path.exists(os.path.dirname(system_manager.config_path)),
+            "config_file_readable": True,
+            "config_file_size": None,
+            "config_file_modified": None
         }
+        
+        # Try to read config file info
+        try:
+            if os.path.exists(system_manager.config_path):
+                stat_info = os.stat(system_manager.config_path)
+                debug_info["file_monitoring"]["config_file_size"] = stat_info.st_size
+                debug_info["file_monitoring"]["config_file_modified"] = datetime.fromtimestamp(stat_info.st_mtime).isoformat()
+                
+                # Test file readability
+                with open(system_manager.config_path, 'r', encoding='utf-8') as f:
+                    content = f.read()
+                    debug_info["file_monitoring"]["config_file_content_length"] = len(content)
+                    debug_info["file_monitoring"]["config_file_valid_json"] = True
+                    try:
+                        import json
+                        json.loads(content)
+                    except json.JSONDecodeError:
+                        debug_info["file_monitoring"]["config_file_valid_json"] = False
+        except Exception as e:
+            debug_info["file_monitoring"]["config_file_readable"] = False
+            debug_info["file_monitoring"]["read_error"] = str(e)
+        
+        if system_manager.master_agent:
+            debug_info["master_agent"] = {
+                "sub_agents_count": len(system_manager.master_agent.sub_agents),
+                "sub_agent_names": [agent.name for agent in system_manager.master_agent.sub_agents]
+            }
     
     return jsonify(debug_info)
 
@@ -544,6 +671,62 @@ def reload_agents_endpoint():
         
     except Exception as e:
         logger.error(f"Error reloading agents: {e}")
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        }), 500
+
+
+@app.route('/api/test-file-monitoring', methods=['POST'])
+def test_file_monitoring():
+    """Test endpoint to manually trigger file monitoring and check system status."""
+    try:
+        if not system_manager:
+            return jsonify({
+                "success": False,
+                "error": "System not initialized"
+            }), 500
+        
+        # Check current file monitoring status
+        monitoring_status = {
+            "observer_exists": system_manager.observer is not None,
+            "observer_alive": system_manager.observer.is_alive() if system_manager.observer else False,
+            "config_path": system_manager.config_path,
+            "config_exists": os.path.exists(system_manager.config_path),
+        }
+        
+        # Try to read current file content
+        current_content = None
+        try:
+            with open(system_manager.config_path, 'r', encoding='utf-8') as f:
+                current_content = f.read()
+                monitoring_status["file_readable"] = True
+                monitoring_status["file_size"] = len(current_content)
+        except Exception as e:
+            monitoring_status["file_readable"] = False
+            monitoring_status["read_error"] = str(e)
+        
+        # Try manual reload
+        reload_success = False
+        reload_error = None
+        try:
+            system_manager.reload_agents()
+            reload_success = True
+        except Exception as e:
+            reload_error = str(e)
+        
+        return jsonify({
+            "success": True,
+            "monitoring_status": monitoring_status,
+            "manual_reload": {
+                "success": reload_success,
+                "error": reload_error
+            },
+            "message": "File monitoring test completed"
+        })
+        
+    except Exception as e:
+        logger.error(f"Error testing file monitoring: {e}")
         return jsonify({
             "success": False,
             "error": str(e)
