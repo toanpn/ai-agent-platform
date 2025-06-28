@@ -14,12 +14,14 @@ namespace AgentPlatform.API.Services
             _environment = environment;
             _logger = logger;
             
-            // Try multiple paths in order of preference
+            // Try multiple paths in order of preference with better Docker support
             var possiblePaths = new[]
             {
-                // Docker paths (production)
-                "/AgentPlatform.Core/toolkit/tools.json",
-                "/app/AgentPlatform.Core/toolkit/tools.json",
+                // Docker production paths (exact mount points)
+                "/AgentPlatform.Core/toolkit/tools.json",     // Main API container mount
+                "/app/shared/tools.json",                     // Shared volume mount (preferred)
+                "/app/AgentPlatform.Core/toolkit/tools.json", // Agent-Core mount point
+                "/app/toolkit/tools.json",                    // Legacy mount (if exists)
                 
                 // Local development paths
                 Path.Combine(_environment.ContentRootPath, "..", "AgentPlatform.Core", "toolkit", "tools.json"),
@@ -30,30 +32,81 @@ namespace AgentPlatform.API.Services
                 "toolkit/tools.json"
             };
 
-            // Find the first existing path or use the first Docker path as default for production
-            _toolsJsonPath = possiblePaths.FirstOrDefault(File.Exists) ?? possiblePaths[0];
+            // Log all possible paths for debugging
+            _logger.LogInformation("Checking possible paths for tools.json:");
+            foreach (var path in possiblePaths)
+            {
+                var exists = File.Exists(path);
+                var canAccess = CanAccessPath(path);
+                _logger.LogInformation("Path: {Path} - Exists: {Exists}, Accessible: {CanAccess}", path, exists, canAccess);
+            }
+
+            // Find the first existing and accessible path
+            _toolsJsonPath = possiblePaths.FirstOrDefault(path => File.Exists(path) && CanAccessPath(path)) 
+                             ?? possiblePaths[0]; // Fallback to first Docker path
             
-            _logger.LogInformation("Using tools.json path: {ToolsJsonPath}", _toolsJsonPath);
+            _logger.LogInformation("Selected tools.json path: {ToolsJsonPath}", _toolsJsonPath);
             
-            // Create the file if it doesn't exist to ensure the path is valid
-            if (!File.Exists(_toolsJsonPath))
+            // Initialize file with better error handling
+            InitializeToolsFile();
+        }
+
+        private bool CanAccessPath(string path)
+        {
+            try
+            {
+                var directory = Path.GetDirectoryName(path);
+                if (string.IsNullOrEmpty(directory)) return true;
+                
+                // Check if we can access the directory
+                var dirInfo = new DirectoryInfo(directory);
+                return dirInfo.Exists || Directory.Exists(directory) || CanCreateDirectory(directory);
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        private bool CanCreateDirectory(string directory)
+        {
+            try
+            {
+                // Check parent directory permissions
+                var parent = Directory.GetParent(directory);
+                return parent != null && parent.Exists;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        private void InitializeToolsFile()
+        {
+            // Only validate if file exists, don't create it
+            if (File.Exists(_toolsJsonPath))
             {
                 try
                 {
-                    var directory = Path.GetDirectoryName(_toolsJsonPath);
-                    if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory))
+                    var content = File.ReadAllText(_toolsJsonPath);
+                    if (string.IsNullOrWhiteSpace(content))
                     {
-                        Directory.CreateDirectory(directory);
-                        _logger.LogInformation("Created directory: {Directory}", directory);
+                        _logger.LogWarning("tools.json file exists but is empty at: {ToolsJsonPath}", _toolsJsonPath);
                     }
-                    
-                    File.WriteAllText(_toolsJsonPath, "[]");
-                    _logger.LogInformation("Created empty tools.json file at: {ToolsJsonPath}", _toolsJsonPath);
+                    else
+                    {
+                        _logger.LogInformation("tools.json file found and validated at: {ToolsJsonPath}", _toolsJsonPath);
+                    }
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "Failed to create tools.json file at: {ToolsJsonPath}", _toolsJsonPath);
+                    _logger.LogError(ex, "Failed to read existing tools.json file at: {ToolsJsonPath}", _toolsJsonPath);
                 }
+            }
+            else
+            {
+                _logger.LogWarning("tools.json file not found at: {ToolsJsonPath}. Tools will not be available until the file is provided.", _toolsJsonPath);
             }
         }
 

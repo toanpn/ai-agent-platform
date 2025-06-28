@@ -41,6 +41,7 @@ services:
     volumes:
       - ./backend/uploads:/app/uploads
       - ./backend/AgentPlatform.Core:/AgentPlatform.Core
+      - agent_shared_data:/app/shared
     networks:
       - agentplatform-network
 
@@ -63,9 +64,10 @@ services:
       - "8000:8000"
     volumes:
       - ./backend/AgentPlatform.Core/uploads:/app/uploads
-      - ./backend/AgentPlatform.Core/agents.json:/app/agents.json
+      - ./backend/AgentPlatform.Core:/app/AgentPlatform.Core
       - ./gcp-credentials.json:/app/gcp-credentials.json:ro
       - chroma_db_data:/app/db
+      - agent_shared_data:/app/shared
     networks:
       - agentplatform-network
     healthcheck:
@@ -100,6 +102,7 @@ services:
 volumes:
   sqlserver_data:
   chroma_db_data:
+  agent_shared_data:
 
 networks:
   agentplatform-network:

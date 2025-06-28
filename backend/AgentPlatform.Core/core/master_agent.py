@@ -30,31 +30,67 @@ class MasterAgent:
         
         # Create a comprehensive prompt for the master agent
         prompt = ChatPromptTemplate.from_messages([
-            ("system", """You are a powerful Master Agent responsible for coordinating and delegating tasks to specialized agents. 
+            ("system", """You are an intelligent Master Agent (Coordinator) responsible for analyzing user requests and routing them to the most appropriate specialist agent. You are the central brain of KiotViet's multi-agent system.
 
-Your primary responsibilities:
-1. Analyze incoming user requests carefully
-2. Determine which specialized agent is best suited to handle the request
-3. Route the request to the appropriate agent
-4. Never attempt to answer directly - always use the available specialist agents
+🏪 KIOTVIET COMPANY CONTEXT:
+- KiotViet is Vietnam's leading sales management software company
+- Main product: Comprehensive sales management platform for stores, restaurants, spas, clinics
+- Core features: Inventory management, POS sales, revenue reporting, customer management, marketing automation
+- Target customers: SMEs (Small & Medium Enterprises) in Vietnam
+- Departments: Sales, Customer Service (CSKH), Dev, Test, Product (PE), HR, IT
+- Company culture: Innovation, efficiency, customer-focused
 
-Available Specialist Agents:
+🎯 CORE MISSION: Analyze, Route, Coordinate - Never answer directly, always delegate to specialists with KiotViet context.
+
+📋 AVAILABLE SPECIALIST AGENTS:
 {agent_descriptions}
 
-Guidelines for routing requests:
-- Read the user's request thoroughly
-- Match the request type with agent capabilities based on their descriptions
-- Always delegate to the most appropriate specialist agent
-- If a request could fit multiple agents, choose the most specific one
-- If no agent seems appropriate, use the General_Search_Agent as a fallback
-- Pass the complete user question to the selected agent
+🧠 INTELLIGENT ROUTING DECISION FRAMEWORK:
 
-IMPORTANT LANGUAGE INSTRUCTION: 
-- Always ensure that the final response to the user is provided in Vietnamese
-- When delegating to sub-agents, include an instruction that they must respond in Vietnamese
-- The user interface expects Vietnamese responses, so this is critical
+1. **REQUEST ANALYSIS**:
+   - Identify the primary domain: HR, IT/Technical, Research, or General
+   - Look for key indicators and keywords
+   - Consider the action type: create, search, troubleshoot, manage, etc.
 
-Remember: Your job is to be a smart router, not to provide direct answers. Trust your specialist agents to handle their domains of expertise."""),
+2. **DOMAIN KEYWORDS MAPPING**:
+   
+   **HR_Agent** → Use for:
+   - Keywords: "nhân sự", "HR", "employee", "nhân viên", "chính sách", "policy", "nghỉ phép", "leave", "tuyển dụng", "recruitment", "benefits", "lương", "salary", "đánh giá", "performance", "onboarding", "offboarding"
+   - Actions: Employee queries, policy questions, leave requests, benefits info, HR procedures
+   
+   **PE_Agent** → Use for:
+   - Keywords: "sản phẩm", "product", "dự án", "project", "phát triển", "development", "business", "kinh doanh", "yêu cầu", "requirements", "user story", "sprint", "scrum", "JIRA", "ticket", "stakeholder", "phân tích", "analysis", "documentation", "tài liệu", "workflow", "process", "strategy", "chiến lược", "market", "thị trường", "competitor", "đối thủ", "research", "nghiên cứu"
+   - Actions: Product development, business analysis, project management, requirements gathering, JIRA management, stakeholder communication
+
+3. **ROUTING DECISION RULES**:
+   - **Primary Rule**: Match domain keywords first
+   - **HR Priority**: Use HR_Agent for any employee/policy/HR-related questions
+   - **PE Priority**: Use PE_Agent for product development, business analysis, JIRA, project management
+   - **Tool Consideration**: JIRA tasks → PE_Agent, HR policies → HR_Agent
+   - **Fallback Rule**: When unclear, prefer PE_Agent as it has more comprehensive tools
+
+4. **DELEGATION INSTRUCTIONS**:
+   - Pass the COMPLETE original user question to the selected agent
+   - Add Vietnamese response instruction: "Vui lòng trả lời bằng tiếng Việt."
+   - Include relevant context if available
+
+5. **CRITICAL REQUIREMENTS**:
+   - NEVER answer questions yourself - ALWAYS delegate
+   - ALWAYS choose exactly ONE agent
+   - ALWAYS pass the full user query to the selected agent
+   - ALWAYS ensure Vietnamese responses from sub-agents
+
+Example routing decisions for KiotViet:
+- "Tạo JIRA ticket cho bug POS system" → PE_Agent
+- "Chính sách nghỉ phép của KiotViet" → HR_Agent  
+- "Phân tích requirements cho tính năng inventory mới" → PE_Agent
+- "Thông tin về benefits nhân viên KiotViet" → HR_Agent
+- "Sprint planning cho KiotViet mobile app" → PE_Agent
+- "Onboarding developer mới vào team Dev" → HR_Agent
+- "Competitor analysis MISA vs KiotViet" → PE_Agent
+- "Quy trình performance review" → HR_Agent
+
+Remember: You are a smart router, not an answerer. Trust your specialists to handle their domains of expertise!"""),
             ("human", "{input}"),
             ("placeholder", "{agent_scratchpad}"),
         ])
@@ -102,21 +138,62 @@ Remember: Your job is to be a smart router, not to provide direct answers. Trust
             str: The response from the appropriate sub-agent
         """
         try:
-            # Log the incoming request
-            print(f"Master Agent received request: {user_input}")
+            # Log the incoming request with analysis
+            print(f"\n🎯 MASTER AGENT: Phân tích yêu cầu từ user...")
+            print(f"📝 User Input: {user_input}")
+            
+            # Analyze request for better routing
+            self._log_routing_analysis(user_input)
             
             # Process the request through the agent executor
             result = self.agent_executor.invoke({"input": user_input})
             
             # Extract the output
-            output = result.get("output", "No response generated")
+            output = result.get("output", "Không có phản hồi được tạo")
+            
+            # Log successful routing
+            print(f"✅ MASTER AGENT: Đã xử lý thành công và nhận được phản hồi")
             
             return output
             
         except Exception as e:
-            error_msg = f"Master Agent encountered an error: {str(e)}"
-            print(f"Error: {error_msg}")
-            return error_msg
+            error_msg = f"❌ Master Agent gặp lỗi: {str(e)}"
+            print(f"❌ Error: {error_msg}")
+            
+            # Provide fallback response in Vietnamese
+            fallback_response = f"""Xin lỗi, tôi gặp sự cố khi xử lý yêu cầu của bạn. 
+
+Lỗi: {str(e)}
+
+Vui lòng thử lại hoặc liên hệ với bộ phận hỗ trợ kỹ thuật nếu vấn đề vẫn tiếp tục."""
+            
+            return fallback_response
+    
+    def _log_routing_analysis(self, user_input: str):
+        """Log analysis for routing decision debugging."""
+        print(f"\n🔍 ROUTING ANALYSIS:")
+        
+        # Check for key domain indicators
+        hr_keywords = ["nhân sự", "HR", "employee", "nhân viên", "chính sách", "policy", "nghỉ phép", "leave", "lương", "salary", "benefits", "tuyển dụng", "recruitment", "onboarding", "offboarding", "xin nghỉ việc", "nghỉ việc", "resignation", "thủ tục"]
+        pe_keywords = ["sản phẩm", "product", "dự án", "project", "phát triển", "development", "business", "kinh doanh", "yêu cầu", "requirements", "user story", "sprint", "scrum", "JIRA", "ticket", "stakeholder", "phân tích", "analysis", "documentation", "tài liệu", "workflow", "process", "strategy", "chiến lược", "market", "thị trường", "competitor", "đối thủ", "research", "nghiên cứu"]
+        
+        detected_domains = []
+        
+        for keyword in hr_keywords:
+            if keyword.lower() in user_input.lower():
+                detected_domains.append(f"HR ({keyword})")
+                
+        for keyword in pe_keywords:
+            if keyword.lower() in user_input.lower():
+                detected_domains.append(f"PE ({keyword})")
+        
+        if detected_domains:
+            print(f"🎯 Detected domains: {', '.join(detected_domains)}")
+        else:
+            print(f"🤔 No specific domain detected - will default to PE_Agent")
+        
+        print(f"📊 Available agents: {[agent.name for agent in self.sub_agents]}")
+        print(f"⚡ Starting routing process...\n")
     
     def process_request_with_details(self, user_input: str) -> dict:
         """
