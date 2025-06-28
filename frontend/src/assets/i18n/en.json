@@ -382,7 +382,8 @@
     "SUPPORTED_FORMATS": "Supported formats: PDF, DOC, DOCX, XLS, XLSX, PPT, TXT, CSV, Images, Code files",
     "SIZE_LIMIT": "Max 50MB per file, 500MB total",
     "BROWSE": "Browse Files",
-    "UPLOAD_AREA_TITLE": "Upload Files"
+    "UPLOAD_AREA_TITLE": "Upload Files",
+    "PROCESSING": "Processing..."
   },
   "NAVIGATION": {
     "HOME": "Home",

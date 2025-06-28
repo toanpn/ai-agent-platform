@@ -25,6 +25,7 @@ import {
 	LlmConfig,
 	ToolConfig,
 	AgentFile,
+	Agent,
 } from '../../../core/services/agent.service';
 import { FileService } from '../../../core/services/file.service';
 import { ChatService } from '../../../core/services/chat.service';
@@ -38,6 +39,12 @@ import { Observable } from 'rxjs';
 interface UpdateAgentPayload {
 	id: number;
 	request: UpdateAgentRequest;
+}
+
+export interface FileUpload {
+	file: File;
+	status: 'pending' | 'uploading' | 'success' | 'error';
+	error?: string;
 }
 
 @Component({
@@ -97,8 +104,7 @@ export class AgentFormComponent implements OnInit {
 	// Files
 	agentFiles: AgentFile[] = [];
 	fileUploadLoading = false;
-	selectedFiles: File[] = [];
-	private filesToDelete: number[] = [];
+	fileUploads: FileUpload[] = [];
 	isDragging = false;
 
 	// Departments
@@ -270,24 +276,11 @@ export class AgentFormComponent implements OnInit {
 				tap(() => (this.loading = true)),
 				exhaustMap(request =>
 					this.agentService.createAgent(request).pipe(
-						switchMap(createdAgent => {
-							if (this.selectedFiles.length === 0) {
-								return of(createdAgent);
-							}
-							const uploadOperations = this.selectedFiles.map(file =>
-								this.fileService.uploadFile(createdAgent.id, file),
-							);
-							return forkJoin(uploadOperations).pipe(
-								switchMap(() => of(createdAgent)), // Return the agent after uploads
-							);
-						}),
 						catchError(err => {
 							console.error('Error during agent creation process:', err);
 							this.saveError = 'AGENTS.CREATE_ERROR';
 							this.loading = false;
-							this.notificationService.showError(
-								'Failed to create agent or upload files.',
-							);
+							this.notificationService.showError('Failed to create agent.');
 							return of(null);
 						}),
 					),
@@ -314,27 +307,7 @@ export class AgentFormComponent implements OnInit {
 			.pipe(
 				tap(() => (this.loading = true)),
 				exhaustMap(({ id, request }) => {
-					const updateAgent$ = this.agentService.updateAgent(id, request);
-
-					const uploadOperations$ =
-						this.selectedFiles.length > 0
-							? forkJoin(
-									this.selectedFiles.map(file =>
-										this.fileService.uploadFile(id, file),
-									),
-							  )
-							: of(null);
-
-					const deleteOperations$ =
-						this.filesToDelete.length > 0
-							? forkJoin(
-									this.filesToDelete.map(fileId =>
-										this.fileService.deleteFile(fileId),
-									),
-							  )
-							: of(null);
-
-					return forkJoin([updateAgent$, uploadOperations$, deleteOperations$]).pipe(
+					return this.agentService.updateAgent(id, request).pipe(
 						catchError(err => {
 							console.error('Error during agent update process:', err);
 							this.saveError = 'AGENTS.UPDATE_ERROR';
@@ -343,15 +316,14 @@ export class AgentFormComponent implements OnInit {
 					);
 				}),
 				filter(result => !!result),
-				tap(([updateResult, uploadResult, deleteResult]) => {
+				tap(updateResult => {
 					this.loading = false;
 					if (updateResult) {
 						this.notificationService.showSuccess('Agent updated successfully!');
 						this.router.navigate(['/agents/result'], {
 							state: { agent: updateResult, action: 'update' },
 						});
-						this.selectedFiles = [];
-						this.filesToDelete = [];
+						this.fileUploads = []; // Clear any pending/failed uploads
 					}
 				}),
 				finalize(() => (this.loading = false)),
@@ -844,42 +816,102 @@ export class AgentFormComponent implements OnInit {
 
 	private addFiles(newFiles: File[]): void {
 		const currentFileNames = new Set([
-			...this.selectedFiles.map(f => f.name),
+			...this.fileUploads.map(fu => fu.file.name),
 			...this.agentFiles.map(f => f.fileName),
 		]);
 
 		const uniqueNewFiles = newFiles.filter(file => !currentFileNames.has(file.name));
-		
 		if (uniqueNewFiles.length < newFiles.length) {
 			this.notificationService.showWarning('Duplicate files were ignored.');
 		}
 
-		this.selectedFiles = [...this.selectedFiles, ...uniqueNewFiles];
+		const newUploads: FileUpload[] = uniqueNewFiles.map(file => ({
+			file,
+			status: 'pending',
+		}));
+
+		this.fileUploads.push(...newUploads);
+		newUploads.forEach(upload => this.uploadFile(upload));
 	}
 
-	removeSelectedFile(fileToRemove: File): void {
-		this.selectedFiles = this.selectedFiles.filter(file => file !== fileToRemove);
+	private uploadFile(upload: FileUpload): void {
+		if (!this.agentId) {
+			upload.status = 'error';
+			upload.error = 'Agent ID is not available.';
+			this.notificationService.showError('Cannot upload file: Agent is not saved yet.');
+			return;
+		}
+
+		upload.status = 'uploading';
+
+		this.fileService
+			.uploadFile(this.agentId, upload.file)
+			.pipe(takeUntilDestroyed(this.destroyRef))
+			.subscribe({
+				next: (uploadedFile: AgentFile) => {
+					// On success, remove from the upload list
+					this.fileUploads = this.fileUploads.filter(fu => fu !== upload);
+
+					// The API response might not contain all file details needed by the UI.
+					// We'll merge the API response with the local file info.
+					const newFile: AgentFile = {
+						...uploadedFile,
+						fileName: upload.file.name,
+						fileSize: upload.file.size,
+					};
+
+					// And add to the permanent agent files list
+					this.agentFiles.push(newFile);
+					// Manually trigger change detection
+					this.cdr.detectChanges();
+				},
+				error: err => {
+					upload.status = 'error';
+					upload.error = err.error?.message || 'Upload failed';
+					this.notificationService.showError(`Failed to upload file '${upload.file.name}'.`);
+					// Manually trigger change detection to show error state
+					this.cdr.detectChanges();
+				},
+			});
+	}
+
+	retryUpload(upload: FileUpload): void {
+		upload.status = 'pending';
+		upload.error = undefined;
+		this.uploadFile(upload);
+	}
+
+	removeSelectedFile(uploadToRemove: FileUpload): void {
+		this.fileUploads = this.fileUploads.filter(upload => upload !== uploadToRemove);
 	}
 
 	deleteFile(fileId: number): void {
-		// Immediately remove from UI
-		this.agentFiles = this.agentFiles.filter(file => file.id !== fileId);
-		// Add to the list of files to be deleted on submit
-		if (!this.filesToDelete.includes(fileId)) {
-			this.filesToDelete.push(fileId);
-		}
+		this.fileService.deleteFile(fileId).subscribe({
+			next: () => {
+				this.agentFiles = this.agentFiles.filter(file => file.id !== fileId);
+				// Manually trigger change detection
+				this.cdr.detectChanges();
+			},
+			error: err => {
+				this.notificationService.showError('Failed to delete file.');
+				console.error('File deletion error', err);
+			},
+		});
 	}
 
 	formatFileSize(bytes: number, decimals = 2): string {
 		if (bytes === 0) return '0 Bytes';
 		const k = 1024;
 		const dm = decimals < 0 ? 0 : decimals;
-		const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+		const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
 		const i = Math.floor(Math.log(bytes) / Math.log(k));
 		return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
 	}
 
 	getIconForFile(fileName: string): string {
+		if (!fileName) {
+			return '/assets/icons/icon-file.svg';
+		}
 		const extension = fileName.split('.').pop()?.toLowerCase();
 		switch (extension) {
 			case 'pdf':

@@ -163,76 +163,96 @@
 
 		<hr class="section-divider" />
 
-		<!-- Agent Files Section -->
-		<div class="files-section">
-			<h2 class="section-title">{{ 'AGENTS.FILES.UPLOAD_TITLE' | translate }}</h2>
-			<input
-				type="file"
-				(change)="onFileSelected($event)"
-				#fileInput
-				style="display: none"
-				id="file-upload-input"
-				multiple
-			/>
+		<ng-container *ngIf="isEditMode">
+			<!-- Agent Files Section -->
+			<div class="files-section">
+				<h2 class="section-title">{{ 'AGENTS.FILES.UPLOAD_TITLE' | translate }}</h2>
+				<input
+					type="file"
+					(change)="onFileSelected($event)"
+					#fileInput
+					style="display: none"
+					id="file-upload-input"
+					multiple
+				/>
 
-			<div
-				class="file-upload-area"
-				(click)="fileInput.click()"
-				(dragover)="onDragOver($event)"
-				(dragleave)="onDragLeave($event)"
-				(drop)="onDrop($event)"
-				[class.dragging]="isDragging"
-				[class.has-files]="selectedFiles.length > 0 || agentFiles.length > 0"
-			>
-				<img src="/assets/icons/icon-cloud-upload.svg" class="upload-icon" alt="upload icon" />
-				<p>
-					<span class="drag-drop-text">{{ 'AGENTS.FILES.DRAG_AND_DROP' | translate }}</span>
-				</p>
-				<div class="file-upload-details">
-					<p>{{ 'AGENTS.FILES.SUPPORTED_FORMATS' | translate }}</p>
-					<p>{{ 'AGENTS.FILES.SIZE_LIMIT' | translate }}</p>
+				<div
+					class="file-upload-area"
+					(click)="fileInput.click()"
+					(dragover)="onDragOver($event)"
+					(dragleave)="onDragLeave($event)"
+					(drop)="onDrop($event)"
+					[class.dragging]="isDragging"
+					[class.has-files]="fileUploads.length > 0 || agentFiles.length > 0"
+				>
+					<img src="/assets/icons/icon-cloud-upload.svg" class="upload-icon" alt="upload icon" />
+					<p>
+						<span class="drag-drop-text">{{ 'AGENTS.FILES.DRAG_AND_DROP' | translate }}</span>
+					</p>
+					<div class="file-upload-details">
+						<p>{{ 'AGENTS.FILES.SUPPORTED_FORMATS' | translate }}</p>
+						<p>{{ 'AGENTS.FILES.SIZE_LIMIT' | translate }}</p>
+					</div>
+					<button type="button" class="browse-button">
+						{{ 'AGENTS.FILES.BROWSE' | translate }}
+					</button>
 				</div>
-				<button type="button" class="browse-button">
-					{{ 'AGENTS.FILES.BROWSE' | translate }}
-				</button>
-			</div>
 
-			<div class="file-list">
-				<!-- Display for newly selected files -->
-				<div *ngFor="let file of selectedFiles" class="file-list-item processing">
-					<div class="file-info">
-						<img [src]="getIconForFile(file.name)" class="file-icon" alt="file icon" />
-						<div class="file-details">
-							<span class="file-name">{{ file.name }}</span>
-							<span class="file-size">{{ formatFileSize(file.size) }}</span>
+				<div class="file-list">
+					<!-- Display for newly selected files (uploading/failed) -->
+					<div *ngFor="let upload of fileUploads" class="file-list-item" [ngClass]="upload.status">
+						<div class="file-info">
+							<img [src]="getIconForFile(upload.file.name)" class="file-icon" alt="file icon" />
+							<div class="file-details">
+								<span class="file-name">{{ upload.file.name }}</span>
+								<span class="file-size">{{ formatFileSize(upload.file.size) }}</span>
+								<mat-error *ngIf="upload.status === 'error'">{{ upload.error }}</mat-error>
+							</div>
+						</div>
+						<div class="file-status">
+							<span *ngIf="upload.status === 'uploading'" class="processing-text">
+								{{ 'AGENTS.FILES.PROCESSING' | translate }}
+							</span>
+
+							<button
+								*ngIf="upload.status === 'error'"
+								mat-icon-button
+								(click)="retryUpload(upload)"
+								[title]="'Retry upload'"
+							>
+								<mat-icon>refresh</mat-icon>
+							</button>
+
+							<button
+								class="remove-btn"
+								type="button"
+								(click)="removeSelectedFile(upload)"
+								*ngIf="upload.status !== 'success'"
+							>
+								<img src="/assets/icons/icon-close.svg" alt="remove" />
+							</button>
 						</div>
 					</div>
-					<div class="file-status">
-						<button class="remove-btn" type="button" (click)="removeSelectedFile(file)">
-							<img src="/assets/icons/icon-close.svg" alt="remove" />
-						</button>
-					</div>
-				</div>
 
-				<!-- Display for existing agent files -->
-				<div *ngFor="let file of agentFiles" class="file-list-item">
-					<div class="file-info">
-						<img [src]="getIconForFile(file.fileName)" class="file-icon" alt="file icon" />
-						<div class="file-details">
-							<span class="file-name">{{ file.fileName }}</span>
-							<span class="file-size">{{ formatFileSize(file.fileSize) }}</span>
+					<!-- Display for existing agent files -->
+					<div *ngFor="let file of agentFiles" class="file-list-item">
+						<div class="file-info">
+							<img [src]="getIconForFile(file.fileName)" class="file-icon" alt="file icon" />
+							<div class="file-details">
+								<span class="file-name">{{ file.fileName }}</span>
+								<span class="file-size">{{ formatFileSize(file.fileSize) }}</span>
+							</div>
 						</div>
-					</div>
-					<div class="file-actions">
-						<button class="remove-btn" type="button" (click)="deleteFile(file.id)">
-							<img src="/assets/icons/icon-close.svg" alt="delete" />
-						</button>
+						<div class="file-actions">
+							<button class="remove-btn" type="button" (click)="deleteFile(file.id)">
+								<img src="/assets/icons/icon-close.svg" alt="delete" />
+							</button>
+						</div>
 					</div>
 				</div>
 			</div>
-		</div>
-
-		<hr class="section-divider" />
+			<hr class="section-divider" />
+		</ng-container>
 
 		<div class="form-group">
 			<div class="tools-section-header">
