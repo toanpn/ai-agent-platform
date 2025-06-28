@@ -51,6 +51,7 @@
 
 /* Agent message general styling */
 .agent-message .message-bubble {
+	background-color: var(--color-surface-soft);
 	.agent-header {
 		display: flex;
 		align-items: center;

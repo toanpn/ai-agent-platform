@@ -44,11 +44,11 @@ export class AuthService {
 		}
 
 		return this.getCurrentUser().pipe(
-			concatMap((user) => {
+			tap((user) => {
 				this.currentUserSignal.set(this.formatUser(user));
 				this.chatState.initialize();
-				return this.router.navigate(['/chat']);
 			}),
+			map(() => true),
 			catchError(() => {
 				this.logout();
 				return of(null);
