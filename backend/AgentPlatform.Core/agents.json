@@ -1,5 +1,12 @@
 [
   {
+    "agent_name": "Master_Router_Agent",
+    "description": "A master agent that intelligently routes requests to other specialized agents. It can access public agents and its own private agents.",
+    "tools": [],
+    "IsMainRouter": true,
+    "owner_id": "user_main"
+  },
+  {
     "agent_name": "HR_Agent",
     "description": "Specialized agent for HR support tasks including knowledge base search and Google search.",
     "tools": [
@@ -19,7 +26,9 @@
     "llm_config": {
       "model_name": "gemini-2.0-flash",
       "temperature": 0.4
-    }
+    },
+    "IsPublic": false,
+    "owner_id": "user_main"
   },
   {
     "agent_name": "PE_Agent",
@@ -51,6 +60,8 @@
     "llm_config": {
       "model_name": "gemini-2.0-flash",
       "temperature": 0.2
-    }
+    },
+    "IsPublic": true,
+    "owner_id": "user_pe"
   }
 ]

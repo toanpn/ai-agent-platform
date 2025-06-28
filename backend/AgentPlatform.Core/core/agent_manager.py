@@ -153,6 +153,7 @@ Each tool has specific parameters and capabilities. Use them appropriately based
     def load_agents_from_config(self, config_path: str = "agents.json") -> List[BaseTool]:
         """
         Reads the JSON file and creates a list of sub-agents (wrapped as tools).
+        It filters agents based on ownership and public access if a main router agent is defined.
         
         Args:
             config_path: Path to the agents configuration file
@@ -169,15 +170,35 @@ Each tool has specific parameters and capabilities. Use them appropriately based
             
             if not isinstance(configs, list):
                 raise ValueError("Configuration file must contain a list of agent configurations")
-            
+
+            # Check for a main router and its owner
+            main_router_config = next((c for c in configs if c.get("IsMainRouter")), None)
+            owner_id = main_router_config.get("owner_id") if main_router_config else None
+
             self.sub_agents = []
             for config in configs:
+                # Skip the main router itself from being a sub-agent
+                if config.get("IsMainRouter"):
+                    continue
+
+                agent_name = config.get('agent_name', 'unknown')
+                
+                # If a main router is defined, apply access control
+                if main_router_config:
+                    is_public = config.get("IsPublic", False)
+                    agent_owner_id = config.get("owner_id")
+
+                    # An agent is accessible if it's public or belongs to the same owner as the router
+                    if not is_public and (agent_owner_id != owner_id or not owner_id):
+                        print(f"ℹ️  Skipping agent '{agent_name}' due to access restrictions.")
+                        continue
+
                 try:
                     agent_tool = self.create_sub_agent(config)
                     self.sub_agents.append(agent_tool)
-                    print(f"✓ Successfully loaded agent: {config['agent_name']}")
+                    print(f"✓ Successfully loaded agent: {agent_name}")
                 except Exception as e:
-                    print(f"✗ Failed to load agent '{config.get('agent_name', 'unknown')}': {e}")
+                    print(f"✗ Failed to load agent '{agent_name}': {e}")
             
             print(f"Loaded {len(self.sub_agents)} agents successfully")
             return self.sub_agents
