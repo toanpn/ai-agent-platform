@@ -1,4 +1,4 @@
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, Inject, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
@@ -20,6 +20,7 @@ export interface ToolConfigDialogData {
 	selector: 'app-tool-config-dialog',
 	standalone: true,
 	imports: [
+		TranslateModule,
 		CommonModule,
 		ReactiveFormsModule,
 		MatFormFieldModule,
@@ -27,7 +28,6 @@ export interface ToolConfigDialogData {
 		MatButtonModule,
 		MatProgressSpinnerModule,
 		MatIconModule,
-		TranslateModule,
 	],
 	templateUrl: './tool-config-dialog.component.html',
 	styleUrls: ['./tool-config-dialog.component.scss'],
@@ -81,8 +81,17 @@ export class ToolConfigDialogComponent implements OnInit {
 		this.dialogRef.close('DELETE');
 	}
 
+	onTestConnection(): void {
+		// TODO: Implement test connection logic
+		console.log('Test connection:', this.configForm.value);
+	}
+
 	onCancel(): void {
 		this.dialogRef.close();
+	}
+
+	get toolDisplayName(): string {
+		return this.tool.name.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
 	}
 
 	/**

@@ -297,15 +297,17 @@
     "REQUIRES_CONFIGURATION": "Yêu cầu cấu hình",
     "TOOLS_CONFIG": {
       "TITLE": "Cấu hình Công cụ",
-      "INSTRUCTION": "Vui lòng cấu hình các tham số bắt buộc cho công cụ này:",
-      "FIELD_REQUIRED": "Trường này là bắt buộc",
+      "INSTRUCTION": "Vui lòng cung cấp thông tin cần thiết để cấu hình công cụ này.",
+      "FIELD_REQUIRED": "Trường này là bắt buộc.",
       "SAVE_SUCCESS": "Lưu cấu hình công cụ thành công",
       "SAVE_ERROR": "Không thể lưu cấu hình công cụ",
-      "NO_CONFIG_NEEDED": "Công cụ này đã sẵn sàng sử dụng mà không cần cấu hình thêm."
+      "NO_CONFIG_NEEDED": "Công cụ này đã sẵn sàng để sử dụng và không cần cấu hìnhเพิ่มเติม.",
+      "CONNECT_TO": "Kết nối với",
+      "TEST_CONNECTION": "Kiểm tra kết nối"
     },
     "LLM": {
       "TITLE": "Cấu hình LLM",
-      "MODEL": "Mô hình LLM",
+      "MODEL": "Mô hình",
       "TEMPERATURE": "Mức độ sáng tạo",
       "CURRENT_VALUE": "Giá trị hiện tại",
       "TEMPERATURE_TOOLTIPS": {

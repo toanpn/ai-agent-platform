@@ -1,81 +1,54 @@
 <div class="dialog-container">
-	<div class="dialog-header">
-		<div class="tool-info">
-			<mat-icon class="tool-icon">extension</mat-icon>
-			<div class="tool-details">
-				<h1 mat-dialog-title>{{ tool.name }}</h1>
-				<p class="tool-subtitle">{{ 'AGENTS.TOOLS_CONFIG.TITLE' | translate }}</p>
+	<div class="header">
+		<div class="title-container">
+			<div class="tool-icon-wrapper" [ngSwitch]="tool.name">
+				<img *ngSwitchCase="'google_search_tool'" src="/assets/icons/google-search.svg" alt="Google Search icon" class="tool-icon" />
+				<img *ngSwitchCase="'gmail_tool'" src="/assets/icons/google.svg" alt="Gmail icon" class="tool-icon" />
+				<img *ngSwitchCase="'knowledge_search_tool'" src="/assets/icons/knowledge-tool.svg" alt="Knowledge icon" class="tool-icon" />
+				<img *ngSwitchCase="'jira_tool'" src="/assets/icons/jira.svg" alt="Jira icon" class="tool-icon" />
+				<img *ngSwitchDefault src="assets/icons/icon-file.svg" alt="Tool icon" class="tool-icon" />
 			</div>
+			<h2 class="title">{{ 'AGENTS.TOOLS_CONFIG.CONNECT_TO' | translate }} {{ toolDisplayName }}</h2>
 		</div>
+		<button class="close-button" (click)="onCancel()">
+			<mat-icon>close</mat-icon>
+		</button>
 	</div>
 
-	<div mat-dialog-content class="dialog-content">
-		<div class="config-intro">
-			<p class="instruction-text">{{ 'AGENTS.TOOLS_CONFIG.INSTRUCTION' | translate }}</p>
-			<div class="tool-description" *ngIf="tool.description">
-				<mat-icon class="info-icon">info_outline</mat-icon>
-				<p>{{ tool.description }}</p>
-			</div>
-		</div>
-
+	<div class="content">
 		<form [formGroup]="configForm" class="config-form" *ngIf="parameters.length > 0">
 			<div *ngFor="let param of parameters; trackBy: trackByParameterKey" class="form-group">
-				<mat-form-field appearance="outline" class="full-width">
-					<mat-label>
-						{{ param.key }}
-						<span *ngIf="param.details.required" class="required-indicator"> *</span>
-					</mat-label>
-					<input
-						matInput
-						[formControlName]="param.key"
-						[type]="param.details.is_credential ? 'password' : 'text'"
-						[required]="param.details.required ?? false"
-						[placeholder]="getParameterPlaceholder(param)"
-					/>
-					<mat-icon matSuffix *ngIf="param.details.is_credential" class="credential-icon">lock</mat-icon>
-					<mat-hint>{{ param.details.description }}</mat-hint>
-					<mat-error *ngIf="configForm.get(param.key)?.hasError('required')">
-						{{ 'AGENTS.TOOLS_CONFIG.FIELD_REQUIRED' | translate }}
-					</mat-error>
-				</mat-form-field>
+				<label [for]="param.key" class="form-label">
+					{{ param.key }}
+					<span *ngIf="param.details.required" class="required-indicator">*</span>
+				</label>
+				<input
+					[id]="param.key"
+					[formControlName]="param.key"
+					[type]="param.details.is_credential ? 'password' : 'text'"
+					[required]="param.details.required ?? false"
+					[placeholder]="getParameterPlaceholder(param)"
+					class="form-input"
+				/>
+				<p class="form-hint" *ngIf="param.details.description">{{ param.details.description }}</p>
+				<div *ngIf="configForm.get(param.key)?.invalid && (configForm.get(param.key)?.dirty || configForm.get(param.key)?.touched)" class="error-message">
+					<p *ngIf="configForm.get(param.key)?.hasError('required')">{{ 'AGENTS.TOOLS_CONFIG.FIELD_REQUIRED' | translate }}</p>
+				</div>
 			</div>
 		</form>
-
 		<div class="no-config-message" *ngIf="parameters.length === 0">
 			<mat-icon class="success-icon">check_circle</mat-icon>
 			<p>{{ 'AGENTS.TOOLS_CONFIG.NO_CONFIG_NEEDED' | translate }}</p>
 		</div>
 	</div>
 
-	<div mat-dialog-actions class="dialog-actions">
-		<div class="action-buttons">
-			<button mat-button (click)="onCancel()" class="cancel-button">
-				<mat-icon>close</mat-icon>
-				{{ 'COMMON.CANCEL' | translate }}
-			</button>
-
-			<button
-				*ngIf="isEditing"
-				type="button"
-				mat-stroked-button
-				color="warn"
-				(click)="onDisconnect()"
-				class="disconnect-button"
-			>
-				<mat-icon>link_off</mat-icon>
-				{{ 'AGENTS.DISCONNECT' | translate }}
-			</button>
-
-			<button
-				mat-flat-button
-				color="primary"
-				(click)="onSave()"
-				[disabled]="configForm.invalid"
-				class="save-button"
-			>
-				<mat-icon>{{ isEditing ? 'save' : 'link' }}</mat-icon>
-				{{ (isEditing ? 'COMMON.SAVE' : 'AGENTS.CONNECT') | translate }}
-			</button>
-		</div>
+	<div class="actions">
+		<button *ngIf="isEditing" class="disconnect-button" (click)="onDisconnect()">
+			{{ 'AGENTS.DISCONNECT' | translate }}
+		</button>
+		<button class="cancel-button-main" (click)="onCancel()">{{ 'COMMON.CANCEL' | translate }}</button>
+		<button class="connect-button" (click)="onSave()" [disabled]="configForm.invalid">
+			{{ (isEditing ? 'COMMON.SAVE' : 'AGENTS.CONNECT') | translate }}
+		</button>
 	</div>
 </div>

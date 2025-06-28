@@ -318,14 +318,13 @@
     "REQUIRES_CONFIGURATION": "Requires configuration",
     "TOOLS_CONFIG": {
       "TITLE": "Tool Configuration",
-      "INSTRUCTION": "Please configure the required parameters for this tool:",
-      "FIELD_REQUIRED": "This field is required",
+      "INSTRUCTION": "Please provide the required information to configure this tool.",
+      "FIELD_REQUIRED": "This field is required.",
       "SAVE_SUCCESS": "Tool configuration saved successfully",
       "SAVE_ERROR": "Failed to save tool configuration",
-      "NO_CONFIG_NEEDED": "This tool is ready to use without additional configuration.",
-      "SAVE_CHANGES": "Save Changes",
-      "CANCEL": "Cancel",
-      "INVALID_JSON": "Invalid JSON format"
+      "NO_CONFIG_NEEDED": "This tool is ready to use and requires no additional configuration.",
+      "CONNECT_TO": "Connect to",
+      "TEST_CONNECTION": "Test Connection"
     },
     "LLM": {
       "TITLE": "LLM Configuration",
