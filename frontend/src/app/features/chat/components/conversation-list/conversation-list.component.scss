@@ -54,16 +54,38 @@
 	flex: 1;
 	overflow-y: auto;
 
+	.conversation-group {
+		list-style: none;
+		padding: 0;
+		margin: 0;
+	}
+
+	.conversation-group-header {
+		padding: var(--spacing-sm) var(--spacing-md);
+		font-size: 12px;
+		font-weight: 500;
+		color: var(--color-text-secondary);
+		background-color: var(--color-background-subtle);
+		position: sticky;
+		top: 0;
+		z-index: 1;
+	}
+
+	.conversation-group ul {
+		list-style: none;
+		padding: 0;
+		margin: 0;
+	}
+
 	.conversation-item {
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
 		padding: var(--spacing-smd) var(--spacing-md);
 		border-bottom: 1px solid var(--color-background-subtle);
-		border-left: 4px solid transparent;
 		cursor: pointer;
 		position: relative;
-		transition: border-left-color 0.3s ease;
+		transition: background-color 0.3s ease;
 
 		.conversation-details {
 			overflow: hidden;
@@ -102,8 +124,6 @@
 
 		&.active {
 			background-color: var(--color-sidebar-active-bg);
-			border-left-color: var(--color-sidebar-active-border);
-			padding-left: calc(var(--spacing-md) - 4px);
 		}
 
 		&:hover:not(.active) {
