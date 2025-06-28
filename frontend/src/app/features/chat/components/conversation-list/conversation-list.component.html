@@ -3,12 +3,18 @@
     <li
       class="conversation-item"
       [class.active]="conversation.id === selectedConversation()?.id"
+      [class.loading]="conversation.loading"
       (click)="onSelectConversation(conversation)"
     >
       <div class="conversation-details">
-        <div class="conversation-title">{{ conversation.title || ('CHAT.NEW_CONVERSATION_TITLE' | translate) }}</div>
+        <div class="conversation-title" [@titleChanged]="conversation.title">{{ conversation.title || ('CHAT.NEW_CONVERSATION_TITLE' | translate) }}</div>
         <div class="conversation-time">{{ conversation.timestamp | date: 'shortTime' }}</div>
       </div>
+      @if (conversation.loading) {
+        <div class="loading-spinner-wrapper">
+          <div class="loading-spinner"></div>
+        </div>
+      }
     </li>
   }
 </ul> 
