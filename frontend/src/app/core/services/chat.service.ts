@@ -84,6 +84,7 @@ export interface ChatSessionDto {
 	title?: string;
 	isActive: boolean;
 	createdAt: string;
+	updatedAt?: string;
 	messages?: ChatMessageDto[];
 }
 
@@ -152,7 +153,27 @@ export class ChatService {
 				history.sessions.map<Conversation>((session: ChatSessionDto) => ({
 					id: session.id.toString(),
 					title: session.title || '',
-					timestamp: new Date(session.createdAt),
+					timestamp: session.updatedAt ? new Date(session.updatedAt) : new Date(session.createdAt),
+				})),
+			),
+		);
+	}
+
+	/**
+	 * Search for conversations by a query term.
+	 */
+	searchConversations(query: string, page: number = 1, pageSize: number = 100): Observable<Conversation[]> {
+		const params = new HttpParams()
+			.set('query', query)
+			.set('page', page)
+			.set('pageSize', pageSize);
+
+		return this.api.get<ChatHistoryDto>('/Chat/history/search', params).pipe(
+			map((history) =>
+				history.sessions.map<Conversation>((session: ChatSessionDto) => ({
+					id: session.id.toString(),
+					title: session.title || '',
+					timestamp: session.updatedAt ? new Date(session.updatedAt) : new Date(session.createdAt),
 				})),
 			),
 		);
@@ -168,7 +189,7 @@ export class ChatService {
 				const conversation: Conversation = {
 					id: session.id.toString(),
 					title: session.title || '',
-					timestamp: new Date(session.createdAt),
+					timestamp: session.updatedAt ? new Date(session.updatedAt) : new Date(session.createdAt),
 					messages: (session.messages || []).map((m: ChatMessageDto) => this.mapMessageDto(m, session.id)),
 				};
 				return conversation;
@@ -208,6 +229,15 @@ export class ChatService {
 			sessionId: conversationId,
 			agentName,
 		});
+	}
+
+	/**
+	 * Deletes a conversation by its ID.
+	 * @param conversationId The ID of the conversation to delete.
+	 * @returns An observable that completes when the deletion is successful.
+	 */
+	deleteConversation(conversationId: string): Observable<void> {
+		return this.api.delete<void>(`/Chat/sessions/${conversationId}`);
 	}
 
 	/**

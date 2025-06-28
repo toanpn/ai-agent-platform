@@ -27,6 +27,7 @@ namespace AgentPlatform.API.DTOs
         public string? Title { get; set; }
         public bool IsActive { get; set; }
         public DateTime CreatedAt { get; set; }
+        public DateTime? UpdatedAt { get; set; }
         public List<ChatMessageDto> Messages { get; set; } = new();
     }
 
