@@ -6,6 +6,7 @@ using AgentPlatform.API.Data;
 using AgentPlatform.API.Services;
 using AgentPlatform.API.Middleware;
 using AgentPlatform.API.Mapping;
+using AgentPlatform.API.Models;
 using FluentValidation.AspNetCore;
 using FluentValidation;
 using System.Text;
@@ -49,6 +50,9 @@ builder.Services.AddSingleton<IIpPolicyStore, MemoryCacheIpPolicyStore>();
 builder.Services.AddSingleton<IRateLimitCounterStore, MemoryCacheRateLimitCounterStore>();
 builder.Services.AddSingleton<IRateLimitConfiguration, RateLimitConfiguration>();
 builder.Services.AddSingleton<IProcessingStrategy, AsyncKeyLockProcessingStrategy>();
+
+// Add Configuration Options
+builder.Services.Configure<AgentManagementConfig>(builder.Configuration.GetSection(AgentManagementConfig.SectionName));
 
 // Add HttpClient
 builder.Services.AddHttpClient<IAgentRuntimeClient, AgentRuntimeClient>(client =>

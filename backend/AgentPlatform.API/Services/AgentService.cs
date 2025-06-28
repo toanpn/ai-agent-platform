@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using AutoMapper;
+using Microsoft.Extensions.Options;
 using AgentPlatform.API.Data;
 using AgentPlatform.API.DTOs;
 using AgentPlatform.API.Models;
@@ -15,15 +16,18 @@ namespace AgentPlatform.API.Services
         private readonly IToolService _toolService;
         private readonly string _agentsJsonPath;
 
-        public AgentService(ApplicationDbContext context, IMapper mapper, IWebHostEnvironment environment, IToolService toolService)
+        public AgentService(ApplicationDbContext context, IMapper mapper, IWebHostEnvironment environment, IToolService toolService, IOptions<AgentManagementConfig> agentConfig)
         {
             _context = context;
             _mapper = mapper;
             _environment = environment;
             _toolService = toolService;
             
-            // Path to agents.json in AgentPlatform.Core project
-            _agentsJsonPath = Path.Combine(_environment.ContentRootPath, "..", "AgentPlatform.Core", "agents.json");
+            // Use configured path or fall back to relative path for development
+            var configPath = agentConfig.Value.AgentsJsonPath;
+            _agentsJsonPath = Path.IsPathRooted(configPath) 
+                ? configPath 
+                : Path.Combine(_environment.ContentRootPath, configPath);
         }
 
         public async Task<List<AgentDto>> GetAgentsAsync(int userId)

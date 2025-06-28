@@ -40,6 +40,7 @@ services:
         condition: service_started
     volumes:
       - ./backend/uploads:/app/uploads
+      - ./backend/AgentPlatform.Core:/AgentPlatform.Core:ro
     networks:
       - agentplatform-network
 
