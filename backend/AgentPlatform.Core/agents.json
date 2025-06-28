@@ -22,7 +22,7 @@
     }
   },
   {
-    "agent_name": "PE_Agent",
+    "agent_name": "PE_Agent ",
     "description": "Specialized agent for PE support tasks including JIRA issue management, knowledge base search, Gmail communication, and Google search.",
     "tools": [
       "jira_tool",
