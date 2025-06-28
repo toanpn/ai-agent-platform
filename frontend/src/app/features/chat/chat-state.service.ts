@@ -1,11 +1,10 @@
 import { effect, inject, Injectable, signal, computed, DestroyRef } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { EMPTY, forkJoin, lastValueFrom } from 'rxjs';
-import { catchError, tap } from 'rxjs/operators';
+import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
+import { EMPTY, forkJoin, lastValueFrom, BehaviorSubject, Subject } from 'rxjs';
+import { catchError, tap, debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
 import { Agent } from '../../core/services/agent.service';
 import { ChatService, Conversation, Message } from '../../core/services/chat.service';
 import { NotificationService } from '../../core/services/notification.service';
-import { toObservable } from '@angular/core/rxjs-interop';
 import { AgentStateService } from './agent-state.service';
 
 @Injectable({
@@ -16,6 +15,10 @@ export class ChatStateService {
 	private notificationService = inject(NotificationService);
 	private destroyRef = inject(DestroyRef);
 	private agentState = inject(AgentStateService);
+
+	// --- Private state management ---
+	private readonly searchTrigger = new BehaviorSubject<string>('');
+	private readonly loadMessagesTrigger = new Subject<string | null>();
 
 	// State Signals
 	readonly conversations = signal<Conversation[]>([]);
@@ -29,14 +32,10 @@ export class ChatStateService {
 	readonly currentConversationId = computed(() => this.activeConversation()?.id);
 
 	constructor() {
-		// Effect to load messages when the active conversation changes
+		// Effect to trigger message loading when the active conversation changes
 		effect(() => {
 			const conversation = this.activeConversation();
-			if (conversation) {
-				this.loadMessagesForConversation(conversation.id);
-			} else {
-				this.messages.set([]);
-			}
+			this.loadMessagesTrigger.next(conversation?.id ?? null);
 		});
 
 		// React to changes in selectedAgent using toObservable
@@ -51,11 +50,72 @@ export class ChatStateService {
 				takeUntilDestroyed(this.destroyRef),
 			)
 			.subscribe();
+
+		// Reactive conversation loading
+		this.searchTrigger
+			.pipe(
+				debounceTime(300),
+				distinctUntilChanged(),
+				tap(() => this.isLoading.set(true)),
+				switchMap((query) => {
+					const request = query
+						? this.chatService.searchConversations(query)
+						: this.chatService.loadConversations();
+
+					return request.pipe(
+						catchError((error: Error) => {
+							this.notificationService.showError('Failed to load conversations.');
+							console.error('Failed to search or load conversations.', error);
+							return EMPTY;
+						}),
+					);
+				}),
+				tap(() => this.isLoading.set(false)),
+				takeUntilDestroyed(this.destroyRef),
+			)
+			.subscribe((conversations) => {
+				this.conversations.set(conversations);
+			});
+
+		// Reactive message loading
+		this.loadMessagesTrigger
+			.pipe(
+				distinctUntilChanged(),
+				tap((conversationId) => {
+					if (conversationId) {
+						this.conversations.update((convos) =>
+							convos.map((c) => (c.id === conversationId ? { ...c, loading: true } : c)),
+						);
+					}
+				}),
+				switchMap((conversationId) => {
+					if (!conversationId) {
+						this.messages.set([]);
+						return EMPTY;
+					}
+					return this.chatService.loadChat(conversationId).pipe(
+						catchError((error: Error) => {
+							this.notificationService.showError('Failed to load chat messages.');
+							this.conversations.update((convos) =>
+								convos.map((c) => (c.id === conversationId ? { ...c, loading: false } : c)),
+							);
+							return EMPTY;
+						}),
+					);
+				}),
+				takeUntilDestroyed(this.destroyRef),
+			)
+			.subscribe((chat) => {
+				this.messages.set(chat?.messages || []);
+				this.conversations.update((convos) =>
+					convos.map((c) => (c.id === chat.id ? { ...c, loading: false } : c)),
+				);
+			});
 	}
 
 	initialize(): void {
 		// Initialization logic can be triggered from auth service
-		this.loadInitialData();
+		this.loadConversations();
 	}
 
 	destroy(): void {
@@ -137,64 +197,46 @@ export class ChatStateService {
 					this.activeConversation.update((ac) => (ac ? { ...ac, title: response.sessionTitle! } : null));
 				}
 			}
+
+			// Move conversation to the top
+			const convos = this.conversations();
+			const updatedConvo = convos.find(c => c.id === conversationId);
+			if (updatedConvo) {
+				const filteredConvos = convos.filter(c => c.id !== conversationId);
+				this.conversations.set([{...updatedConvo, timestamp: new Date()}, ...filteredConvos]);
+			}
 		} catch (error) {
 			this.notificationService.showError('Failed to send message.');
 			this.messages.update((msgs) => msgs.filter((m) => m.id !== optimisticMessage.id));
 		} finally {
 			this.isLoading.set(false);
 			if (conversationId) {
+				// Stop loading indicator
 				this.conversations.update((convos) =>
 					convos.map((c) => (c.id === conversationId ? { ...c, loading: false } : c)),
 				);
+				
+				// Move updated conversation to the top
+				const conversations = this.conversations();
+				const conversationToMove = conversations.find(c => c.id === conversationId);
+				if (conversationToMove) {
+					const otherConversations = conversations.filter(c => c.id !== conversationId);
+					this.conversations.set([
+						{ ...conversationToMove, timestamp: new Date() }, 
+						...otherConversations
+					]);
+				}
 			}
 		}
 	}
 
-	// --- Private Data Loading ---
-
-	private loadInitialData(): void {
-		this.isLoading.set(true);
-		this.chatService
-			.loadConversations()
-			.pipe(
-				catchError((error: Error) => {
-					this.notificationService.showError('Failed to load initial data.');
-					console.error('Failed to load initial data.', error);
-					return EMPTY;
-				}),
-				tap(() => this.isLoading.set(false)),
-				takeUntilDestroyed(this.destroyRef),
-			)
-			.subscribe(conversations => {
-				this.conversations.set(conversations);
-			});
+	// --- Public Data Loading ---
+	loadConversations(): void {
+		this.searchTrigger.next('');
 	}
 
-	private loadMessagesForConversation(conversationId: string): void {
-		this.conversations.update(convos =>
-			convos.map(c => (c.id === conversationId ? { ...c, loading: true } : c)),
-		);
-
-		this.chatService
-			.loadChat(conversationId)
-			.pipe(
-				catchError(() => {
-					this.notificationService.showError('Failed to load chat messages.');
-					this.conversations.update(convos =>
-						convos.map(c => (c.id === conversationId ? { ...c, loading: false } : c)),
-					);
-					return EMPTY;
-				}),
-				tap(() => {
-					this.conversations.update(convos =>
-						convos.map(c => (c.id === conversationId ? { ...c, loading: false } : c)),
-					);
-				}),
-				takeUntilDestroyed(this.destroyRef),
-			)
-			.subscribe((chat) => {
-				this.messages.set(chat?.messages || []);
-			});
+	searchConversations(query: string): void {
+		this.searchTrigger.next(query);
 	}
 
 	private resetState(): void {

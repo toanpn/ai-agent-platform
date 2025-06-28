@@ -44,6 +44,17 @@ namespace AgentPlatform.API.Controllers
             return Ok(history);
         }
 
+        [HttpGet("history/search")]
+        public async Task<ActionResult<ChatHistoryDto>> SearchChatHistory(
+            [FromQuery] string query,
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 10)
+        {
+            var userId = GetUserId();
+            var history = await _chatService.SearchChatHistoryAsync(userId, query, page, pageSize);
+            return Ok(history);
+        }
+
         [HttpGet("sessions/{sessionId}")]
         public async Task<ActionResult<ChatSessionDto>> GetChatSession(int sessionId)
         {

@@ -42,11 +42,14 @@ namespace AgentPlatform.API.Services
                 session = new ChatSession
                 {
                     UserId = userId,
-                    CreatedAt = DateTime.UtcNow
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow,
                 };
                 _context.ChatSessions.Add(session);
-                await _context.SaveChangesAsync();
+                // No need for SaveChangesAsync here, it will be saved with the message
             }
+
+            session.UpdatedAt = DateTime.UtcNow;
 
             // Save user message
             var userMessage = new ChatMessage
@@ -146,10 +149,15 @@ namespace AgentPlatform.API.Services
                 {
                     session.Title = summary;
                     sessionTitle = summary;
-                    session.UpdatedAt = DateTime.UtcNow;
-                    await _context.SaveChangesAsync();
+                    // UpdatedAt is already set at the start of the method
                 }
+            } else if (string.IsNullOrEmpty(session.Title)) {
+                // If there's no title yet, just update the timestamp
+                session.UpdatedAt = DateTime.UtcNow;
+                await _context.SaveChangesAsync();
             }
+
+            await _context.SaveChangesAsync();
 
             // Map the enhanced runtime response to ChatResponseDto
             return new ChatResponseDto
@@ -184,8 +192,8 @@ namespace AgentPlatform.API.Services
         {
             var query = _context.ChatSessions
                 .Where(s => s.UserId == userId)
-                .Include(s => s.Messages.OrderBy(m => m.CreatedAt))
-                .OrderByDescending(s => s.CreatedAt);
+                .OrderByDescending(s => s.UpdatedAt)
+                .ThenByDescending(s => s.CreatedAt);
 
             var totalCount = await query.CountAsync();
             var sessions = await query
@@ -199,14 +207,40 @@ namespace AgentPlatform.API.Services
                 Title = s.Title,
                 IsActive = s.IsActive,
                 CreatedAt = s.CreatedAt,
-                Messages = s.Messages.Select(m => new ChatMessageDto
-                {
-                    Id = m.Id,
-                    Content = m.Content,
-                    Role = m.Role,
-                    AgentName = m.AgentName,
-                    CreatedAt = m.CreatedAt
-                }).ToList()
+                UpdatedAt = s.UpdatedAt,
+                Messages = new List<ChatMessageDto>() // Messages are not needed for the history list
+            }).ToList();
+
+            return new ChatHistoryDto
+            {
+                Sessions = sessionDtos,
+                TotalCount = totalCount,
+                Page = page,
+                PageSize = pageSize
+            };
+        }
+
+        public async Task<ChatHistoryDto> SearchChatHistoryAsync(int userId, string query, int page = 1, int pageSize = 10)
+        {
+            var queryable = _context.ChatSessions
+                .Where(s => s.UserId == userId && (s.Title != null && s.Title.ToLower().Contains(query.ToLower())))
+                .OrderByDescending(s => s.UpdatedAt)
+                .ThenByDescending(s => s.CreatedAt);
+            
+            var totalCount = await queryable.CountAsync();
+            var sessions = await queryable
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            var sessionDtos = sessions.Select(s => new ChatSessionDto
+            {
+                Id = s.Id,
+                Title = s.Title,
+                IsActive = s.IsActive,
+                CreatedAt = s.CreatedAt,
+                UpdatedAt = s.UpdatedAt,
+                Messages = new List<ChatMessageDto>()
             }).ToList();
 
             return new ChatHistoryDto
@@ -235,6 +269,7 @@ namespace AgentPlatform.API.Services
                 Title = session.Title,
                 IsActive = session.IsActive,
                 CreatedAt = session.CreatedAt,
+                UpdatedAt = session.UpdatedAt,
                 Messages = session.Messages.Select(m => new ChatMessageDto
                 {
                     Id = m.Id,

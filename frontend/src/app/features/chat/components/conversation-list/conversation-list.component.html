@@ -1,3 +1,7 @@
+<div class="search-container">
+    <input type="text" [formControl]="searchControl" [placeholder]="'CHAT.SEARCH_CONVERSATIONS' | translate" class="search-input">
+    <i class="icon-search"></i>
+</div>
 <ul class="conversations-list">
   @for (conversation of conversations(); track conversation.id) {
     <li

@@ -5,18 +5,20 @@ import {
 	inject,
 	input,
 	output,
-	HostListener,
+	HostListener
 } from '@angular/core';
 import { DatePipe } from '@angular/common';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { Conversation } from '../../../../core/services/chat.service';
 import { trigger, state, style, transition, animate } from '@angular/animations';
 import { ChatStateService } from '../../chat-state.service';
+import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
 	selector: 'app-conversation-list',
 	standalone: true,
-	imports: [DatePipe, TranslateModule],
+	imports: [DatePipe, TranslateModule, ReactiveFormsModule],
 	templateUrl: './conversation-list.component.html',
 	styleUrls: ['./conversation-list.component.scss'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
@@ -31,13 +33,23 @@ import { ChatStateService } from '../../chat-state.service';
 })
 export class ConversationListComponent {
 	private readonly chatState = inject(ChatStateService);
+	private readonly translate = inject(TranslateService);
 	readonly conversations = this.chatState.conversations;
 	selectedConversation = input<Conversation | null>(null);
 
 	selectConversation = output<Conversation>();
 	loadMore = output<void>();
+	searchControl = new FormControl('');
 
 	private readonly elementRef = inject(ElementRef);
+
+	constructor() {
+		this.searchControl.valueChanges.pipe(
+			takeUntilDestroyed()
+		).subscribe(value => {
+			this.chatState.searchConversations(value || '');
+		});
+	}
 
 	onSelectConversation(conversation: Conversation): void {
 		this.selectConversation.emit(conversation);
