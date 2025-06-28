@@ -1,6 +1,9 @@
 <div class="sidebar-container">
 	<div class="sidebar-header">
 		<h2 class="sidebar-title">{{ 'CHAT.AGENT_LIST_TITLE' | translate }}</h2>
+		<button class="header-action-btn" [routerLink]="['/agents']" [title]="'CHAT.AGENT_LIST_VIEW_ALL' | translate">
+			<img src="assets/icons/list.svg" alt="" />
+		</button>
 	</div>
 	<div class="agent-list">
 		@for (agent of agents(); track agent.id) {

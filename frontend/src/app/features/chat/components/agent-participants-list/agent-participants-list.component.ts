@@ -4,11 +4,12 @@ import { TranslateModule } from '@ngx-translate/core';
 import { Agent } from '../../../../core/services/agent.service';
 import { AgentTypeService } from '../../../../core/services/agent-type.service';
 import { ChatStateService } from '../../chat-state.service';
+import { RouterModule } from '@angular/router';
 
 @Component({
 	selector: 'app-agent-participants-list',
 	standalone: true,
-	imports: [CommonModule, TranslateModule],
+	imports: [CommonModule, TranslateModule, RouterModule],
 	templateUrl: './agent-participants-list.component.html',
 	styleUrls: ['./agent-participants-list.component.scss'],
 	changeDetection: ChangeDetectionStrategy.OnPush,

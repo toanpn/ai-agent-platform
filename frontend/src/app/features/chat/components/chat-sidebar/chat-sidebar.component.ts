@@ -4,9 +4,8 @@ import {
 	input,
 	output,
 	ChangeDetectionStrategy,
-	computed,
 } from '@angular/core';
-import { CommonModule, DatePipe } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
 import { AuthService } from '../../../../core/services/auth.service';
@@ -14,18 +13,19 @@ import { Conversation } from '../../../../core/services/chat.service';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatListModule } from '@angular/material/list';
+import { ConversationListComponent } from '../conversation-list/conversation-list.component';
 
 @Component({
 	selector: 'app-chat-sidebar',
 	standalone: true,
 	imports: [
 		CommonModule,
-		DatePipe,
 		RouterModule,
 		MatListModule,
 		MatButtonModule,
 		MatIconModule,
 		TranslateModule,
+		ConversationListComponent,
 	],
 	templateUrl: './chat-sidebar.component.html',
 	styleUrls: ['./chat-sidebar.component.scss'],
@@ -50,6 +50,11 @@ export class ChatSidebarComponent {
 
 	onStartNewChat(): void {
 		this.startNewChat.emit();
+	}
+
+	onLoadMoreConversations(): void {
+		// Implement logic to load more conversations
+		console.log('Load more conversations triggered');
 	}
 
 	logout(): void {

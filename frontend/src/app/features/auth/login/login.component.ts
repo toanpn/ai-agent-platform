@@ -137,6 +137,24 @@ export class LoginComponent implements OnInit {
 			'eye',
 			this.domSanitizer.bypassSecurityTrustResourceUrl('assets/icons/eye.svg')
 		);
+		this.matIconRegistry.addSvgIcon(
+			'arrow-down',
+			this.domSanitizer.bypassSecurityTrustResourceUrl(
+				'assets/icons/arrow-down.svg'
+			)
+		);
+		this.matIconRegistry.addSvgIcon(
+			'us-flag',
+			this.domSanitizer.bypassSecurityTrustResourceUrl(
+				'assets/icons/us-flag.svg'
+			)
+		);
+		this.matIconRegistry.addSvgIcon(
+			'vn-flag',
+			this.domSanitizer.bypassSecurityTrustResourceUrl(
+				'assets/icons/vn-flag.svg'
+			)
+		);
 	}
 
 	ngOnInit(): void {

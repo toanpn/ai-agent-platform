@@ -1,0 +1,49 @@
+:host {
+	display: block;
+	height: 100%;
+	overflow-y: auto;
+}
+
+.conversations-list {
+	list-style: none;
+	padding: 0;
+	margin: 0;
+
+	.conversation-item {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		padding: var(--spacing-smd) var(--spacing-md);
+		border-bottom: 1px solid var(--color-background-subtle);
+		cursor: pointer;
+
+		.conversation-details {
+			overflow: hidden;
+
+			.conversation-title {
+				font-size: 14px;
+				font-weight: 500;
+				color: var(--color-text-strong);
+				white-space: nowrap;
+				text-overflow: ellipsis;
+				overflow: hidden;
+			}
+
+			.conversation-time {
+				font-size: 12px;
+				font-weight: 400;
+				color: var(--color-text-secondary);
+			}
+		}
+
+		&.active {
+			background-color: var(--color-sidebar-active-bg);
+			border-left: 4px solid var(--color-sidebar-active-border);
+			padding-left: calc(var(--spacing-md) - 4px);
+		}
+
+		&:hover:not(.active) {
+			background-color: var(--color-background-alt);
+		}
+	}
+} 
