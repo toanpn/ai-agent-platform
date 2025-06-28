@@ -35,8 +35,15 @@ out/
 # IDE files
 .idea/
 .vscode/
+.cursor/
 *.swp
 *.swo
+
+# Database files
+chroma_db/
+*.db
+*.sqlite
+*.sqlite3
 
 # .NET Core
 bin/
@@ -242,11 +249,6 @@ docker-compose.override.yml
 supabase/.branches
 supabase/.temp
 supabase/temp/
-
-# Database
-*.db
-*.sqlite
-*.sqlite3
 
 # Misc
 .DS_Store
