@@ -1,17 +1,27 @@
 :host {
-	display: flex;
+	display: block;
 	height: 100%;
-	overflow: hidden;
-	background-color: var(--color-background-grey);
 }
 
 .chat-container {
-	display: grid;
-	grid-template-columns: var(--chat-sidebar-width) 1fr auto;
-	grid-template-rows: minmax(0, 1fr);
-	flex: 1;
+	display: flex;
 	height: 100%;
-	overflow: hidden;
+	background-color: var(--color-background);
+
+	.chat-sidebar {
+		flex-shrink: 0;
+	}
+
+	.chat-main {
+		flex: 1;
+		display: flex;
+		flex-direction: column;
+		min-width: 0;
+	}
+
+	.agent-participants-sidebar {
+		flex-shrink: 0;
+	}
 }
 
 .chat-container .chat-sidebar {
@@ -103,13 +113,6 @@
 	flex-shrink: 0;
 	border-top: 1px solid var(--color-border);
 	padding: var(--spacing-md);
-}
-
-.chat-container .agent-participants-sidebar {
-	width: 288px;
-	background-color: var(--color-surface);
-	border-left: 1px solid var(--color-border-light);
-	flex-shrink: 0;
 }
 
 .chat-main {

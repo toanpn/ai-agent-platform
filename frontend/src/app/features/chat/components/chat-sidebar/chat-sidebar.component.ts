@@ -4,6 +4,7 @@ import {
 	input,
 	output,
 	ChangeDetectionStrategy,
+	signal,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
@@ -14,6 +15,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatListModule } from '@angular/material/list';
 import { ConversationListComponent } from '../conversation-list/conversation-list.component';
+import { StorageService } from '../../../../core/services/storage.service';
 
 @Component({
 	selector: 'app-chat-sidebar',
@@ -35,6 +37,11 @@ export class ChatSidebarComponent {
 	// Services
 	private authService = inject(AuthService);
 	private router = inject(Router);
+	private storageService = inject(StorageService);
+
+	isCollapsed = signal<boolean>(
+		this.storageService.getItem('chat-sidebar-collapsed') === 'true',
+	);
 
 	// Inputs
 	conversations = input<Conversation[] | null>([]);
@@ -50,6 +57,14 @@ export class ChatSidebarComponent {
 
 	onStartNewChat(): void {
 		this.startNewChat.emit();
+	}
+
+	toggleCollapse(): void {
+		this.isCollapsed.set(!this.isCollapsed());
+		this.storageService.setItem(
+			'chat-sidebar-collapsed',
+			String(this.isCollapsed()),
+		);
 	}
 
 	onLoadMoreConversations(): void {

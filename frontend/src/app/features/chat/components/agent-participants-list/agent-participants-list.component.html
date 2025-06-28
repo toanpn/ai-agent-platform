@@ -1,9 +1,22 @@
-<div class="sidebar-container">
+<div class="sidebar-container" [class.collapsed]="isCollapsed()">
 	<div class="sidebar-header">
 		<h2 class="sidebar-title">{{ 'CHAT.AGENT_LIST_TITLE' | translate }}</h2>
-		<button class="header-action-btn" [routerLink]="['/agents']" [title]="'CHAT.AGENT_LIST_VIEW_ALL' | translate">
-			<img src="assets/icons/list.svg" alt="" />
-		</button>
+		<div class="header-actions">
+			<button
+				class="header-action-btn"
+				[routerLink]="['/agents']"
+				[title]="'CHAT.AGENT_LIST_VIEW_ALL' | translate"
+			>
+				<img src="assets/icons/list.svg" alt="" />
+			</button>
+			<button
+				class="header-action-btn collapse-btn"
+				(click)="toggleCollapse()"
+				[title]="isCollapsed() ? ('CHAT.EXPAND_SIDEBAR' | translate) : ('CHAT.COLLAPSE_SIDEBAR' | translate)"
+			>
+				<img src="assets/icons/arrow-down.svg" class="collapse-icon" alt="Toggle sidebar" />
+			</button>
+		</div>
 	</div>
 	<div class="agent-list">
 		@for (agent of agents(); track agent.id) {

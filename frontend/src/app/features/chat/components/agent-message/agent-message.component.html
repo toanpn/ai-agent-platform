@@ -1,0 +1,25 @@
+@let msg = message();
+
+<div class="message-container agent-message">
+  <img class="avatar" [src]="getAgentAvatar()" alt="Agent Avatar" />
+  <div class="message-bubble" [attr.data-agent-type]="agentType()">
+    <div class="agent-header">
+      <span class="agent-name">{{ msg.agentName }}</span>
+      <span class="agent-specialty-tag">{{ getAgentSpecialty() }}</span>
+    </div>
+    <p class="message-text">{{ msg.text }}</p>
+    @if (msg.masterAgentThinking) {
+    <div class="master-agent-thinking">
+      <p>{{ msg.masterAgentThinking }}</p>
+    </div>
+    }
+  </div>
+</div>
+
+@if (msg.executionDetails) {
+<app-execution-details [details]="msg.executionDetails"></app-execution-details>
+}
+
+<div class="timestamp agent-message">
+  {{ formattedTimestamp() }}
+</div> 
