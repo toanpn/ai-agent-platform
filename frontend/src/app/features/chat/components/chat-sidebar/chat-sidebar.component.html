@@ -1,72 +1,28 @@
 <div class="sidebar-container">
 	<div class="sidebar-header">
-		<button mat-raised-button color="primary" (click)="onStartNewChat()">
-			<mat-icon>add</mat-icon>
-			{{ 'CHAT.NEW_CHAT' | translate }}
-		</button>
-		<button mat-button routerLink="/agents" class="manage-agents-button">
-			<mat-icon>settings</mat-icon>
-			{{ 'AGENTS.AGENT_SETTINGS' | translate }}
-		</button>
+		<h2 class="sidebar-title">{{ 'CHAT.SIDEBAR_TITLE' | translate }}</h2>
+	</div>
+	<button class="new-chat-btn" (click)="onStartNewChat()">
+		<img src="assets/icons/plus.svg" alt="New Chat" class="new-chat-icon" />
+		<span>{{ 'CHAT.NEW_CHAT' | translate }}</span>
+	</button>
+	<div class="search-bar">
+		<img src="assets/icons/search.svg" alt="Search" class="search-icon" />
+		<input type="text" placeholder="{{ 'CHAT.SEARCH_PLACEHOLDER' | translate }}" />
 	</div>
 
-	<div class="agent-selector">
-		<button mat-button [matMenuTriggerFor]="agentMenu" class="agent-selector-button">
-			<mat-icon>person</mat-icon>
-			<span>{{ selectedAgent()?.name || ('AGENTS.SELECT_MODEL' | translate) }}</span>
-			<mat-icon>expand_more</mat-icon>
-		</button>
-		<mat-menu #agentMenu="matMenu">
-			@for (agent of agents(); track agent.id) {
-				<button mat-menu-item (click)="onSelectAgent(agent)">
-					{{ agent.name }}
-				</button>
-			}
-		</mat-menu>
-	</div>
-
-	<mat-divider></mat-divider>
-
-	<div class="conversations-list">
-        @let displayConversations = conversations();
-		<mat-nav-list>
-			@for (conversation of displayConversations; track conversation.id; let i = $index) {
-				<a
-					mat-list-item
-					(click)="onSelectConversation(conversation)"
-				>
-					<div class="conversation-item">
-						<mat-icon>chat</mat-icon>
-						<div class="conversation-details">
-							<div class="conversation-title">{{ conversation.title || 'Session ' + (i + 1) }}</div>
-							<div class="conversation-time">
-								{{ conversation.timestamp | date: 'short' }}
-							</div>
-						</div>
-					</div>
-				</a>
-			}
-		</mat-nav-list>
-
-		@if (displayConversations?.length === 0) {
-			<div class="empty-state">
-				<p>{{ 'CHAT.NO_CONVERSATIONS' | translate }}</p>
-			</div>
-		}
-	</div>
-
-	<div class="sidebar-footer">
-		@if (currentUser(); as user) {
-			<div class="user-info">
-				<mat-icon>account_circle</mat-icon>
-				<div class="user-details">
-					<div class="username">{{ user.username }}</div>
-					<div class="email">{{ user.email }}</div>
+	<ul class="conversations-list">
+		@for (conversation of conversations(); track conversation.id) {
+			<li
+				class="conversation-item"
+				[class.active]="conversation.id === selectedConversation()?.id"
+				(click)="onSelectConversation(conversation)"
+			>
+				<div class="conversation-details">
+					<div class="conversation-title">{{ conversation.title || ('CHAT.NEW_CONVERSATION_TITLE' | translate) }}</div>
+					<div class="conversation-time">{{ conversation.timestamp | date: 'shortTime' }}</div>
 				</div>
-			</div>
+			</li>
 		}
-		<button mat-icon-button (click)="logout()" [matTooltip]="'COMMON.LOGOUT' | translate">
-			<mat-icon>exit_to_app</mat-icon>
-		</button>
-	</div>
+	</ul>
 </div>

@@ -1,64 +1,138 @@
-.message-container {
+:host {
+	display: block;
 	margin-bottom: var(--spacing-md);
-	max-width: 80%;
+}
 
-	.message-sender {
-		margin-bottom: var(--spacing-xs);
-		font-size: var(--font-size-xs);
-		font-weight: 500;
+.message-container {
+	display: flex;
+	align-items: flex-start;
+	gap: var(--spacing-sm);
+	max-width: 90%;
+
+	&.agent-message {
+		margin-right: auto;
+	}
+
+	&.user-message {
+		margin-left: auto;
+		flex-direction: row-reverse;
+	}
+
+	.avatar {
+		width: 32px;
+		height: 32px;
+		border-radius: 50%;
+		flex-shrink: 0;
+		object-fit: cover;
+	}
+
+	.message-bubble {
+		padding: var(--spacing-smd) var(--spacing-md);
+		border-radius: 8px;
+		box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+
+		.message-text {
+			margin: 0;
+			font-family: 'Inter', sans-serif;
+			font-size: 16px;
+			line-height: 1.5;
+			white-space: pre-wrap;
+		}
+	}
+}
+
+/* User message styling */
+.user-message .message-bubble {
+	background-color: var(--color-sidebar-new-chat-text);
+	.message-text {
+		color: var(--color-surface);
+	}
+}
+
+/* Agent message general styling */
+.agent-message .message-bubble {
+	background-color: var(--color-surface-soft);
+	.agent-header {
 		display: flex;
-		justify-content: space-between;
+		align-items: center;
+		gap: var(--spacing-sm);
+		margin-bottom: var(--spacing-xs);
 
-		.message-time {
-			color: var(--color-text-tertiary);
-			font-weight: normal;
+		.agent-name {
+			font-weight: 500;
+			font-size: 16px;
+		}
+		.agent-specialty-tag {
+			padding: 2px var(--spacing-xs);
+			border-radius: 9999px;
+			font-size: 12px;
+			font-weight: 400;
 		}
 	}
 
-	mat-card {
-		padding: var(--spacing-smd);
-		border-radius: 12px;
+	.message-text {
+		color: var(--color-text-strong);
 	}
 }
 
-.user-message {
-	margin-left: auto;
+/* Agent type specific styles */
+.message-bubble[data-agent-type='marketing'] {
+	background-color: var(--color-agent-purple-bg);
+	.agent-name {
+		color: var(--color-agent-purple-text);
+	}
+	.agent-specialty-tag {
+		background-color: var(--color-agent-purple-tag-bg);
+		color: var(--color-agent-purple-tag-text);
+	}
+}
+.message-bubble[data-agent-type='finance'] {
+	background-color: var(--color-agent-blue-bg);
+	.agent-name {
+		color: var(--color-agent-blue-text);
+	}
+	.agent-specialty-tag {
+		background-color: var(--color-agent-blue-tag-bg);
+		color: var(--color-agent-blue-tag-text);
+	}
+}
+.message-bubble[data-agent-type='data'] {
+	background-color: var(--color-agent-green-bg);
+	.agent-name {
+		color: var(--color-agent-green-text);
+	}
+	.agent-specialty-tag {
+		background-color: var(--color-agent-green-tag-bg);
+		color: var(--color-agent-green-tag-text);
+	}
+}
 
-	.message-sender {
+/* Timestamp styling */
+.timestamp {
+	font-size: 12px;
+	color: var(--color-text-secondary);
+	padding: 0 var(--spacing-sm);
+	margin-top: var(--spacing-xs);
+	margin-left: calc(32px + var(--spacing-sm));
+
+	&.user-message {
 		text-align: right;
-	}
-
-	mat-card {
-		background-color: var(--color-primary-extralight);
+		margin-left: 0;
+		margin-right: calc(32px + var(--spacing-sm));
 	}
 }
 
-.assistant-message {
-	margin-right: auto;
-
-	mat-card {
-		background-color: var(--color-background-alt);
-	}
-}
-
-.thinking-block {
+/* System message styling */
+.system-message-container {
 	display: flex;
-	align-items: center;
-	gap: 0.5rem;
-	padding: 0.5rem;
-	background-color: #f0f4f8;
-	border-radius: 4px;
-	margin-bottom: 1rem;
-	color: #5f6368;
-}
+	justify-content: center;
+	margin: var(--spacing-md) 0;
 
-.error-block {
-	display: flex;
-	align-items: center;
-	gap: 0.5rem;
-	padding: 0.5rem;
-	background-color: #fce8e6;
-	border-radius: 4px;
-	margin-top: 1rem;
-	color: #c5221f;
+	.system-message {
+		background-color: var(--color-border-light);
+		color: var(--color-text-subtle);
+		padding: var(--spacing-xs) var(--spacing-md);
+		border-radius: 9999px;
+		font-size: 12px;
+	}
 }

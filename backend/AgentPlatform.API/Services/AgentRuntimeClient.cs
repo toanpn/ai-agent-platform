@@ -105,6 +105,40 @@ namespace AgentPlatform.API.Services
         public string Summary { get; set; } = string.Empty;
     }
 
+    // DTOs for RAG operations
+    public class PythonRagUploadResponse
+    {
+        [JsonPropertyName("success")]
+        public bool Success { get; set; }
+        
+        [JsonPropertyName("result")]
+        public PythonRagUploadResult? Result { get; set; }
+        
+        [JsonPropertyName("error")]
+        public string? Error { get; set; }
+    }
+
+    public class PythonRagUploadResult
+    {
+        [JsonPropertyName("document_id")]
+        public string DocumentId { get; set; } = string.Empty;
+        
+        [JsonPropertyName("chunks_created")]
+        public int ChunksCreated { get; set; }
+        
+        [JsonPropertyName("agent_id")]
+        public string AgentId { get; set; } = string.Empty;
+        
+        [JsonPropertyName("file_name")]
+        public string FileName { get; set; } = string.Empty;
+        
+        [JsonPropertyName("file_size")]
+        public long FileSize { get; set; }
+        
+        [JsonPropertyName("processed_at")]
+        public string ProcessedAt { get; set; } = string.Empty;
+    }
+
     public class AgentRuntimeClient : IAgentRuntimeClient
     {
         private readonly HttpClient _httpClient;
@@ -387,6 +421,131 @@ namespace AgentPlatform.API.Services
             {
                 _logger.LogError(ex, "Unexpected error getting session summary from runtime service");
                 return null;
+            }
+        }
+
+        public async Task<RagUploadResponse?> UploadFileForProcessingAsync(string filePath, int agentId, Dictionary<string, object>? metadata = null)
+        {
+            try
+            {
+                _logger.LogInformation("Uploading file {FilePath} for agent {AgentId} to runtime service", filePath, agentId);
+
+                if (!File.Exists(filePath))
+                {
+                    _logger.LogError("File not found: {FilePath}", filePath);
+                    return new RagUploadResponse
+                    {
+                        Success = false,
+                        Error = "File not found"
+                    };
+                }
+
+                using var formContent = new MultipartFormDataContent();
+                
+                // Add file
+                var fileContent = new ByteArrayContent(await File.ReadAllBytesAsync(filePath));
+                fileContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/octet-stream");
+                formContent.Add(fileContent, "file", Path.GetFileName(filePath));
+                
+                // Add agent_id
+                formContent.Add(new StringContent(agentId.ToString()), "agent_id");
+                
+                // Add metadata if provided
+                if (metadata != null && metadata.Count > 0)
+                {
+                    var metadataJson = JsonSerializer.Serialize(metadata, _jsonOptions);
+                    formContent.Add(new StringContent(metadataJson), "metadata");
+                }
+
+                var stopwatch = System.Diagnostics.Stopwatch.StartNew();
+                var response = await _httpClient.PostAsync("/api/rag/upload", formContent);
+                stopwatch.Stop();
+
+                _logger.LogInformation("RAG upload completed in {ElapsedMs}ms with status {StatusCode}", 
+                    stopwatch.ElapsedMilliseconds, response.StatusCode);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    _logger.LogError("Runtime service returned error on RAG upload: {StatusCode}, Content: {Content}", 
+                        response.StatusCode, errorContent);
+                    return new RagUploadResponse
+                    {
+                        Success = false,
+                        Error = $"Runtime service returned error: {response.StatusCode}"
+                    };
+                }
+
+                var responseJson = await response.Content.ReadAsStringAsync();
+                _logger.LogDebug("RAG upload response: {Response}", responseJson);
+
+                var pythonResponse = JsonSerializer.Deserialize<PythonRagUploadResponse>(responseJson, _jsonOptions);
+                
+                if (pythonResponse == null)
+                {
+                    _logger.LogError("Failed to deserialize RAG upload response");
+                    return new RagUploadResponse
+                    {
+                        Success = false,
+                        Error = "Failed to parse response from runtime service"
+                    };
+                }
+
+                // Map Python response to our DTO
+                var result = new RagUploadResponse
+                {
+                    Success = pythonResponse.Success,
+                    Error = pythonResponse.Error,
+                    Result = pythonResponse.Result != null ? new RagUploadResult
+                    {
+                        DocumentId = pythonResponse.Result.DocumentId,
+                        ChunksCreated = pythonResponse.Result.ChunksCreated,
+                        AgentId = pythonResponse.Result.AgentId,
+                        FileName = pythonResponse.Result.FileName,
+                        FileSize = pythonResponse.Result.FileSize,
+                        ProcessedAt = pythonResponse.Result.ProcessedAt
+                    } : null
+                };
+
+                _logger.LogInformation("Successfully uploaded and processed file {FileName} with {ChunksCreated} chunks", 
+                    result.Result?.FileName, result.Result?.ChunksCreated);
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Unexpected error uploading file to runtime service");
+                return new RagUploadResponse
+                {
+                    Success = false,
+                    Error = ex.Message
+                };
+            }
+        }
+
+        public async Task<bool> DeleteAgentDocumentsAsync(string agentId)
+        {
+            try
+            {
+                _logger.LogInformation("Deleting documents for agent {AgentId} from runtime service", agentId);
+
+                var response = await _httpClient.DeleteAsync($"/api/rag/agent/{agentId}/documents");
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    _logger.LogError("Runtime service returned error on document deletion: {StatusCode}, Content: {Content}", 
+                        response.StatusCode, errorContent);
+                    return false;
+                }
+
+                _logger.LogInformation("Successfully deleted documents for agent {AgentId}", agentId);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Unexpected error deleting agent documents from runtime service");
+                return false;
             }
         }
     }

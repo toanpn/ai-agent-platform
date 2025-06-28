@@ -6,5 +6,6 @@ namespace AgentPlatform.API.Services
         Task<bool> DeleteFileAsync(int fileId, int userId);
         Task<Stream?> GetFileStreamAsync(int fileId, int userId);
         Task<bool> IndexFileAsync(int fileId);
+        Task<bool> ReindexAgentFilesAsync(int agentId, int userId);
     }
 }

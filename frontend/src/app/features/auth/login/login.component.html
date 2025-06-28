@@ -5,219 +5,258 @@
 			<div class="logo">
 				<img src="assets/icons/logo.svg" alt="AI Agent Platform Logo" />
 			</div>
-			<h1>KiotViet AI Agent Platform</h1>
-			<p>Empowering your business with intelligent automation</p>
+			<h1>{{ 'AUTH.PLATFORM_TITLE' | translate }}</h1>
+			<p>{{ 'AUTH.PLATFORM_SUBTITLE' | translate }}</p>
 		</div>
 
 		<!-- Form Container -->
 		<div class="form-container">
 			<div class="tabs">
 				<button
-					class="tab"
+					class="tab-button"
 					[class.active]="activeTab === 'login'"
 					(click)="activeTab = 'login'"
 				>
-					Login
+					{{ 'AUTH.LOGIN_TAB' | translate }}
 				</button>
 				<button
-					class="tab"
+					class="tab-button"
 					[class.active]="activeTab === 'register'"
 					(click)="activeTab = 'register'"
 				>
-					Register
+					{{ 'AUTH.REGISTER_TAB' | translate }}
 				</button>
 			</div>
 
 			<!-- Login Form -->
 			<div *ngIf="activeTab === 'login'" class="form-content">
-				<form (ngSubmit)="login()" #loginForm="ngForm">
-					<div class="form-field">
-						<label for="login-email">Email Address</label>
-						<div class="input-wrapper">
-							<i class="icon-email"></i>
-							<input
-								id="login-email"
-								type="email"
-								name="login-email"
-								[(ngModel)]="loginCredentials.email"
-								placeholder="your@kiotviet.com"
-								required
-								email
-								#loginEmail="ngModel"
-							/>
-						</div>
-					</div>
+				<form [formGroup]="loginForm" (ngSubmit)="login()">
+					<mat-form-field appearance="outline">
+						<mat-icon matPrefix svgIcon="email"></mat-icon>
+						<mat-label>{{ 'AUTH.EMAIL' | translate }}</mat-label>
+						<input
+							matInput
+							formControlName="email"
+							placeholder="{{ 'AUTH.EMAIL_PLACEHOLDER' | translate }}"
+							required
+						/>
+						<mat-error *ngIf="loginForm.get('email')?.hasError('required')">
+							{{ 'VALIDATION.EMAIL_REQUIRED' | translate }}
+						</mat-error>
+						<mat-error *ngIf="loginForm.get('email')?.hasError('email')">
+							{{ 'VALIDATION.EMAIL_INVALID' | translate }}
+						</mat-error>
+					</mat-form-field>
 
-					<div class="form-field">
-						<label for="login-password">Password</label>
-						<div class="input-wrapper">
-							<i class="icon-lock"></i>
-							<input
-								id="login-password"
-								[type]="hidePassword ? 'password' : 'text'"
-								name="password"
-								[(ngModel)]="loginCredentials.password"
-								placeholder="••••••••••"
-								required
-								#password="ngModel"
-							/>
-							<button
-								type="button"
-								class="icon-button"
-								(click)="hidePassword = !hidePassword"
-							>
-								<i [class]="hidePassword ? 'icon-eye-off' : 'icon-eye'"></i>
-							</button>
-						</div>
-					</div>
+					<mat-form-field appearance="outline">
+						<mat-icon matPrefix svgIcon="lock"></mat-icon>
+						<mat-label>{{ 'AUTH.PASSWORD' | translate }}</mat-label>
+						<input
+							matInput
+							[type]="hidePassword ? 'password' : 'text'"
+							formControlName="password"
+							placeholder="{{ 'AUTH.PASSWORD_PLACEHOLDER' | translate }}"
+							required
+						/>
+						<button
+							mat-icon-button
+							matSuffix
+							(click)="hidePassword = !hidePassword"
+						>
+							<mat-icon>{{
+								hidePassword ? 'visibility_off' : 'visibility'
+							}}</mat-icon>
+						</button>
+						<mat-error *ngIf="loginForm.get('password')?.hasError('required')">
+							{{ 'VALIDATION.PASSWORD_REQUIRED' | translate }}
+						</mat-error>
+					</mat-form-field>
 
 					<div class="form-options">
 						<div class="checkbox-wrapper">
 							<input type="checkbox" id="remember-me" name="remember-me" />
-							<label for="remember-me">Remember me</label>
+							<label for="remember-me">{{
+								'AUTH.REMEMBER_ME' | translate
+							}}</label>
 						</div>
-						<a href="#" class="forgot-password-link">Forgot password?</a>
+						<a href="#" class="forgot-password-link">{{
+							'AUTH.FORGOT_PASSWORD' | translate
+						}}</a>
 					</div>
 
 					<button
+						mat-raised-button
+						color="primary"
 						type="submit"
-						class="button-primary"
-						[disabled]="loginForm.invalid || loading"
+						[disabled]="loginForm.invalid || isLoading"
+						class="submit-button"
 					>
-						<span *ngIf="!loading">Sign in</span>
-						<mat-spinner *ngIf="loading" diameter="20"></mat-spinner>
+						<span *ngIf="!isLoading">{{ 'AUTH.LOGIN_BTN' | translate }}</span>
+						<mat-spinner
+							*ngIf="isLoading"
+							diameter="20"
+							class="button-spinner"
+						></mat-spinner>
 					</button>
 				</form>
 
 				<div class="divider">
-					<span>or continue with</span>
+					<span>{{ 'AUTH.OR_CONTINUE_WITH' | translate }}</span>
 				</div>
 
 				<div class="social-login">
 					<button type="button" class="button-social">
-						<i class="icon-google"></i>
+						<img src="assets/icons/google.svg" alt="Google" />
 						<span>Google</span>
 					</button>
 					<button type="button" class="button-social">
-						<i class="icon-microsoft"></i>
+						<img src="assets/icons/microsoft.svg" alt="Microsoft" />
 						<span>Microsoft</span>
 					</button>
+				</div>
+				<div class="language-picker-container">
+					<app-language-picker></app-language-picker>
 				</div>
 			</div>
 
 			<!-- Register Form -->
 			<div *ngIf="activeTab === 'register'" class="form-content">
-				<form (ngSubmit)="register()" #registerForm="ngForm">
-					<div class="form-field">
-						<label for="register-fullname">Full Name</label>
-						<div class="input-wrapper">
-							<i class="icon-user"></i>
-							<input
-								id="register-fullname"
-								type="text"
-								name="register-fullname"
-								[(ngModel)]="registerCredentials.firstName"
-								placeholder="Jolie Nguyen"
-								required
-							/>
-						</div>
-					</div>
+				<form [formGroup]="registerForm" (ngSubmit)="register()">
+					<mat-form-field appearance="outline">
+						<mat-icon matPrefix>person</mat-icon>
+						<mat-label>{{ 'AUTH.FULL_NAME' | translate }}</mat-label>
+						<input
+							matInput
+							formControlName="fullName"
+							placeholder="{{ 'AUTH.FULL_NAME_PLACEHOLDER' | translate }}"
+							required
+						/>
+						<mat-error *ngIf="registerForm.get('fullName')?.hasError('required')">
+							{{ 'VALIDATION.FULL_NAME_REQUIRED' | translate }}
+						</mat-error>
+					</mat-form-field>
 
-					<div class="form-field">
-						<label for="register-email">Email Address</label>
-						<div class="input-wrapper">
-							<i class="icon-email"></i>
-							<input
-								id="register-email"
-								type="email"
-								name="email"
-								[(ngModel)]="registerCredentials.email"
-								placeholder="your@kiotviet.com"
-								required
-								email
-								#email="ngModel"
-							/>
-						</div>
-					</div>
+					<mat-form-field appearance="outline">
+						<mat-icon matPrefix svgIcon="email"></mat-icon>
+						<mat-label>{{ 'AUTH.EMAIL' | translate }}</mat-label>
+						<input
+							matInput
+							formControlName="email"
+							placeholder="{{ 'AUTH.EMAIL_PLACEHOLDER' | translate }}"
+							required
+						/>
+						<mat-error *ngIf="registerForm.get('email')?.hasError('required')">
+							{{ 'VALIDATION.EMAIL_REQUIRED' | translate }}
+						</mat-error>
+						<mat-error *ngIf="registerForm.get('email')?.hasError('email')">
+							{{ 'VALIDATION.EMAIL_INVALID' | translate }}
+						</mat-error>
+					</mat-form-field>
 
-					<div class="form-field">
-						<label for="register-password">Password</label>
-						<div class="input-wrapper">
-							<i class="icon-lock"></i>
-							<input
-								id="register-password"
-								[type]="hideRegisterPassword ? 'password' : 'text'"
-								name="register-password"
-								[(ngModel)]="registerCredentials.password"
-								placeholder="••••••••••"
-								required
-								minlength="6"
-								#registerPassword="ngModel"
-							/>
-							<button
-								type="button"
-								class="icon-button"
-								(click)="hideRegisterPassword = !hideRegisterPassword"
-							>
-								<i
-									[class]="
-										hideRegisterPassword ? 'icon-eye-off' : 'icon-eye'
-									"
-								></i>
-							</button>
-						</div>
-					</div>
+					<mat-form-field appearance="outline">
+						<mat-icon matPrefix svgIcon="lock"></mat-icon>
+						<mat-label>{{ 'AUTH.PASSWORD' | translate }}</mat-label>
+						<input
+							matInput
+							[type]="hidePassword ? 'password' : 'text'"
+							formControlName="password"
+							placeholder="{{ 'AUTH.PASSWORD_PLACEHOLDER' | translate }}"
+							required
+						/>
+						<button
+							mat-icon-button
+							matSuffix
+							(click)="hidePassword = !hidePassword"
+						>
+							<mat-icon>{{
+								hidePassword ? 'visibility_off' : 'visibility'
+							}}</mat-icon>
+						</button>
+						<mat-error *ngIf="registerForm.get('password')?.hasError('required')">
+							{{ 'VALIDATION.PASSWORD_REQUIRED' | translate }}
+						</mat-error>
+						<mat-error *ngIf="registerForm.get('password')?.hasError('minlength')">
+							{{ 'VALIDATION.PASSWORD_MIN_LENGTH' | translate }}
+						</mat-error>
+					</mat-form-field>
 
-					<div class="form-field">
-						<label for="confirm-password">Confirm password</label>
-						<div class="input-wrapper">
-							<i class="icon-lock"></i>
-							<input
-								id="confirm-password"
-								type="password"
-								name="confirm-password"
-								placeholder="••••••••••"
-								required
-							/>
-						</div>
-					</div>
+					<mat-form-field appearance="outline">
+						<mat-icon matPrefix svgIcon="lock"></mat-icon>
+						<mat-label>{{ 'AUTH.CONFIRM_PASSWORD' | translate }}</mat-label>
+						<input
+							matInput
+							[type]="hideConfirmPassword ? 'password' : 'text'"
+							formControlName="confirmPassword"
+							placeholder="{{ 'AUTH.CONFIRM_PASSWORD_PLACEHOLDER' | translate }}"
+							required
+							[errorStateMatcher]="passwordMatcher"
+						/>
+						<button
+							mat-icon-button
+							matSuffix
+							(click)="hideConfirmPassword = !hideConfirmPassword"
+						>
+							<mat-icon>{{
+								hideConfirmPassword ? 'visibility_off' : 'visibility'
+							}}</mat-icon>
+						</button>
+						<mat-error
+							*ngIf="registerForm.get('confirmPassword')?.hasError('required')"
+						>
+							{{ 'VALIDATION.CONFIRM_PASSWORD_REQUIRED' | translate }}
+						</mat-error>
+						<mat-error *ngIf="registerForm.hasError('passwordMismatch')">
+							{{ 'VALIDATION.PASSWORD_MISMATCH' | translate }}
+						</mat-error>
+					</mat-form-field>
 
 					<button
+						mat-raised-button
+						color="primary"
 						type="submit"
-						class="button-primary"
-						[disabled]="registerForm.invalid || loading"
+						[disabled]="registerForm.invalid || isLoading"
+						class="submit-button"
 					>
-						<span *ngIf="!loading">Register</span>
-						<mat-spinner *ngIf="loading" diameter="20"></mat-spinner>
+						<span *ngIf="!isLoading">{{ 'AUTH.REGISTER_BTN' | translate }}</span>
+						<mat-spinner
+							*ngIf="isLoading"
+							diameter="20"
+							class="button-spinner"
+						></mat-spinner>
 					</button>
 				</form>
 
 				<div class="divider">
-					<span>or continue with</span>
+					<span>{{ 'AUTH.OR_CONTINUE_WITH' | translate }}</span>
 				</div>
 
 				<div class="social-login">
 					<button type="button" class="button-social">
-						<i class="icon-google"></i>
+						<img src="assets/icons/google.svg" alt="Google" />
 						<span>Google</span>
 					</button>
 					<button type="button" class="button-social">
-						<i class="icon-microsoft"></i>
+						<img src="assets/icons/microsoft.svg" alt="Microsoft" />
 						<span>Microsoft</span>
 					</button>
+				</div>
+				<div class="language-picker-container">
+					<app-language-picker></app-language-picker>
 				</div>
 			</div>
 		</div>
 
 		<!-- Footer -->
 		<div class="auth-footer">
-			<p>© 2023 KiotViet AI Agent Platform. All rights reserved.</p>
-			<div class="footer-links">
-				<a href="#">Terms</a>
-				<a href="#">Privacy</a>
-				<a href="#">Help</a>
-				<a href="#">Contact</a>
-			</div>
+			<p>
+				{{ 'AUTH.FOOTER_COPYRIGHT' | translate }}
+			</p>
+			<p>
+				<a href="#">{{ 'AUTH.FOOTER_TERMS' | translate }}</a>
+				<a href="#">{{ 'AUTH.FOOTER_PRIVACY' | translate }}</a>
+				<a href="#">{{ 'AUTH.FOOTER_HELP' | translate }}</a>
+				<a href="#">{{ 'AUTH.FOOTER_CONTACT' | translate }}</a>
+			</p>
 		</div>
 	</div>
 </div>

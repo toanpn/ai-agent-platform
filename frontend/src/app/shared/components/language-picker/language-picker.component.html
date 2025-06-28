@@ -1,0 +1,24 @@
+<button
+	mat-button
+	class="language-picker"
+	[matMenuTriggerFor]="languageMenu"
+	[attr.aria-label]="'COMMON.LANGUAGE' | translate"
+>
+	<mat-icon
+		class="flag-icon"
+		[svgIcon]="getFlagIcon(currentLanguage.code)"
+	></mat-icon>
+	<span class="language-code">{{ currentLanguage.name }}</span>
+	<mat-icon class="dropdown-icon" svgIcon="arrow-down"></mat-icon>
+</button>
+
+<mat-menu #languageMenu="matMenu" class="language-menu">
+	<button
+		mat-menu-item
+		*ngFor="let language of availableLanguages"
+		(click)="selectLanguage(language)"
+	>
+		<mat-icon class="flag-icon" [svgIcon]="getFlagIcon(language.code)"></mat-icon>
+		<span>{{ language.name }}</span>
+	</button>
+</mat-menu> 

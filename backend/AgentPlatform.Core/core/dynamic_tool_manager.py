@@ -286,7 +286,7 @@ class DynamicToolManager:
             def _execute_knowledge_search_tool(self, tool_module, params: Dict[str, Any]) -> str:
                 """Execute knowledge search tool (RAG) with dynamic configuration."""
                 try:
-                    from toolkit.rag_tool import RAGTool
+                    from toolkit.rag_tool import KnowledgeSearchTool
                     
                     # Try to find query from various possible parameter names
                     query = None
@@ -312,13 +312,16 @@ class DynamicToolManager:
                     if not isinstance(max_results, int) or max_results < 1:
                         max_results = 5
                     
+                    # Extract agent_id if provided
+                    agent_id = params.get("agent_id")
+                    
                     print(f"Debug: Knowledge search using query: '{query.strip()}' with {max_results} results")
                     
-                    # Create RAG tool instance
-                    tool_instance = RAGTool()
+                    # Create KnowledgeSearchTool instance
+                    tool_instance = KnowledgeSearchTool()
                     
                     # Execute the knowledge search
-                    return tool_instance._run(query.strip(), max_results)
+                    return tool_instance._run(query.strip(), agent_id, max_results)
                     
                 except Exception as e:
                     return f"❌ Error executing knowledge search tool: {str(e)}"

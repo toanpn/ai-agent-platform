@@ -3,13 +3,13 @@ import {
 	importProvidersFrom,
 	provideAppInitializer,
 	inject,
-    provideBrowserGlobalErrorListeners,
-    provideZoneChangeDetection,
+	provideBrowserGlobalErrorListeners,
+	provideZoneChangeDetection,
 } from '@angular/core';
-import { provideRouter } from '@angular/router';
+import { provideRouter, withComponentInputBinding } from '@angular/router';
 import { routes } from './app.routes';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
-import { provideAnimations } from '@angular/platform-browser/animations';
+import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { AuthInterceptor } from './core/interceptors/auth.interceptor';
 import { AuthService } from './core/services/auth.service';
 import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
@@ -28,8 +28,8 @@ export const appConfig: ApplicationConfig = {
 	providers: [
 		provideBrowserGlobalErrorListeners(),
 		provideZoneChangeDetection({ eventCoalescing: true }),
-		provideRouter(routes),
-		provideAnimations(),
+		provideRouter(routes, withComponentInputBinding()),
+		provideAnimationsAsync(),
 		provideHttpClient(withInterceptors([AuthInterceptor])),
 		provideHashbrown(environment.hashbrown.config),
 		// Import Angular Material SnackBar module for the notification service

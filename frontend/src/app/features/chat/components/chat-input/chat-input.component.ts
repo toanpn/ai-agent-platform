@@ -7,24 +7,18 @@ import {
 	inject,
 	DestroyRef,
 	OnInit,
+	ViewChild,
+	ElementRef,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatInputModule } from '@angular/material/input';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatTooltipModule } from '@angular/material/tooltip';
-import { TextFieldModule } from '@angular/cdk/text-field';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { Subject } from 'rxjs';
 import { exhaustMap, tap, catchError, switchMap } from 'rxjs/operators';
 import { ChatService } from '../../../../core/services/chat.service';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { SpeechService } from '../../../../core/services/speech.service';
-import { toSignal } from '@angular/core/rxjs-interop';
 
 /**
  * ChatInputComponent handles user input for sending messages in the chat interface.
@@ -34,18 +28,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 @Component({
 	selector: 'app-chat-input',
 	standalone: true,
-	imports: [
-		CommonModule,
-		FormsModule,
-		MatButtonModule,
-		MatIconModule,
-		MatInputModule,
-		MatFormFieldModule,
-		MatProgressSpinnerModule,
-		MatTooltipModule,
-		TextFieldModule,
-		TranslateModule,
-	],
+	imports: [CommonModule, FormsModule, TranslateModule],
 	templateUrl: './chat-input.component.html',
 	styleUrls: ['./chat-input.component.scss'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
@@ -64,6 +47,8 @@ export class ChatInputComponent implements OnInit {
 
 	isSpeechSupported = this.speechService.isApiSupported;
 	isListening = toSignal(this.speechService.isListening$, { initialValue: false });
+
+	@ViewChild('promptInput') promptInput!: ElementRef<HTMLTextAreaElement>;
 
 	// Action subjects for declarative reactive patterns
 	private enhancePromptTrigger$ = new Subject<string>();
@@ -178,5 +163,10 @@ export class ChatInputComponent implements OnInit {
 			const currentLang = this.translateService.currentLang || this.translateService.defaultLang;
 			this.speechService.startListening(currentLang);
 		}
+	}
+
+	setPrompt(promptText: string): void {
+		this.messageText.set(promptText);
+		this.promptInput.nativeElement.focus();
 	}
 }

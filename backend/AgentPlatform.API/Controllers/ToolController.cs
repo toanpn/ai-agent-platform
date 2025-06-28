@@ -23,5 +23,24 @@ namespace AgentPlatform.API.Controllers
             var tools = await _toolService.GetToolsAsync();
             return Ok(tools);
         }
+
+        [HttpGet("tools-json")]
+        [AllowAnonymous]
+        public async Task<ActionResult> GetToolsJson()
+        {
+            try
+            {
+                var toolsJson = await _toolService.GetToolsJsonContentAsync();
+                return Content(toolsJson, "application/json");
+            }
+            catch (FileNotFoundException)
+            {
+                return NotFound(new { message = "Tools JSON file not found" });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = $"Error reading tools JSON: {ex.Message}" });
+            }
+        }
     }
 }

@@ -55,6 +55,10 @@ services:
       - FLASK_ENV=${FLASK_ENV}
       - PORT=${PORT}
       - GOOGLE_API_KEY=${GOOGLE_API_KEY}
+      - GOOGLE_CLOUD_PROJECT=midyear-grid-416507
+      - GOOGLE_CLOUD_LOCATION=us-central1
+      - GOOGLE_APPLICATION_CREDENTIALS=/app/gcp-credentials.json
+      - CHROMA_DB_PATH=/app/db
     ports:
       - "8000:8000"
     volumes:

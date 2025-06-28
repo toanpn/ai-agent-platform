@@ -19,6 +19,11 @@ import chromadb
 from chromadb.config import Settings
 from chromadb.utils import embedding_functions
 
+# Google Cloud imports
+from google.auth import default
+from google.oauth2 import service_account
+import google.auth
+
 # LangChain imports
 from langchain_google_vertexai import VertexAIEmbeddings
 from langchain_community.document_loaders import (
@@ -143,18 +148,23 @@ class RAGService:
     def __init__(self, 
                  collection_name: str = "agent_knowledge_base",
                  embedding_model: str = "text-multilingual-embedding-002",
-                 persist_directory: str = "/app/db"):
+                 persist_directory: Optional[str] = None):
         """
         Initialize RAG service.
         
         Args:
             collection_name: Name of the ChromaDB collection
             embedding_model: VertexAI embedding model name
-            persist_directory: Directory to persist ChromaDB data
+            persist_directory: Directory to persist ChromaDB data (defaults to CHROMA_DB_PATH env var or /tmp/chroma_db)
         """
         self.collection_name = collection_name
         self.embedding_model = embedding_model
-        self.persist_directory = persist_directory
+        
+        # Set persist directory with environment variable support
+        if persist_directory:
+            self.persist_directory = persist_directory
+        else:
+            self.persist_directory = os.getenv('CHROMA_DB_PATH', '/tmp/chroma_db')
         
         # Initialize components
         self.document_processor = DocumentProcessor()
@@ -173,12 +183,64 @@ class RAGService:
     def _init_embeddings(self):
         """Initialize VertexAI embeddings."""
         try:
+            project_id = os.getenv('GOOGLE_CLOUD_PROJECT')
+            location = os.getenv('GOOGLE_CLOUD_LOCATION', 'us-central1')
+            credentials_path = os.getenv('GOOGLE_APPLICATION_CREDENTIALS')
+            
+            if not project_id:
+                raise ValueError("GOOGLE_CLOUD_PROJECT environment variable is required")
+            
+            # Set up Google Cloud credentials - check multiple possible paths
+            credentials = None
+            
+            # List of possible credential file paths (local and Docker)
+            possible_paths = []
+            if credentials_path:
+                possible_paths.append(credentials_path)
+            
+            # Add common paths for both local and Docker environments
+            possible_paths.extend([
+                '/app/gcp-credentials.json',  # Docker path
+                './gcp-credentials.json',     # Local relative path
+                'gcp-credentials.json',       # Current directory
+                '../gcp-credentials.json',    # Parent directory (if running from subdirectory)
+                os.path.join(os.path.dirname(__file__), '../../../gcp-credentials.json')  # From core/ to project root
+            ])
+            
+            # Try each path until we find a valid credentials file
+            credentials_found = False
+            for path in possible_paths:
+                if path and os.path.exists(path):
+                    try:
+                        logger.info(f"✅ Loading service account credentials from: {path}")
+                        credentials = service_account.Credentials.from_service_account_file(path)
+                        logger.info(f"✅ Service account loaded: {credentials.service_account_email}")
+                        credentials_found = True
+                        break
+                    except Exception as e:
+                        logger.warning(f"⚠️ Failed to load credentials from {path}: {e}")
+                        continue
+            
+            # If no service account file found, try default credentials
+            if not credentials_found:
+                logger.info("🔄 No service account file found, attempting to use default credentials")
+                try:
+                    credentials, project = default()
+                    if project:
+                        project_id = project
+                    logger.info(f"✅ Default credentials loaded for project: {project_id}")
+                except Exception as e:
+                    logger.warning(f"⚠️ Failed to load default credentials: {e}")
+                    raise ValueError("No valid Google Cloud credentials found")
+            
+            # Initialize VertexAI embeddings with explicit credentials
             self.embeddings = VertexAIEmbeddings(
                 model_name=self.embedding_model,
-                project=os.getenv('GOOGLE_CLOUD_PROJECT'),
-                location=os.getenv('GOOGLE_CLOUD_LOCATION', 'us-central1')
+                project=project_id,
+                location=location,
+                credentials=credentials
             )
-            logger.info(f"✅ VertexAI embeddings initialized with model: {self.embedding_model}")
+            logger.info(f"✅ VertexAI embeddings initialized with model: {self.embedding_model} (project: {project_id}, location: {location})")
         except Exception as e:
             logger.error(f"❌ Failed to initialize VertexAI embeddings: {e}")
             # Fallback to ChromaDB default embeddings if VertexAI fails
@@ -194,30 +256,82 @@ class RAGService:
             # Initialize ChromaDB client with persistence
             self.client = chromadb.PersistentClient(path=self.persist_directory)
             
-            # Create or get collection
+            # Determine embedding function based on VertexAI availability
             if self.embeddings:
-                # Use custom VertexAI embeddings
-                embedding_function = embedding_functions.GoogleVertexEmbeddingFunction(
-                    api_key=os.getenv('GOOGLE_API_KEY'),
-                    model_name=self.embedding_model
-                )
+                # Create custom embedding function using service account credentials
+                class VertexAIServiceAccountEmbeddingFunction:
+                    def __init__(self, langchain_embeddings, model_name):
+                        self.embeddings = langchain_embeddings
+                        self._name = f"vertex_ai_service_account_{model_name}"
+                    
+                    def name(self):
+                        return self._name
+                    
+                    def __call__(self, input):
+                        # Handle both single string and list of strings
+                        if isinstance(input, str):
+                            return self.embeddings.embed_query(input)
+                        elif isinstance(input, list):
+                            return self.embeddings.embed_documents(input)
+                        else:
+                            raise ValueError(f"Unsupported input type: {type(input)}")
+                
+                embedding_function = VertexAIServiceAccountEmbeddingFunction(self.embeddings, self.embedding_model)
+                embedding_type = "google_vertex_service_account"
             else:
                 # Use default embedding function
                 embedding_function = embedding_functions.DefaultEmbeddingFunction()
+                embedding_type = "default"
             
+            # Check if collection exists and handle embedding function conflicts
             try:
-                self.collection = self.client.get_collection(
-                    name=self.collection_name,
-                    embedding_function=embedding_function
-                )
-                logger.info(f"✅ Retrieved existing ChromaDB collection: {self.collection_name}")
-            except ValueError:
-                # Collection doesn't exist, create it
-                self.collection = self.client.create_collection(
-                    name=self.collection_name,
-                    embedding_function=embedding_function
-                )
-                logger.info(f"✅ Created new ChromaDB collection: {self.collection_name}")
+                existing_collections = [col.name for col in self.client.list_collections()]
+                if self.collection_name in existing_collections:
+                    try:
+                        # Try to get existing collection
+                        self.collection = self.client.get_collection(
+                            name=self.collection_name,
+                            embedding_function=embedding_function
+                        )
+                        logger.info(f"✅ Retrieved existing ChromaDB collection: {self.collection_name}")
+                    except Exception as e:
+                        # If there's an embedding function conflict, recreate the collection
+                        if "embedding function" in str(e).lower() or "conflict" in str(e).lower():
+                            logger.warning(f"⚠️ Embedding function conflict detected: {e}")
+                            logger.info(f"🔄 Recreating collection with {embedding_type} embedding function...")
+                            
+                            # Delete existing collection
+                            self.client.delete_collection(name=self.collection_name)
+                            logger.info(f"🗑️ Deleted existing collection: {self.collection_name}")
+                            
+                            # Create new collection with correct embedding function
+                            self.collection = self.client.create_collection(
+                                name=self.collection_name,
+                                embedding_function=embedding_function
+                            )
+                            logger.info(f"✅ Created new ChromaDB collection with {embedding_type} embeddings: {self.collection_name}")
+                        else:
+                            raise e
+                else:
+                    # Collection doesn't exist, create it
+                    self.collection = self.client.create_collection(
+                        name=self.collection_name,
+                        embedding_function=embedding_function
+                    )
+                    logger.info(f"✅ Created new ChromaDB collection with {embedding_type} embeddings: {self.collection_name}")
+            
+            except Exception as e:
+                logger.error(f"❌ Error with ChromaDB collection operations: {e}")
+                # Final fallback - try to create collection directly
+                try:
+                    self.collection = self.client.create_collection(
+                        name=f"{self.collection_name}_{embedding_type}",
+                        embedding_function=embedding_function
+                    )
+                    logger.info(f"✅ Created fallback ChromaDB collection: {self.collection_name}_{embedding_type}")
+                except Exception as create_error:
+                    logger.error(f"❌ Failed to create collection as fallback: {create_error}")
+                    raise create_error
             
         except Exception as e:
             logger.error(f"❌ Failed to initialize ChromaDB: {e}")

@@ -21,13 +21,14 @@
 
 .auth-box {
 	width: 100%;
-	max-width: 448px;
+	max-width: 450px;
 	display: flex;
 	flex-direction: column;
 	gap: 2rem;
 }
 
 .auth-header {
+	padding: 2.5rem 2rem 2rem;
 	text-align: center;
 	.logo {
 		width: 48px;
@@ -71,9 +72,9 @@
 
 .tabs {
 	display: flex;
-	border-bottom: 1px solid var(--color-login-divider);
+	border-bottom: 1px solid var(--color-border-light);
 
-	.tab {
+	.tab-button {
 		flex: 1;
 		padding: 1rem;
 		border: none;
@@ -124,6 +125,8 @@ form {
 	justify-content: space-between;
 	align-items: center;
 	font-size: 14px;
+	margin-top: -0.5rem;
+	margin-bottom: 0.5rem;
 }
 
 .checkbox-wrapper {
@@ -147,26 +150,21 @@ form {
 	}
 }
 
-.button-primary {
+.submit-button.mat-mdc-button-base {
 	width: 100%;
 	height: 42px;
-	border: none;
 	border-radius: 8px;
-	color: var(--color-text-on-primary);
+	font-size: 14px;
+	font-weight: 500;
 	background: linear-gradient(
 		to right,
 		var(--color-login-gradient-start),
 		var(--color-login-gradient-end)
 	);
-	font-size: 14px;
-	font-weight: 500;
-	cursor: pointer;
-	box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-	transition: opacity 0.2s;
+	color: var(--color-text-on-primary);
 
 	&:disabled {
-		opacity: 0.7;
-		cursor: not-allowed;
+		background: var(--color-primary-disabled);
 	}
 }
 
@@ -182,10 +180,10 @@ form {
 	&::after {
 		content: '';
 		flex: 1;
-		border-bottom: 1px solid var(--color-login-divider);
+		border-bottom: 1px solid var(--color-border-light);
 	}
 
-	& span {
+	& > span {
 		padding: 0 1rem;
 	}
 }
@@ -193,59 +191,81 @@ form {
 .social-login {
 	display: flex;
 	gap: 0.75rem;
-}
 
-.button-social {
-	flex: 1;
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	gap: 0.5rem;
-	height: 46px;
-	border: 1px solid var(--color-login-border);
-	border-radius: 8px;
-	background-color: var(--color-surface);
-	font-size: 14px;
-	font-weight: 500;
-	color: var(--color-login-text-label);
-	cursor: pointer;
-	box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-
-	.icon-google {
-		background-image: url('/assets/icons/google.svg');
-		width: 16px;
-		height: 16px;
-	}
-
-	.icon-microsoft {
-		background-image: url('/assets/icons/microsoft.svg');
-		width: 14px;
-		height: 14px;
-	}
-}
-
-.auth-footer {
-	text-align: center;
-	font-size: 14px;
-	color: var(--color-login-text-subheader);
-
-	.footer-links {
+	.button-social {
+		flex: 1;
 		display: flex;
 		justify-content: center;
-		gap: 1.5rem;
-		margin-top: 0.5rem;
+		align-items: center;
+		gap: 0.5rem;
+		height: 46px;
+		border: 1px solid var(--color-login-border);
+		border-radius: 8px;
+		background-color: var(--color-surface);
+		font-size: 14px;
+		font-weight: 500;
+		color: var(--color-login-text-label);
+		cursor: pointer;
 
-		a {
-			color: var(--color-login-text-subheader);
-			text-decoration: none;
-			&:hover {
-				text-decoration: underline;
-			}
+		.icon-google,
+		.icon-microsoft {
+			display: inline-block;
+			background-size: contain;
+			background-repeat: no-repeat;
+			background-position: center;
+		}
+
+		.icon-google {
+			background-image: url('/assets/icons/google.svg');
+			width: 16px;
+			height: 16px;
+		}
+
+		.icon-microsoft {
+			background-image: url('/assets/icons/microsoft.svg');
+			width: 14px;
+			height: 14px;
 		}
 	}
 }
 
-// You will need to add icon styles. For example:
-// .icon-email::before { content: '...'; }
-// Using a library like Font Awesome or Material Icons is recommended.
-// For this example, I'm assuming you will add them.
+.language-picker-container {
+	margin-top: 1.5rem;
+	display: flex;
+	justify-content: center;
+}
+
+.auth-footer {
+	text-align: center;
+	padding: 2rem;
+	font-size: 14px;
+	color: var(--color-login-text-subheader);
+
+	a {
+		color: var(--color-login-text-subheader);
+		text-decoration: none;
+		margin-left: 1.5rem;
+
+		&:hover {
+			text-decoration: underline;
+		}
+	}
+}
+
+// Override Angular Material styles for inputs to match Figma spec
+::ng-deep .mat-mdc-form-field .mdc-notched-outline > .mdc-notched-outline__leading,
+::ng-deep .mat-mdc-form-field .mdc-notched-outline > .mdc-notched-outline__notch,
+::ng-deep .mat-mdc-form-field .mdc-notched-outline > .mdc-notched-outline__trailing {
+	border-color: #d1d5db !important;
+	border-width: 1px !important;
+}
+
+::ng-deep .mat-mdc-form-field .mdc-text-field {
+	font-family: 'Inter', sans-serif;
+}
+
+::ng-deep .mat-mdc-form-field .mat-mdc-floating-label {
+	font-family: 'Inter', sans-serif;
+	color: #374151 !important;
+	font-weight: 500;
+}

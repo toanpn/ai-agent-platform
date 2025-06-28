@@ -93,3 +93,25 @@
 		}
 	}
 }
+
+:host {
+	height: 100%;
+	display: block;
+}
+
+.app-container {
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+
+	&.logged-in {
+		.app-content {
+			padding-top: 60px; // Height of the fixed header
+		}
+	}
+}
+
+.app-content {
+	flex: 1;
+	overflow: auto;
+}

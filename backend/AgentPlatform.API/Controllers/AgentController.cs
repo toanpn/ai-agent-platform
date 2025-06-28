@@ -153,5 +153,24 @@ namespace AgentPlatform.API.Controllers
             }
             return Ok(tools);
         }
+
+        [HttpGet("agents-json")]
+        [AllowAnonymous]
+        public async Task<ActionResult> GetAgentsJson()
+        {
+            try
+            {
+                var agentsJson = await _agentService.GetAgentsJsonContentAsync();
+                return Content(agentsJson, "application/json");
+            }
+            catch (FileNotFoundException)
+            {
+                return NotFound(new { message = "Agents JSON file not found" });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = $"Error reading agents JSON: {ex.Message}" });
+            }
+        }
     }
 } 

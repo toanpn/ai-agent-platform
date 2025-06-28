@@ -8,8 +8,8 @@ import { CommonModule } from '@angular/common';
 import { TranslateModule } from '@ngx-translate/core';
 import { AuthService } from './core/services/auth.service';
 import { ThemeService } from './core/services/theme.service';
-import { LanguageSelectorComponent } from './shared/components/language-selector/language-selector.component';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { HeaderComponent } from './shared/components/header/header.component';
 
 /**
  * AppComponent is the root component of the chatbot application.
@@ -27,7 +27,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 		MatIconModule,
 		MatMenuModule,
 		TranslateModule,
-		LanguageSelectorComponent,
+		HeaderComponent,
 	],
 	templateUrl: './app.html',
 	styleUrl: './app.scss',

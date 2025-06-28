@@ -42,18 +42,22 @@
     "INACTIVE": "Không hoạt động",
     "OTHER": "khác",
     "OTHERS": "khác",
-    "RETRY": "Thử lại"
+    "RETRY": "Thử lại",
+    "SHARE": "Chia sẻ",
+    "MORE_OPTIONS": "Thêm tùy chọn",
+    "PRIVATE": "Riêng tư",
+    "FULL_NAME": "Họ và Tên"
   },
   "AUTH": {
     "LOGIN": "Đăng Nhập",
     "REGISTER": "Đăng Ký",
     "EMAIL": "Email",
     "PASSWORD": "Mật Khẩu",
-    "CONFIRM_PASSWORD": "Xác Nhận Mật Khẩu",
+    "CONFIRM_PASSWORD": "Xác nhận Mật khẩu",
     "USERNAME": "Tên Đăng Nhập",
     "FIRST_NAME": "Tên",
     "LAST_NAME": "Họ",
-    "FORGOT_PASSWORD": "Quên Mật Khẩu?",
+    "FORGOT_PASSWORD": "Quên mật khẩu?",
     "LOGIN_BUTTON": "Đăng Nhập",
     "REGISTER_BUTTON": "Đăng Ký",
     "LOGIN_ERROR": "Email hoặc mật khẩu không đúng",
@@ -78,7 +82,24 @@
     "HIDE_PASSWORD": "Ẩn mật khẩu",
     "REMEMBER_ME": "Ghi nhớ đăng nhập",
     "PASSWORD_MISMATCH": "Mật khẩu không khớp",
-    "LOGOUT_SUCCESS": "Đăng xuất thành công"
+    "LOGOUT_SUCCESS": "Đăng xuất thành công",
+    "PLATFORM_TITLE": "Nền tảng Đại lý AI KiotViet",
+    "PLATFORM_SUBTITLE": "Trao quyền cho doanh nghiệp của bạn bằng tự động hóa thông minh",
+    "LOGIN_TAB": "Đăng nhập",
+    "REGISTER_TAB": "Đăng ký",
+    "EMAIL_PLACEHOLDER": "your@example.com",
+    "PASSWORD_PLACEHOLDER": "Nhập mật khẩu của bạn",
+    "FULL_NAME_PLACEHOLDER": "Nhập họ và tên của bạn",
+    "CONFIRM_PASSWORD_PLACEHOLDER": "Xác nhận lại mật khẩu",
+    "LOGIN_BTN": "Đăng nhập",
+    "REGISTER_BTN": "Đăng ký",
+    "OR_CONTINUE_WITH": "hoặc tiếp tục với",
+    "FOOTER_COPYRIGHT": "© 2025 Nền tảng Đại lý AI KiotViet. Đã đăng ký bản quyền.",
+    "FOOTER_TERMS": "Điều khoản",
+    "FOOTER_PRIVACY": "Bảo mật",
+    "FOOTER_HELP": "Trợ giúp",
+    "FOOTER_CONTACT": "Liên hệ",
+    "FULL_NAME": "Họ và Tên"
   },
   "CHAT": {
     "NEW_CHAT": "Cuộc Trò Chuyện Mới",
@@ -125,8 +146,29 @@
     "TTS_DISABLE": "Tắt đọc văn bản",
     "DEFAULT_AGENT_NAME": "Trợ lý AI",
     "MIC_PERMISSION_ERROR": "Quyền truy cập micro đã bị từ chối. Vui lòng cho phép truy cập micro trong cài đặt trình duyệt của bạn.",
+    "DEFAULT_TITLE": "Cuộc trò chuyện mới",
+    "NEW_CONVERSATION_TITLE": "Cuộc trò chuyện mới",
+    "SIDEBAR_TITLE": "Các cuộc trò chuyện",
+    "SEARCH_PLACEHOLDER": "Tìm kiếm cuộc trò chuyện...",
+    "AGENT_LIST_TITLE": "Danh sách trợ lý",
+    "AGENT_SPECIALTIES": "Chuyên môn",
+    "AGENT_CAPABILITIES": "Khả năng",
+    "ADD_IMAGE": "Thêm ảnh",
+    "FORMAT_CODE": "Định dạng mã",
+    "CODE_FORMAT": "Mã",
+    "FORMAT_TABLE": "Định dạng bảng",
+    "TABLE_FORMAT": "Bảng",
+    "FORMAT_LIST": "Định dạng danh sách",
+    "LIST_FORMAT": "Danh sách",
+    "AGENT_RESPONSE_NOTE": "Tất cả các agent sẽ trả lời tin nhắn của bạn",
     "MIC_NOT_FOUND_ERROR": "Không tìm thấy micro. Vui lòng kết nối micro và thử lại.",
-    "MIC_GENERIC_ERROR": "Đã xảy ra lỗi khi truy cập micro."
+    "MIC_GENERIC_ERROR": "Đã xảy ra lỗi khi truy cập micro.",
+    "SUGGESTED_PROMPTS": {
+      "COMPETITORS": "Cho tôi biết thêm về đối thủ cạnh tranh của bạn",
+      "SEO": "Tôi cần trợ giúp về chiến lược SEO",
+      "MARKETING_MIX": "Hỗn hợp tiếp thị lý tưởng của tôi là gì?",
+      "CONVERSION_RATE": "Làm thế nào để cải thiện tỷ lệ chuyển đổi?"
+    }
   },
   "AGENTS": {
     "CREATE_AGENT": "Tạo Agent",
@@ -221,7 +263,6 @@
     "LOAD_AGENT_ERROR": "Không thể tải agent",
     "LIST_TITLE": "Danh sách trợ lý ảo",
     "LIST_SUBTITLE": "Quản lý và thiết lập trợ lý ảo của riêng bạn",
-    "SEARCH_PLACEHOLDER": "Tìm kiếm trợ lý...",
     "DEPARTMENT_FILTER_LABEL": "Phòng ban",
     "STATUS_FILTER_LABEL": "Trạng thái",
     "ALL_DEPARTMENTS": "Tất cả phòng ban",
@@ -328,7 +369,13 @@
     "MAX_LENGTH": "Độ dài tối đa là {{max}} ký tự",
     "PATTERN": "Vui lòng nhập giá trị hợp lệ",
     "PASSWORD_MISMATCH": "Mật khẩu không khớp",
-    "INVALID_FORMAT": "Định dạng không hợp lệ"
+    "INVALID_FORMAT": "Định dạng không hợp lệ",
+    "EMAIL_REQUIRED": "Email là bắt buộc.",
+    "PASSWORD_REQUIRED": "Mật khẩu là bắt buộc.",
+    "FULL_NAME_REQUIRED": "Họ và tên là bắt buộc.",
+    "PASSWORD_MIN_LENGTH": "Mật khẩu phải có ít nhất 6 ký tự.",
+    "CONFIRM_PASSWORD_REQUIRED": "Yêu cầu xác nhận mật khẩu.",
+    "EMAIL_INVALID": "Vui lòng nhập một địa chỉ email hợp lệ."
   },
   "ERRORS": {
     "GENERIC_TITLE": "Đã xảy ra lỗi",
@@ -338,6 +385,7 @@
     "FORBIDDEN": "Truy cập bị từ chối.",
     "NOT_FOUND": "Không tìm thấy tài nguyên được yêu cầu.",
     "TIMEOUT": "Yêu cầu hết thời gian chờ. Vui lòng thử lại.",
-    "UNKNOWN_ERROR": "Đã xảy ra lỗi không xác định."
+    "UNKNOWN_ERROR": "Đã xảy ra lỗi không xác định.",
+    "UNKNOWN": "Đã xảy ra lỗi không xác định."
   }
 }

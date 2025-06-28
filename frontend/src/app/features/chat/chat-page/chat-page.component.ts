@@ -1,15 +1,12 @@
-import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ChatSidebarComponent } from '../components/chat-sidebar/chat-sidebar.component';
 import { ChatMessagesComponent } from '../components/chat-messages/chat-messages.component';
 import { ChatInputComponent } from '../components/chat-input/chat-input.component';
+import { AgentParticipantsListComponent } from '../components/agent-participants-list/agent-participants-list.component';
 import { ChatStateService } from '../chat-state.service';
 import { Conversation } from '../../../core/services/chat.service';
-import { Agent } from '../../../core/services/agent.service';
-import { TranslateModule } from '@ngx-translate/core';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatTooltipModule } from '@angular/material/tooltip';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
 @Component({
 	selector: 'app-chat-page',
@@ -19,9 +16,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 		ChatSidebarComponent,
 		ChatMessagesComponent,
 		ChatInputComponent,
-		MatButtonModule,
-		MatIconModule,
-		MatTooltipModule,
+		AgentParticipantsListComponent,
 		TranslateModule,
 	],
 	templateUrl: './chat-page.component.html',
@@ -30,6 +25,16 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 })
 export class ChatPageComponent {
 	readonly chatState = inject(ChatStateService);
+	private readonly translate = inject(TranslateService);
+
+	@ViewChild(ChatInputComponent) chatInput!: ChatInputComponent;
+
+	suggestedPrompts = [
+		'CHAT.SUGGESTED_PROMPTS.COMPETITORS',
+		'CHAT.SUGGESTED_PROMPTS.SEO',
+		'CHAT.SUGGESTED_PROMPTS.MARKETING_MIX',
+		'CHAT.SUGGESTED_PROMPTS.CONVERSION_RATE',
+	];
 
 	onConversationSelected(conversation: Conversation): void {
 		this.chatState.selectConversation(conversation);
@@ -43,7 +48,8 @@ export class ChatPageComponent {
 		this.chatState.sendMessage(messageText);
 	}
 
-	onAgentSelected(agent: Agent): void {
-		this.chatState.selectAgent(agent);
+	onPromptClicked(promptKey: string): void {
+		const promptText = this.translate.instant(promptKey);
+		this.chatInput.setPrompt(promptText);
 	}
 } 
