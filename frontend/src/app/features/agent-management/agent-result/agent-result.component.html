@@ -1,0 +1,52 @@
+<div class="result-page-container">
+  <div class="result-content-container">
+    <div class="result-header">
+      <div class="icon-container">
+        <mat-icon class="check-icon">check</mat-icon>
+      </div>
+      <h1 class="success-title">{{ successMessage | translate }}</h1>
+    </div>
+
+    <div class="agent-card" *ngIf="agent">
+      <div class="agent-card-header">
+        <h2 class="agent-name">{{ agent.name }}</h2>
+        <span class="department-chip">{{ agent.department }}</span>
+      </div>
+      <p class="agent-description">{{ agent.description }}</p>
+
+      <div class="tools-section" *ngIf="agent.tools && agent.tools.length > 0">
+        <h3 class="tools-title">{{ 'AGENTS.TOOLS.CONNECTED' | translate }}:</h3>
+        <div class="tools-list">
+          <div *ngFor="let tool of displayedTools" class="tool-chip">
+            <div class="tool-icon-container">
+              <ng-container [ngSwitch]="getToolKey(tool)">
+                <img *ngSwitchCase="'google-search-tool'" src="/assets/icons/google.svg" alt="Google Search icon" class="tool-icon" />
+                <img *ngSwitchCase="'gmail-tool'" src="/assets/icons/email.svg" alt="Gmail icon" class="tool-icon" />
+                <img *ngSwitchCase="'knowledge-search-tool'" src="/assets/icons/knowledge-tool.svg" alt="Knowledge Search icon" class="tool-icon" />
+                <img *ngSwitchCase="'jira-tool'" src="/assets/icons/jira.svg" alt="Jira icon" class="tool-icon" />
+                <img *ngSwitchDefault src="assets/icons/icon-file.svg" alt="Tool icon" class="tool-icon" />
+              </ng-container>
+            </div>
+            <span>{{ getToolDisplayName(tool) }}</span>
+          </div>
+          <div *ngIf="moreToolsCount > 0" class="tool-chip more-tools-chip">
+            + {{ moreToolsCount }} {{ 'AGENTS.TOOLS.MORE' | translate }}
+          </div>
+        </div>
+      </div>
+
+      <p class="subtitle" *ngIf="agent">{{ 'AGENTS.READY_TO_USE' | translate }}</p>
+    </div>
+
+    <div class="result-actions">
+      <button mat-stroked-button class="back-button" (click)="goToList()">
+        <mat-icon>arrow_back</mat-icon>
+        <span>{{ 'AGENTS.BACK_TO_LIST' | translate }}</span>
+      </button>
+      <button mat-flat-button class="chat-button" (click)="startChat()">
+        <span>{{ 'AGENTS.START_CHAT' | translate }}</span>
+        <mat-icon>chat_bubble_outline</mat-icon>
+      </button>
+    </div>
+  </div>
+</div>

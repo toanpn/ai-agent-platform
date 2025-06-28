@@ -1,8 +1,7 @@
+<div class="header">
+	<h1>{{ isEditMode ? ('AGENTS.EDIT_AGENT' | translate) : ('AGENTS.CREATE_NEW_AGENT' | translate) }}</h1>
+</div>
 <div class="agent-form-container">
-	<div class="header">
-		<h1>{{ isEditMode ? ('AGENTS.EDIT_AGENT' | translate) : ('AGENTS.CREATE_NEW_AGENT' | translate) }}</h1>
-	</div>
-
 	<div class="loading-indicator" *ngIf="loading">
 		<p>{{ isEditMode ? ('AGENTS.LOADING_AGENT' | translate) : ('AGENTS.CREATING_AGENT' | translate) }}</p>
 	</div>
@@ -77,9 +76,6 @@
 					<mat-progress-spinner *ngIf="isEnhancingDescription" diameter="20"></mat-progress-spinner>
 				</button>
 			</div>
-			<div class="helper-text">
-				<p>{{ 'AGENTS.DESCRIPTION_HELP' | translate }}</p>
-			</div>
 		</div>
 
 		<div class="form-group">
@@ -114,6 +110,58 @@
 				<p>{{ 'AGENTS.INSTRUCTIONS_HELP' | translate }}</p>
 			</div>
 		</div>
+
+		<hr class="section-divider" />
+
+		<div class="llm-config-section" formGroupName="llmConfig">
+			<div class="form-group">
+				<label for="llmModel">{{ 'AGENTS.LLM.MODEL' | translate }}</label>
+				<mat-form-field appearance="outline" class="full-width">
+					<mat-select id="llmModel" formControlName="modelName">
+						<mat-option *ngFor="let model of llmModels" [value]="model">
+							{{ model }}
+						</mat-option>
+					</mat-select>
+				</mat-form-field>
+			</div>
+
+			<div class="form-group">
+				<div class="form-field">
+					<label for="temperature">{{ 'AGENTS.LLM.TEMPERATURE' | translate }}</label>
+					<div class="temperature-slider-container">
+						<mat-slider class="temperature-slider" min="0" max="1" step="0.1" discrete>
+							<input matSliderThumb formControlName="temperature" />
+						</mat-slider>
+						<div class="temperature-labels">
+							<div class="label-group">
+								<span class="label-title">{{ 'AGENTS.LLM.TEMPERATURE_TOOLTIPS.PRECISE' | translate }}</span>
+								<span class="label-range">0.0 - 0.3</span>
+							</div>
+							<div class="label-group">
+								<span class="label-title">{{ 'AGENTS.LLM.TEMPERATURE_TOOLTIPS.BALANCED' | translate }}</span>
+								<span class="label-range">0.4 - 0.7</span>
+							</div>
+							<div class="label-group">
+								<span class="label-title">{{ 'AGENTS.LLM.TEMPERATURE_TOOLTIPS.CREATIVE' | translate }}</span>
+								<span class="label-range">0.7 - 1</span>
+							</div>
+						</div>
+					</div>
+					<div class="current-value">
+						{{ 'AGENTS.LLM.CURRENT_VALUE' | translate }}:
+						<strong>{{ agentForm.get('llmConfig.temperature')?.value }}</strong>
+					</div>
+					<div class="helper-text" *ngIf="agentForm.get('llmConfig.temperature')?.value !== null">
+						<p>{{ getTemperatureTooltip(agentForm.get('llmConfig.temperature')?.value) | translate }}</p>
+					</div>
+					<mat-error *ngIf="agentForm.get('llmConfig.temperature')?.hasError('required')">
+						{{ 'VALIDATION.REQUIRED' | translate }}
+					</mat-error>
+				</div>
+			</div>
+		</div>
+
+		<hr class="section-divider" />
 
 		<!-- Agent Files Section -->
 		<div class="files-section">
@@ -186,9 +234,12 @@
 				</div>
 			</div>
 		</div>
+
+		<hr class="section-divider" />
+
 		<div class="form-group">
 			<div class="tools-section-header">
-				<label for="tools">{{ 'AGENTS.TOOLS' | translate }}</label>
+				<label for="tools">{{ 'AGENTS.TOOLS_TITLE' | translate }}</label>
 				<span class="tools-count" *ngIf="tools.length > 0">
 					({{ connectedTools.length }}/{{ tools.length }} {{ 'AGENTS.CONNECTED' | translate | lowercase }})
 				</span>
@@ -224,88 +275,67 @@
 				<div class="tools-grid" *ngIf="!loadingTools && !toolsError && tools.length > 0">
 					<div
 						*ngFor="let tool of tools; trackBy: trackByToolId"
-						class="tool-card"
+						class="tool-item"
 						[class.connected]="isToolConnected(tool.id)"
-						[class.configured]="isToolConnected(tool.id) && isToolProperlyConfigured(tool)"
-						[class.has-config]="hasRequiredConfig(tool)"
+						(keydown.enter)="toggleToolConnection(tool)"
+						(keydown.space)="$event.preventDefault(); toggleToolConnection(tool)"
 						tabindex="0"
 						role="button"
 						[attr.aria-pressed]="isToolConnected(tool.id)"
 						[attr.aria-label]="getToolCardAriaLabel(tool)"
-						(click)="toggleToolConnection(tool)"
-						(dblclick)="debugToolStatus(tool)"
-						(keydown.enter)="toggleToolConnection(tool)"
-						(keydown.space)="$event.preventDefault(); toggleToolConnection(tool)"
 					>
-						<div class="tool-card-header">
-							<div class="tool-info">
-								<h3 class="tool-name">{{ tool.name }}</h3>
-								<span class="tool-type" *ngIf="tool.file">
-									{{ getToolTypeFromFile(tool.file) }}
-								</span>
+						<div class="tool-info-wrapper">
+							<div class="tool-icon-container">
+								<ng-container [ngSwitch]="getToolKey(tool.name)">
+									<img *ngSwitchCase="'google-search-tool'" src="/assets/icons/google-search.svg" alt="Google Search icon" class="tool-icon" />
+									<img *ngSwitchCase="'gmail-tool'" src="/assets/icons/google.svg" alt="Gmail icon" class="tool-icon" />
+									<img *ngSwitchCase="'knowledge-search-tool'" src="/assets/icons/knowledge-tool.svg" alt="Figma icon" class="tool-icon" />
+									<img *ngSwitchCase="'jira-tool'" src="/assets/icons/jira.svg" alt="Cursor icon" class="tool-icon" />
+									<img *ngSwitchDefault src="assets/icons/icon-file.svg" alt="Tool icon" class="tool-icon" />
+								</ng-container>
 							</div>
-							<div class="connection-status" *ngIf="isToolConnected(tool.id)">
-								<div class="status-indicator">
-									<div class="status-dot"></div>
-									<span class="status-text">{{ 'AGENTS.CONNECTED' | translate }}</span>
-								</div>
-							</div>
-						</div>
-
-						<div class="tool-content">
-							<p class="tool-description" [title]="tool.description">
-								{{ tool.description }}
-							</p>
-
-							<div class="tool-requirements" *ngIf="shouldShowRequiresConfig(tool)">
-								<mat-icon class="config-icon">settings</mat-icon>
-								<span class="config-text">{{ 'AGENTS.REQUIRES_CONFIGURATION' | translate }}</span>
+							<div class="tool-details">
+								<h3 class="tool-name">{{ getToolDisplayName(tool.name) }}</h3>
+								<p class="tool-description">{{ tool.description }}</p>
 							</div>
 						</div>
 
-						<div class="tool-card-footer">
-							<button
-								type="button"
-								mat-stroked-button
-								[color]="isToolConnected(tool.id) ? 'accent' : 'primary'"
-								class="connection-button"
-								[attr.aria-label]="getConnectionButtonAriaLabel(tool)"
-							>
-								<mat-icon>{{ isToolConnected(tool.id) ? 'link_off' : 'link' }}</mat-icon>
-								{{ (isToolConnected(tool.id) ? 'AGENTS.DISCONNECT' : 'AGENTS.CONNECT') | translate }}
+						<div class="tool-actions">
+							<ng-container *ngIf="isToolConnected(tool.id)">
+								<button type="button" mat-button class="connected-btn" type="button" (click)="toggleToolConnection(tool)">
+									<img src="assets/icons/check.svg" alt="check" class="icon" />
+									{{ 'AGENTS.CONNECTED' | translate }}
+								</button>
+							</ng-container>
+
+							<ng-container *ngIf="!isToolConnected(tool.id)">
+								<button type="button" mat-stroked-button class="connect-btn" (click)="toggleToolConnection(tool)">
+									<img src="assets/icons/link.svg" alt="link" class="icon" />
+									{{ 'AGENTS.CONNECT' | translate }}
+								</button>
+							</ng-container>
+						</div>
+					</div>
+					<div *ngFor="let tool of comingSoonTools" class="tool-item">
+						<div class="tool-info-wrapper">
+							<div class="tool-icon-container">
+								<img
+									[src]="getToolIcon(tool.id)"
+									[alt]="tool.name"
+									class="tool-icon"
+								/>
+							</div>
+							<div class="tool-details">
+								<p class="tool-name">{{ tool.name }}</p>
+								<p class="tool-description">{{ tool.description }}</p>
+							</div>
+						</div>
+						<div class="tool-actions">
+							<button class="btn btn-secondary" disabled>
+								{{ 'AGENTS.TOOLS.COMING_SOON' | translate }}
 							</button>
 						</div>
 					</div>
-				</div>
-			</div>
-		</div>
-		<div class="llm-config-section" formGroupName="llmConfig">
-			<h2 class="section-title">{{ 'AGENTS.LLM.TITLE' | translate }}</h2>
-			<div class="form-group">
-				<label for="llmModel">{{ 'AGENTS.LLM.MODEL' | translate }}</label>
-				<mat-form-field appearance="outline" class="full-width">
-					<mat-select id="llmModel" formControlName="modelName">
-						<mat-option *ngFor="let model of llmModels" [value]="model">
-							{{ model }}
-						</mat-option>
-					</mat-select>
-				</mat-form-field>
-			</div>
-
-			<div class="form-group">
-				<label for="temperature">{{ 'AGENTS.LLM.TEMPERATURE' | translate }}</label>
-				<mat-slider
-					min="0"
-					max="1"
-					step="0.1"
-					discrete
-					thumbLabel
-					class="full-width"
-				>
-					<input matSliderThumb formControlName="temperature" />
-				</mat-slider>
-				<div class="helper-text" *ngIf="agentForm.get('llmConfig.temperature')?.value !== null">
-					<p>{{ getTemperatureTooltip(agentForm.get('llmConfig.temperature')?.value) | translate }}</p>
 				</div>
 			</div>
 		</div>

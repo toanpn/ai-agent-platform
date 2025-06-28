@@ -230,7 +230,16 @@
     "STATUS_PRIVATE": "Private",
     "DESCRIPTION_REQUIRED": "Agent description is required",
     "TYPE_REQUIRED": "Agent type is required",
-    "TOOLS": "Tools",
+    "TOOLS": {
+      "CONNECTED": "Connected",
+      "MORE": "more",
+      "COMING_SOON": "Coming Soon"
+    },
+    "READY_TO_USE": "Your agent is ready to use",
+    "CREATE_SUCCESS_NOTIFICATION": "Agent created successfully",
+    "UPDATE_SUCCESS_NOTIFICATION": "Agent updated successfully",
+    "BACK_TO_LIST": "Back to list",
+    "START_CHAT": "Start Chat",
     "LLM_CONFIG": "LLM Configuration",
     "TEMPERATURE": "Temperature",
     "MAX_TOKENS": "Max Tokens",
@@ -263,14 +272,25 @@
       "TITLE": "LLM Configuration",
       "MODEL": "Model",
       "TEMPERATURE": "Temperature",
+      "CURRENT_VALUE": "Current value",
       "TEMPERATURE_TOOLTIPS": {
-        "CREATIVE": "More creative and random",
-        "BALANCED": "Balanced creativity and determinism",
-        "PRECISE": "More focused and deterministic"
+        "CREATIVE": "Creative",
+        "BALANCED": "Balanced",
+        "PRECISE": "Precise",
+        "CREATIVE_HINT": "More creative and random",
+        "BALANCED_HINT": "Balanced creativity and determinism",
+        "PRECISE_HINT": "More focused and deterministic"
       }
     },
     "BASIC_INFO": "Basic Information",
-    "TOOL_INTEGRATION": "Tool Integration"
+    "TOOL_INTEGRATION": "Tool Integration",
+    "TOOLS_TITLE": "Tools",
+    "TOOLS_DESCRIPTION": "Connect tools to extend your agent's capabilities.",
+    "SYSTEM_PROMPT_PLACEHOLDER": "e.g., You are a helpful assistant.",
+    "COMING_SOON": "Coming Soon",
+    "KNOWLEDGE_BASE_TITLE": "Knowledge Base",
+    "KNOWLEDGE_BASE_DESCRIPTION": "Upload files to provide your agent with specific knowledge.",
+    "ADD_FILES": "Add Files"
   },
   "FILES": {
     "FILES": "Files",
@@ -299,11 +319,12 @@
     "REMOVE_SELECTED": "Remove selected file",
     "UPLOADING": "Uploading...",
     "UPLOAD_SUCCESS": "File uploaded successfully.",
-    "UPLOAD_TITLE": "Upload Documents",
+    "UPLOAD_TITLE": "Knowledge",
     "DRAG_AND_DROP": "Drag files here or click to browse",
     "SUPPORTED_FORMATS": "Supported formats: PDF, DOC, DOCX, XLS, XLSX, PPT, TXT, CSV, Images, Code files",
     "SIZE_LIMIT": "Max 50MB per file, 500MB total",
-    "BROWSE": "Browse Files"
+    "BROWSE": "Browse Files",
+    "UPLOAD_AREA_TITLE": "Upload Files"
   },
   "NAVIGATION": {
     "HOME": "Home",
@@ -331,5 +352,8 @@
     "NOT_FOUND": "The requested resource was not found.",
     "TIMEOUT": "Request timed out. Please try again.",
     "UNKNOWN_ERROR": "An unknown error occurred."
+  },
+  "AGENT_FORM": {
+    "CREATE_AGENT_TITLE": "Create New Agent"
   }
 }

@@ -1,0 +1,206 @@
+:host {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  background-color: var(--color-background);
+  padding: 2rem;
+}
+
+.result-page-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+}
+
+.result-content-container {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 2rem;
+  width: 100%;
+  max-width: 600px;
+  box-shadow: 0px 4px 6px 0px rgba(0, 0, 0, 0.05),
+    0px 1px 3px 0px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.result-header {
+  margin-bottom: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  .icon-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 64px;
+    height: 64px;
+    background-color: #22c55e;
+    border-radius: 50%;
+    margin-bottom: 2rem;
+  }
+
+  .check-icon {
+    font-size: 36px;
+    width: 36px;
+    height: 36px;
+    color: #ffffff;
+  }
+
+  .success-title {
+    font-family: 'Inter', sans-serif;
+    font-size: 24px;
+    font-weight: 700;
+    color: #1f2937;
+    margin-top: 0;
+  }
+}
+
+.agent-card {
+  background-color: #f3f4f6;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 1.5rem;
+  width: 100%;
+  text-align: left;
+  margin-bottom: 2rem;
+
+  .agent-card-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.5rem;
+
+    .agent-name {
+      font-family: 'Inter', sans-serif;
+      font-size: 18px;
+      font-weight: 700;
+      margin: 0;
+      color: #1f2937;
+    }
+
+    .department-chip {
+      background-color: #0ea5e9;
+      color: white;
+      font-family: 'Inter', sans-serif;
+      font-size: 12px;
+      font-weight: 500;
+      padding: 0.2rem 0.6rem;
+      border-radius: 9999px;
+    }
+  }
+
+  .agent-description {
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    color: #4b5563;
+    margin: 0;
+    line-height: 1.5;
+  }
+
+  .tools-section {
+    margin-top: 1.5rem;
+    .tools-title {
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      font-weight: 400;
+      color: #6b7280;
+      margin-bottom: 0.75rem;
+    }
+
+    .tools-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .tool-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: white;
+      border: 1px solid #e5e7eb;
+      border-radius: 6px;
+      padding: 0.35rem 0.7rem;
+      font-size: 12px;
+      font-weight: 400;
+      color: #000000;
+
+      .tool-icon {
+        font-size: 16px;
+        width: 16px;
+        height: 16px;
+        color: #374151;
+      }
+    }
+    .more-tools-chip {
+      color: #6b7280;
+      font-weight: 400;
+    }
+  }
+
+  .subtitle {
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    color: #6b7280;
+    margin-top: 1.5rem;
+    margin-bottom: 0;
+    text-align: left;
+  }
+}
+
+.result-actions {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  width: 100%;
+
+  button {
+    height: 48px;
+    flex-basis: auto;
+    width: auto;
+    min-width: 160px;
+    padding: 0 1.5rem;
+    font-family: 'Inter', sans-serif;
+    font-size: 16px;
+    font-weight: 400;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border-radius: 8px;
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+  }
+
+  .back-button {
+    background-color: #f3f4f6;
+    color: #374151;
+    border: 1px solid #d1d5db;
+    box-shadow: none;
+
+    &:hover {
+      background-color: #e5e7eb;
+    }
+  }
+
+  .chat-button {
+    background: linear-gradient(to right, #0284c7, #0ea5e9);
+    color: white;
+    border: none;
+    box-shadow: 0px 4px 6px 0px rgba(0, 0, 0, 0.1),
+      0px 2px 4px 0px rgba(0, 0, 0, 0.1);
+
+    &:hover {
+      filter: brightness(1.1);
+      box-shadow: 0px 4px 10px 0px rgba(0, 0, 0, 0.15),
+        0px 2px 6px 0px rgba(0, 0, 0, 0.12);
+    }
+  }
+}

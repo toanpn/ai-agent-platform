@@ -51,6 +51,13 @@ export const routes: Routes = [
 					),
 			},
 			{
+				path: 'result',
+				loadComponent: () =>
+					import('./features/agent-management/agent-result/agent-result.component').then(
+						(m) => m.AgentResultComponent,
+					),
+			},
+			{
 				path: ':id',
 				loadComponent: () =>
 					import('./features/agent-management/agent-detail/agent-detail.component').then(

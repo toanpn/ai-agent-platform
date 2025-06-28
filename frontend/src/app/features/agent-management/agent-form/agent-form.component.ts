@@ -66,6 +66,28 @@ interface UpdateAgentPayload {
 	styleUrls: ['./agent-form.component.scss'],
 })
 export class AgentFormComponent implements OnInit {
+	comingSoonTools = [
+		{
+			id: 'playwright_browser_toolkit',
+			name: 'Playwright Browser Toolkit',
+			description: 'Automate browser testing with Playwright.',
+		},
+		{
+			id: 'gitlab_toolkit',
+			name: 'GitLab Toolkit',
+			description: 'Manage code repositories and CI/CD pipelines.',
+		},
+		{
+			id: 'sql_database_toolkit',
+			name: 'SQL Database Toolkit',
+			description: 'Query and interact with SQL databases.',
+		},
+		{
+			id: 'jenkins_toolkit',
+			name: 'Jenkins',
+			description: 'Automate builds and deployment with Jenkins.',
+		},
+	];
 	agentForm!: FormGroup;
 	isEditMode = false;
 	agentId: number | null = null;
@@ -99,7 +121,7 @@ export class AgentFormComponent implements OnInit {
 	];
 
 	// LLM Configuration
-	llmModels: string[] = ['gemini-2.0-flash'];
+	llmModels: string[] = ['gemini-2.0-flash', 'gemini-2.5-flash', 'gemini-2.5-flash-lite-preview-06-17', 'gemini-2.5-pro'];
 
 	// Tools related properties
 	tools: Tool[] = [];
@@ -250,16 +272,23 @@ export class AgentFormComponent implements OnInit {
 					this.loading = true;
 					this.saveError = '';
 				}),
-				exhaustMap((createRequest) =>
-					this.agentService.createAgent(createRequest).pipe(
-						tap((agent) => {
+				exhaustMap(request =>
+					this.agentService.createAgent(request).pipe(
+						tap(createdAgent => {
 							this.loading = false;
-							this.router.navigate(['/agents', agent.id]);
+							this.notificationService.showSuccess(
+								this.translateService.instant('AGENTS.CREATE_SUCCESS_NOTIFICATION'),
+							);
+							this.router.navigate(['/agents/result'], {
+								state: { agent: createdAgent, action: 'create' },
+							});
 						}),
-						catchError((error) => {
-							console.error('Error creating agent:', error);
-							this.saveError = 'AGENTS.FAILED_CREATE_AGENT';
+						catchError(error => {
 							this.loading = false;
+							this.saveError = this.translateService.instant(
+								'AGENTS.CREATE_ERROR_NOTIFICATION',
+							);
+							console.error('Error creating agent:', error);
 							return of(null);
 						}),
 					),
@@ -280,41 +309,33 @@ export class AgentFormComponent implements OnInit {
 					this.saveError = '';
 				}),
 				exhaustMap(({ id, request, fileToUpload, filesToDelete }) => {
-					const operations: Observable<any>[] = [];
+					const updateAgent$ = this.agentService.updateAgent(id, request);
+					const fileUpload$ = fileToUpload
+						? this.fileService.uploadFile(id, fileToUpload)
+						: of(null);
+					const fileDelete$ =
+						filesToDelete.length > 0
+							? forkJoin(filesToDelete.map(fileId => this.fileService.deleteFile(fileId)))
+							: of(null);
 
-					// Agent update is the primary operation
-					operations.push(this.agentService.updateAgent(id, request));
-
-					// Add file upload operation if a file is selected
-					if (fileToUpload) {
-						operations.push(this.fileService.uploadFile(id, fileToUpload));
-					}
-
-					// Add file deletion operations if any files are marked for deletion
-					if (filesToDelete.length > 0) {
-						const deleteOps = filesToDelete.map(fileId => this.fileService.deleteFile(fileId));
-						operations.push(...deleteOps);
-					}
-
-					// If there are no operations, return an observable of null
-					if (operations.length === 0) {
-						return of(null);
-					}
-
-					return forkJoin(operations).pipe(
-						tap(() => {
+					return forkJoin([updateAgent$, fileUpload$, fileDelete$]).pipe(
+						tap(([updatedAgentResponse]) => {
 							this.loading = false;
-							this.filesToDelete = []; // Clear the deletion queue
-							this.selectedFile = null; // Clear the selected file
-							this.router.navigate(['/agents']);
+							this.notificationService.showSuccess(
+								this.translateService.instant('AGENTS.UPDATE_SUCCESS_NOTIFICATION'),
+							);
+							this.router.navigate(['/agents/result'], {
+								state: { agent: updatedAgentResponse, action: 'update' },
+							});
 						}),
-						catchError((error) => {
-							console.error('Error updating agent or handling files:', error);
-							this.saveError = 'AGENTS.FAILED_UPDATE_AGENT';
+						catchError(error => {
 							this.loading = false;
+							this.saveError = this.translateService.instant(
+								'AGENTS.UPDATE_ERROR_NOTIFICATION',
+							);
 							return of(null);
 						}),
-					)
+					);
 				}),
 				takeUntilDestroyed(this.destroyRef),
 			)
@@ -727,13 +748,25 @@ export class AgentFormComponent implements OnInit {
 		}
 	}
 
+	getToolDisplayName(toolName: string): string {
+		const nameMap: { [key: string]: string } = {
+			google_search_tool: 'Google Search',
+			knowledge_search_tool: 'Knowledge Search',
+			gmail_tool: 'Gmail',
+			jira_tool: 'Jira',
+		};
+		return nameMap[toolName] || toolName;
+	}
+
 	/**
 	 * Get accessible label for tool card
 	 */
 	getToolCardAriaLabel(tool: Tool): string {
 		const status = this.isToolConnected(tool.id) ? 'connected' : 'disconnected';
 		const configRequired = this.hasRequiredConfig(tool) ? ', requires configuration' : '';
-		return `${tool.name} tool, ${status}${configRequired}. Click to ${this.isToolConnected(tool.id) ? 'disconnect' : 'connect'}.`;
+		return `${this.getToolDisplayName(tool.name)} tool, ${status}${configRequired}. Click to ${
+			this.isToolConnected(tool.id) ? 'disconnect' : 'connect'
+		}.`;
 	}
 
 	/**
@@ -741,8 +774,8 @@ export class AgentFormComponent implements OnInit {
 	 */
 	getConnectionButtonAriaLabel(tool: Tool): string {
 		return this.isToolConnected(tool.id)
-			? `Disconnect ${tool.name} tool`
-			: `Connect ${tool.name} tool`;
+			? `Disconnect ${this.getToolDisplayName(tool.name)} tool`
+			: `Connect ${this.getToolDisplayName(tool.name)} tool`;
 	}
 
 	/**
@@ -751,11 +784,16 @@ export class AgentFormComponent implements OnInit {
 	 * @returns A translated string explaining the temperature level.
 	 */
 	getTemperatureTooltip(value: number | null): string {
-		if (value === null) return '';
-		if (value === 0) return 'AGENTS.LLM.TEMPERATURE_TOOLTIPS.CREATIVE';
-		if (value > 0 && value <= 0.5) return 'AGENTS.LLM.TEMPERATURE_TOOLTIPS.BALANCED';
-		if (value > 0.5) return 'AGENTS.LLM.TEMPERATURE_TOOLTIPS.PRECISE';
-		return 'AGENTS.LLM.TEMPERATURE_TOOLTIPS.BALANCED';
+		if (value === null) {
+			return '';
+		}
+		if (value <= 0.3) {
+			return 'AGENTS.LLM.TEMPERATURE_TOOLTIPS.PRECISE_HINT';
+		} else if (value <= 0.7) {
+			return 'AGENTS.LLM.TEMPERATURE_TOOLTIPS.BALANCED_HINT';
+		} else {
+			return 'AGENTS.LLM.TEMPERATURE_TOOLTIPS.CREATIVE_HINT';
+		}
 	}
 
 	onDragOver(event: DragEvent): void {
@@ -783,9 +821,9 @@ export class AgentFormComponent implements OnInit {
 	}
 
 	onFileSelected(event: Event): void {
-		const input = event.target as HTMLInputElement;
-		if (input.files && input.files.length > 0) {
-			this.selectedFile = input.files[0];
+		const element = event.currentTarget as HTMLInputElement;
+		if (element.files && element.files.length > 0) {
+			this.selectedFile = element.files[0];
 		}
 	}
 
@@ -826,5 +864,23 @@ export class AgentFormComponent implements OnInit {
 			default:
 				return '/assets/icons/icon-file.svg'; // Default icon
 		}
+	}
+
+	getToolIcon(toolId: string): string {
+		const iconMap: { [key: string]: string } = {
+			google_search_tool: 'assets/icons/google-search.svg',
+			knowledge_tool: 'assets/icons/knowledge-tool.svg',
+			gmail_tool: 'assets/icons/email.svg',
+			jira_tool: 'assets/icons/jira.svg',
+			playwright_browser_toolkit: 'assets/icons/playwright.svg',
+			gitlab_toolkit: 'assets/icons/gitlab.svg',
+			sql_database_toolkit: 'assets/icons/sql.svg',
+			jenkins_toolkit: 'assets/icons/jenkins.svg',
+		};
+		return iconMap[toolId] || 'assets/icons/icon-file.svg';
+	}
+
+	getToolKey(toolName: string): string {
+		return toolName.toLowerCase().replace(/_/g, '-');
 	}
 }

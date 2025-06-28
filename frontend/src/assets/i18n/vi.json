@@ -230,7 +230,13 @@
     "STATUS_PRIVATE": "Riêng tư",
     "DESCRIPTION_REQUIRED": "Mô tả agent là bắt buộc",
     "TYPE_REQUIRED": "Loại agent là bắt buộc",
-    "TOOLS": "Công cụ",
+    "DESCRIPTION": "Mô tả",
+    "TOOLS": {
+      "CONNECTED": "Đã kết nối",
+      "MORE": "thêm",
+      "COMING_SOON": "Sắp ra mắt"
+    },
+    "TOOLS_TITLE": "Công cụ",
     "LLM_CONFIG": "Cấu hình LLM",
     "TEMPERATURE": "Nhiệt độ",
     "MAX_TOKENS": "Số token tối đa",
@@ -240,7 +246,7 @@
     "DESCRIPTION_ENHANCED_ERROR": "Cải thiện mô tả thất bại.",
     "INSTRUCTION_ENHANCED_SUCCESS": "Hướng dẫn đã được cải thiện thành công!",
     "INSTRUCTION_ENHANCED_ERROR": "Cải thiện hướng dẫn thất bại.",
-    "ENHANCE_INSTRUCTION": "Cải thiện hướng dẫn bằng AI",
+    "ENHANCE_INSTRUCTION": "Cải thiện chỉ dẫn bằng AI",
     "CONNECT": "Kết nối",
     "DISCONNECT": "Ngắt kết nối",
     "CONNECTED": "Đã kết nối",
@@ -260,14 +266,26 @@
       "TITLE": "Cấu hình LLM",
       "MODEL": "Mô hình LLM",
       "TEMPERATURE": "Mức độ sáng tạo",
+      "CURRENT_VALUE": "Giá trị hiện tại",
       "TEMPERATURE_TOOLTIPS": {
-        "CREATIVE": "Sáng tạo và ngẫu nhiên hơn",
-        "BALANCED": "Cân bằng giữa sáng tạo và logic",
-        "PRECISE": "Tập trung và logic hơn"
+        "CREATIVE": "Sáng tạo",
+        "BALANCED": "Cân bằng",
+        "PRECISE": "Chính xác",
+        "CREATIVE_HINT": "Sáng tạo và ngẫu nhiên hơn",
+        "BALANCED_HINT": "Cân bằng giữa sáng tạo và logic",
+        "PRECISE_HINT": "Tập trung và logic hơn"
       }
     },
     "BASIC_INFO": "Thông tin cơ bản",
-    "TOOL_INTEGRATION": "Tích hợp công cụ"
+    "TOOL_INTEGRATION": "Tích hợp công cụ",
+    "CREATE_SUCCESS_NOTIFICATION": "Tạo agent thành công",
+    "CREATE_ERROR_NOTIFICATION": "Tạo agent thất bại",
+    "UPDATE_SUCCESS_NOTIFICATION": "Cập nhật agent thành công",
+    "UPDATE_ERROR_NOTIFICATION": "Cập nhật agent thất bại",
+    "BACK_TO_LIST": "Quay lại danh sách",
+    "START_CHAT": "Bắt đầu trò chuyện",
+    "NAME": "Tên agent",
+    "READY_TO_USE": "Agent của bạn đã sẵn sàng để sử dụng"
   },
   "FILES": {
     "FILES": "Tệp",
@@ -290,7 +308,9 @@
     "UNSUPPORTED_FILE_TYPE": "Loại tệp không được hỗ trợ",
     "DRAG_AND_DROP": "Kéo và thả tệp vào đây, hoặc nhấp để chọn",
     "SELECT_FILES": "Chọn tệp",
-    "TITLE": "Tệp"
+    "TITLE": "Tệp của Agent",
+    "SELECT_FILE": "Chọn tệp để tải lên",
+    "UPLOAD_TITLE": "Tài liệu"
   },
   "NAVIGATION": {
     "HOME": "Trang chủ",
