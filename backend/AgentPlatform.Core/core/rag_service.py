@@ -143,18 +143,23 @@ class RAGService:
     def __init__(self, 
                  collection_name: str = "agent_knowledge_base",
                  embedding_model: str = "text-multilingual-embedding-002",
-                 persist_directory: str = "/app/db"):
+                 persist_directory: Optional[str] = None):
         """
         Initialize RAG service.
         
         Args:
             collection_name: Name of the ChromaDB collection
             embedding_model: VertexAI embedding model name
-            persist_directory: Directory to persist ChromaDB data
+            persist_directory: Directory to persist ChromaDB data (defaults to CHROMA_DB_PATH env var or /tmp/chroma_db)
         """
         self.collection_name = collection_name
         self.embedding_model = embedding_model
-        self.persist_directory = persist_directory
+        
+        # Set persist directory with environment variable support
+        if persist_directory:
+            self.persist_directory = persist_directory
+        else:
+            self.persist_directory = os.getenv('CHROMA_DB_PATH', '/tmp/chroma_db')
         
         # Initialize components
         self.document_processor = DocumentProcessor()
@@ -205,19 +210,34 @@ class RAGService:
                 # Use default embedding function
                 embedding_function = embedding_functions.DefaultEmbeddingFunction()
             
+            # Check if collection exists first
             try:
-                self.collection = self.client.get_collection(
-                    name=self.collection_name,
-                    embedding_function=embedding_function
-                )
-                logger.info(f"✅ Retrieved existing ChromaDB collection: {self.collection_name}")
-            except ValueError:
-                # Collection doesn't exist, create it
-                self.collection = self.client.create_collection(
-                    name=self.collection_name,
-                    embedding_function=embedding_function
-                )
-                logger.info(f"✅ Created new ChromaDB collection: {self.collection_name}")
+                existing_collections = [col.name for col in self.client.list_collections()]
+                if self.collection_name in existing_collections:
+                    self.collection = self.client.get_collection(
+                        name=self.collection_name,
+                        embedding_function=embedding_function
+                    )
+                    logger.info(f"✅ Retrieved existing ChromaDB collection: {self.collection_name}")
+                else:
+                    # Collection doesn't exist, create it
+                    self.collection = self.client.create_collection(
+                        name=self.collection_name,
+                        embedding_function=embedding_function
+                    )
+                    logger.info(f"✅ Created new ChromaDB collection: {self.collection_name}")
+            except Exception as e:
+                logger.error(f"❌ Error with ChromaDB collection operations: {e}")
+                # Try to create collection as a last resort
+                try:
+                    self.collection = self.client.create_collection(
+                        name=self.collection_name,
+                        embedding_function=embedding_function
+                    )
+                    logger.info(f"✅ Created new ChromaDB collection as fallback: {self.collection_name}")
+                except Exception as create_error:
+                    logger.error(f"❌ Failed to create collection as fallback: {create_error}")
+                    raise create_error
             
         except Exception as e:
             logger.error(f"❌ Failed to initialize ChromaDB: {e}")

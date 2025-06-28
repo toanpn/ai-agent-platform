@@ -8,12 +8,16 @@ namespace AgentPlatform.API.Services
     {
         private readonly ApplicationDbContext _context;
         private readonly IConfiguration _configuration;
+        private readonly IAgentRuntimeClient _runtimeClient;
+        private readonly ILogger<FileService> _logger;
         private readonly string _basePath;
 
-        public FileService(ApplicationDbContext context, IConfiguration configuration)
+        public FileService(ApplicationDbContext context, IConfiguration configuration, IAgentRuntimeClient runtimeClient, ILogger<FileService> logger)
         {
             _context = context;
             _configuration = configuration;
+            _runtimeClient = runtimeClient;
+            _logger = logger;
             _basePath = _configuration["FileStorage:BasePath"] ?? "./uploads";
             
             // Ensure upload directory exists
@@ -60,11 +64,23 @@ namespace AgentPlatform.API.Services
                 ContentType = file.ContentType,
                 FileSize = file.Length,
                 UploadedById = userId,
-                CreatedAt = DateTime.UtcNow
+                CreatedAt = DateTime.UtcNow,
+                IsIndexed = false // Initially not indexed
             };
 
             _context.AgentFiles.Add(agentFile);
             await _context.SaveChangesAsync();
+
+            // Automatically start indexing the file
+            try
+            {
+                await IndexFileAsync(agentFile.Id);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to index file {FileId} during upload", agentFile.Id);
+                // Don't throw here - the file was uploaded successfully, indexing can be retried
+            }
 
             return filePath;
         }
@@ -80,16 +96,38 @@ namespace AgentPlatform.API.Services
                 return false;
             }
 
-            // Delete physical file
-            if (File.Exists(file.FilePath))
+            try
             {
-                File.Delete(file.FilePath);
+                // If the file was indexed, we should clean up the RAG data
+                if (file.IsIndexed)
+                {
+                    _logger.LogInformation("Cleaning up RAG data for file {FileId} from agent {AgentId}", fileId, file.AgentId);
+                    
+                    // Note: The Python backend's delete endpoint is per-agent, not per-file
+                    // This would delete all documents for the agent, which might not be desired
+                    // For now, we'll just log this - you might want to implement a more granular deletion
+                    _logger.LogWarning("File {FileId} was indexed but RAG cleanup is not implemented for individual files", fileId);
+                }
+
+                // Delete physical file
+                if (File.Exists(file.FilePath))
+                {
+                    File.Delete(file.FilePath);
+                    _logger.LogInformation("Physical file deleted: {FilePath}", file.FilePath);
+                }
+
+                // Remove from database
+                _context.AgentFiles.Remove(file);
+                await _context.SaveChangesAsync();
+
+                _logger.LogInformation("File {FileId} successfully deleted", fileId);
+                return true;
             }
-
-            _context.AgentFiles.Remove(file);
-            await _context.SaveChangesAsync();
-
-            return true;
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error deleting file {FileId}: {Error}", fileId, ex.Message);
+                return false;
+            }
         }
 
         public async Task<Stream?> GetFileStreamAsync(int fileId, int userId)
@@ -109,24 +147,150 @@ namespace AgentPlatform.API.Services
         public async Task<bool> IndexFileAsync(int fileId)
         {
             var file = await _context.AgentFiles
+                .Include(f => f.Agent)
                 .FirstOrDefaultAsync(f => f.Id == fileId);
 
             if (file == null)
             {
+                _logger.LogWarning("File not found for indexing: {FileId}", fileId);
                 return false;
             }
 
-            // TODO: Implement actual file indexing for RAG
-            // This would typically involve:
-            // 1. Reading file content
-            // 2. Chunking the content
-            // 3. Creating embeddings
-            // 4. Storing in vector database
+            if (!File.Exists(file.FilePath))
+            {
+                _logger.LogError("Physical file not found for indexing: {FilePath}", file.FilePath);
+                return false;
+            }
 
-            file.IsIndexed = true;
-            await _context.SaveChangesAsync();
+            if (file.IsIndexed)
+            {
+                _logger.LogInformation("File {FileId} is already indexed", fileId);
+                return true;
+            }
 
-            return true;
+            try
+            {
+                _logger.LogInformation("Starting RAG indexing for file {FileId} ({FileName}) for agent {AgentId}", 
+                    fileId, file.FileName, file.AgentId);
+
+                // Prepare metadata for the Python backend
+                var metadata = new Dictionary<string, object>
+                {
+                    ["file_id"] = fileId,
+                    ["original_filename"] = file.FileName,
+                    ["content_type"] = file.ContentType,
+                    ["file_size"] = file.FileSize,
+                    ["uploaded_by"] = file.UploadedById,
+                    ["uploaded_at"] = file.CreatedAt.ToString("O") // ISO 8601 format
+                };
+
+                // Send file to Python backend for RAG processing
+                var uploadResult = await _runtimeClient.UploadFileForProcessingAsync(
+                    file.FilePath, 
+                    file.AgentId, 
+                    metadata);
+
+                if (uploadResult?.Success == true)
+                {
+                    // Update the database record
+                    file.IsIndexed = true;
+                    
+                    // Store additional indexing information if available
+                    if (uploadResult.Result != null)
+                    {
+                        _logger.LogInformation("Successfully indexed file {FileId} with {ChunksCreated} chunks. Document ID: {DocumentId}", 
+                            fileId, uploadResult.Result.ChunksCreated, uploadResult.Result.DocumentId);
+                        
+                        // You could add a property to store the document ID if needed
+                        // file.DocumentId = uploadResult.Result.DocumentId;
+                    }
+                    
+                    await _context.SaveChangesAsync();
+                    
+                    _logger.LogInformation("File {FileId} successfully indexed and database updated", fileId);
+                    return true;
+                }
+                else
+                {
+                    var errorMessage = uploadResult?.Error ?? "Unknown error during file processing";
+                    _logger.LogError("Failed to index file {FileId}: {Error}", fileId, errorMessage);
+                    return false;
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error indexing file {FileId}: {Error}", fileId, ex.Message);
+                return false;
+            }
+        }
+
+        public async Task<bool> ReindexAgentFilesAsync(int agentId, int userId)
+        {
+            var agent = await _context.Agents
+                .FirstOrDefaultAsync(a => a.Id == agentId && a.CreatedById == userId);
+
+            if (agent == null)
+            {
+                _logger.LogWarning("Agent not found for re-indexing: {AgentId}", agentId);
+                return false;
+            }
+
+            try
+            {
+                _logger.LogInformation("Starting re-indexing for agent {AgentId}", agentId);
+
+                // First, clear existing documents for this agent in the RAG system
+                var clearResult = await _runtimeClient.DeleteAgentDocumentsAsync(agentId.ToString());
+                if (!clearResult)
+                {
+                    _logger.LogWarning("Failed to clear existing documents for agent {AgentId}", agentId);
+                }
+
+                // Get all files for this agent
+                var agentFiles = await _context.AgentFiles
+                    .Where(f => f.AgentId == agentId)
+                    .ToListAsync();
+
+                if (!agentFiles.Any())
+                {
+                    _logger.LogInformation("No files found for agent {AgentId}", agentId);
+                    return true;
+                }
+
+                // Reset indexing status
+                foreach (var file in agentFiles)
+                {
+                    file.IsIndexed = false;
+                }
+                await _context.SaveChangesAsync();
+
+                // Re-index all files
+                var indexedCount = 0;
+                foreach (var file in agentFiles)
+                {
+                    try
+                    {
+                        if (await IndexFileAsync(file.Id))
+                        {
+                            indexedCount++;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "Failed to re-index file {FileId} during agent re-indexing", file.Id);
+                    }
+                }
+
+                _logger.LogInformation("Re-indexing completed for agent {AgentId}. Successfully indexed {IndexedCount}/{TotalCount} files", 
+                    agentId, indexedCount, agentFiles.Count);
+
+                return indexedCount > 0;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error during agent re-indexing for agent {AgentId}: {Error}", agentId, ex.Message);
+                return false;
+            }
         }
     }
 } 
