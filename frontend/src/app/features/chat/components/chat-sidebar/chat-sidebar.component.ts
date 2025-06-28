@@ -6,31 +6,25 @@ import {
 	ChangeDetectionStrategy,
 	computed,
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatListModule } from '@angular/material/list';
-import { MatDividerModule } from '@angular/material/divider';
-import { MatTooltipModule } from '@angular/material/tooltip';
+import { CommonModule, DatePipe } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
-import { MatMenuModule } from '@angular/material/menu';
 import { TranslateModule } from '@ngx-translate/core';
 import { AuthService } from '../../../../core/services/auth.service';
 import { Conversation } from '../../../../core/services/chat.service';
-import { Agent } from '../../../../core/services/agent.service';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatListModule } from '@angular/material/list';
 
 @Component({
 	selector: 'app-chat-sidebar',
 	standalone: true,
 	imports: [
 		CommonModule,
+		DatePipe,
+		RouterModule,
+		MatListModule,
 		MatButtonModule,
 		MatIconModule,
-		MatListModule,
-		MatDividerModule,
-		MatTooltipModule,
-		RouterModule,
-		MatMenuModule,
 		TranslateModule,
 	],
 	templateUrl: './chat-sidebar.component.html',
@@ -44,16 +38,11 @@ export class ChatSidebarComponent {
 
 	// Inputs
 	conversations = input<Conversation[] | null>([]);
-	agents = input<Agent[] | null>([]);
-	selectedAgent = input<Agent | null>(null);
+	selectedConversation = input<Conversation | null>(null);
 
 	// Outputs
 	conversationSelected = output<Conversation>();
 	startNewChat = output<void>();
-	agentSelected = output<Agent>();
-
-	// Computed
-	currentUser = computed(() => this.authService.currentUser());
 
 	onSelectConversation(conversation: Conversation): void {
 		this.conversationSelected.emit(conversation);
@@ -61,10 +50,6 @@ export class ChatSidebarComponent {
 
 	onStartNewChat(): void {
 		this.startNewChat.emit();
-	}
-
-	onSelectAgent(agent: Agent): void {
-		this.agentSelected.emit(agent);
 	}
 
 	logout(): void {

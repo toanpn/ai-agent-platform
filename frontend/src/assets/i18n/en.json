@@ -42,7 +42,11 @@
     "INACTIVE": "Inactive",
     "OTHER": "other",
     "OTHERS": "others",
-    "RETRY": "Retry"
+    "RETRY": "Retry",
+    "SHARE": "Share",
+    "MORE_OPTIONS": "More Options",
+    "PRIVATE": "Private",
+    "FULL_NAME": "Full Name"
   },
   "AUTH": {
     "LOGIN": "Login",
@@ -78,7 +82,41 @@
     "HIDE_PASSWORD": "Hide password",
     "REMEMBER_ME": "Remember Me",
     "PASSWORD_MISMATCH": "Passwords do not match",
-    "LOGOUT_SUCCESS": "Logout successful"
+    "LOGOUT_SUCCESS": "Logout successful",
+    "MIC_NOT_FOUND_ERROR": "No microphone found. Please connect a microphone and try again.",
+    "MIC_GENERIC_ERROR": "An error occurred while accessing the microphone.",
+    "DEFAULT_TITLE": "New Conversation",
+    "NEW_CONVERSATION_TITLE": "New Conversation",
+    "SIDEBAR_TITLE": "Conversations",
+    "SEARCH_PLACEHOLDER": "Search conversations...",
+    "AGENT_LIST_TITLE": "Assistants List",
+    "AGENT_SPECIALTIES": "Specialties",
+    "AGENT_CAPABILITIES": "Capabilities",
+    "ADD_IMAGE": "Add Image",
+    "FORMAT_CODE": "Format as Code",
+    "CODE_FORMAT": "Code",
+    "FORMAT_TABLE": "Format as Table",
+    "TABLE_FORMAT": "Table",
+    "FORMAT_LIST": "Format as List",
+    "LIST_FORMAT": "List",
+    "AGENT_RESPONSE_NOTE": "All agents will respond to your message",
+    "PLATFORM_TITLE": "KiotViet AI Agent Platform",
+    "PLATFORM_SUBTITLE": "Empowering your business with intelligent automation",
+    "LOGIN_TAB": "Login",
+    "REGISTER_TAB": "Register",
+    "EMAIL_PLACEHOLDER": "your@example.com",
+    "PASSWORD_PLACEHOLDER": "Enter your password",
+    "FULL_NAME_PLACEHOLDER": "Enter your full name",
+    "CONFIRM_PASSWORD_PLACEHOLDER": "Confirm your password",
+    "LOGIN_BTN": "Sign In",
+    "REGISTER_BTN": "Register",
+    "OR_CONTINUE_WITH": "or continue with",
+    "FOOTER_COPYRIGHT": "© 2025 KiotViet AI Agent Platform. All rights reserved.",
+    "FOOTER_TERMS": "Terms",
+    "FOOTER_PRIVACY": "Privacy",
+    "FOOTER_HELP": "Help",
+    "FOOTER_CONTACT": "Contact",
+    "FULL_NAME": "Full Name"
   },
   "CHAT": {
     "NEW_CHAT": "New Chat",
@@ -126,7 +164,28 @@
     "DEFAULT_AGENT_NAME": "Assistant",
     "MIC_PERMISSION_ERROR": "Microphone permission denied. Please allow microphone access in your browser settings.",
     "MIC_NOT_FOUND_ERROR": "No microphone found. Please connect a microphone and try again.",
-    "MIC_GENERIC_ERROR": "An error occurred while accessing the microphone."
+    "MIC_GENERIC_ERROR": "An error occurred while accessing the microphone.",
+    "DEFAULT_TITLE": "New Conversation",
+    "NEW_CONVERSATION_TITLE": "New Conversation",
+    "SIDEBAR_TITLE": "Conversations",
+    "SEARCH_PLACEHOLDER": "Search conversations...",
+    "AGENT_LIST_TITLE": "Assistants List",
+    "AGENT_SPECIALTIES": "Specialties",
+    "AGENT_CAPABILITIES": "Capabilities",
+    "ADD_IMAGE": "Add Image",
+    "FORMAT_CODE": "Format as Code",
+    "CODE_FORMAT": "Code",
+    "FORMAT_TABLE": "Format as Table",
+    "TABLE_FORMAT": "Table",
+    "FORMAT_LIST": "Format as List",
+    "LIST_FORMAT": "List",
+    "AGENT_RESPONSE_NOTE": "All agents will respond to your message",
+    "SUGGESTED_PROMPTS": {
+      "COMPETITORS": "Tell me more about your competitors",
+      "SEO": "I need help with SEO strategy",
+      "MARKETING_MIX": "What's my ideal marketing mix?",
+      "CONVERSION_RATE": "How to improve conversion rate?"
+    }
   },
   "AGENTS": {
     "CREATE_AGENT": "Create Agent",
@@ -320,8 +379,14 @@
     "MIN_LENGTH": "Minimum length is {{min}} characters",
     "MAX_LENGTH": "Maximum length is {{max}} characters",
     "PATTERN": "Please enter a valid value",
-    "PASSWORD_MISMATCH": "Passwords do not match",
-    "INVALID_FORMAT": "Invalid format"
+    "PASSWORD_MISMATCH": "Passwords do not match.",
+    "INVALID_FORMAT": "Invalid format",
+    "EMAIL_REQUIRED": "Email is required.",
+    "PASSWORD_REQUIRED": "Password is required.",
+    "FULL_NAME_REQUIRED": "Full name is required.",
+    "PASSWORD_MIN_LENGTH": "Password must be at least 6 characters.",
+    "CONFIRM_PASSWORD_REQUIRED": "Password confirmation is required.",
+    "EMAIL_INVALID": "Please enter a valid email address."
   },
   "ERRORS": {
     "NETWORK_ERROR": "Network error. Please check your connection.",
@@ -330,6 +395,7 @@
     "FORBIDDEN": "Access denied.",
     "NOT_FOUND": "The requested resource was not found.",
     "TIMEOUT": "Request timed out. Please try again.",
-    "UNKNOWN_ERROR": "An unknown error occurred."
+    "UNKNOWN_ERROR": "An unknown error occurred.",
+    "UNKNOWN": "An unknown error occurred."
   }
 }

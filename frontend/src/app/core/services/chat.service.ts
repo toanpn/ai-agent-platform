@@ -26,7 +26,7 @@ export interface Message {
 	text: string;
 
 	/** Who sent the message */
-	sender: 'user' | 'assistant';
+	sender: 'user' | 'assistant' | 'system';
 
 	/** When the message was sent */
 	timestamp: Date;

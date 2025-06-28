@@ -1,12 +1,67 @@
-import { Component, OnDestroy } from '@angular/core';
+import { Component, inject, DestroyRef, OnInit } from '@angular/core';
+import {
+	AbstractControl,
+	FormBuilder,
+	FormControl,
+	FormGroup,
+	FormGroupDirective,
+	NgForm,
+	ReactiveFormsModule,
+	ValidationErrors,
+	ValidatorFn,
+	Validators,
+} from '@angular/forms';
+import { Router, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { MatCardModule } from '@angular/material/card';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule, MatIconRegistry } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { TranslateModule } from '@ngx-translate/core';
-import { AuthService, LoginRequest, RegisterRequest } from '../../../core/services/auth.service';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { AuthService } from '../../../core/services/auth.service';
 import { NotificationService } from '../../../core/services/notification.service';
-import { finalize, Subscription } from 'rxjs';
+import { finalize, Subject, exhaustMap, catchError, of } from 'rxjs';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { ErrorStateMatcher } from '@angular/material/core';
+import { DomSanitizer } from '@angular/platform-browser';
+import { LanguagePickerComponent } from '../../../shared/components/language-picker/language-picker.component';
+
+export const passwordMatchValidator: ValidatorFn = (
+	control: AbstractControl
+): ValidationErrors | null => {
+	const password = control.get('password');
+	const confirmPassword = control.get('confirmPassword');
+
+	if (
+		!password ||
+		!confirmPassword ||
+		password.value === confirmPassword.value
+	) {
+		return null;
+	}
+
+	return { passwordMismatch: true };
+};
+
+/** Error state matcher for password mismatch validation. */
+export class PasswordMismatchErrorStateMatcher implements ErrorStateMatcher {
+	isErrorState(
+		control: FormControl | null,
+		form: FormGroupDirective | NgForm | null
+	): boolean {
+		const controlTouched = !!(control && (control.dirty || control.touched));
+		const parentInvalid = !!(
+			control &&
+			control.parent &&
+			control.parent.invalid &&
+			control.parent.hasError('passwordMismatch')
+		);
+
+		return (control?.invalid && controlTouched) || (parentInvalid && controlTouched);
+	}
+}
 
 /**
  * LoginComponent handles user authentication through a login form.
@@ -18,191 +73,162 @@ import { finalize, Subscription } from 'rxjs';
 	standalone: true,
 	imports: [
 		CommonModule,
-		FormsModule,
+		ReactiveFormsModule,
+		RouterModule,
+		MatCardModule,
+		MatFormFieldModule,
+		MatInputModule,
+		MatButtonModule,
+		MatIconModule,
 		MatProgressSpinnerModule,
 		TranslateModule,
+		LanguagePickerComponent,
 	],
 	templateUrl: './login.component.html',
 	styleUrls: ['./login.component.scss'],
 })
-export class LoginComponent implements OnDestroy {
-	/** User credentials from the login form */
-	loginCredentials: LoginRequest = {
-		email: '',
-		password: '',
-	};
+export class LoginComponent implements OnInit {
+	private fb = inject(FormBuilder);
+	private authService = inject(AuthService);
+	private router = inject(Router);
+	private notificationService = inject(NotificationService);
+	private translate = inject(TranslateService);
+	private destroyRef = inject(DestroyRef);
+	private matIconRegistry = inject(MatIconRegistry);
+	private domSanitizer = inject(DomSanitizer);
 
-	/** User credentials from the registration form */
-	registerCredentials: RegisterRequest = {
-		username: '',
-		email: '',
-		password: '',
-		firstName: '',
-		lastName: '',
-	};
+	private loginAction$ = new Subject<void>();
+	private registerAction$ = new Subject<void>();
 
-	/** Error message to display in the UI */
-	loginError: string = '';
-	registerError: string = '';
+	passwordMatcher = new PasswordMismatchErrorStateMatcher();
 
-	/** Loading state for the login/register button */
-	loading: boolean = false;
+	loginForm = this.fb.group({
+		email: ['', [Validators.required, Validators.email]],
+		password: ['', [Validators.required]],
+	});
 
-	/** Toggle for password visibility */
-	hidePassword: boolean = true;
-	hideRegisterPassword: boolean = true;
+	registerForm = this.fb.group(
+		{
+			fullName: ['', [Validators.required]],
+			email: ['', [Validators.required, Validators.email]],
+			password: ['', [Validators.required, Validators.minLength(6)]],
+			confirmPassword: ['', [Validators.required]],
+		},
+		{ validators: passwordMatchValidator }
+	);
 
-	/** Currently selected tab index */
+	isLoading = false;
+	hidePassword = true;
+	hideConfirmPassword = true;
 	activeTab: 'login' | 'register' = 'login';
 
-	/** Subscription for auth request */
-	private authSubscription?: Subscription;
-
-	/**
-	 * Creates an instance of LoginComponent
-	 * @param authService - Service for authentication operations
-	 * @param router - Angular router for navigation
-	 * @param notificationService - Service for displaying notifications
-	 */
-	constructor(
-		private authService: AuthService,
-		private router: Router,
-		private notificationService: NotificationService,
-	) {}
-
-	/**
-	 * Cleans up subscriptions when component is destroyed
-	 */
-	ngOnDestroy(): void {
-		if (this.authSubscription) {
-			this.authSubscription.unsubscribe();
-		}
+	constructor() {
+		this.matIconRegistry.addSvgIcon(
+			'email',
+			this.domSanitizer.bypassSecurityTrustResourceUrl(
+				'assets/icons/email.svg'
+			)
+		);
+		this.matIconRegistry.addSvgIcon(
+			'lock',
+			this.domSanitizer.bypassSecurityTrustResourceUrl('assets/icons/lock.svg')
+		);
+		this.matIconRegistry.addSvgIcon(
+			'eye',
+			this.domSanitizer.bypassSecurityTrustResourceUrl('assets/icons/eye.svg')
+		);
 	}
 
-	/**
-	 * Validates form and submits login request
-	 */
+	ngOnInit(): void {
+		this.handleLoginAction();
+		this.handleRegisterAction();
+	}
+
 	login(): void {
-		// Validate form inputs
-		if (!this.validateLoginForm()) {
+		if (this.loginForm.invalid) {
 			return;
 		}
-
-		this.loading = true;
-		this.loginError = '';
-
-		this.authSubscription = this.authService
-			.login(this.loginCredentials)
-			.pipe(finalize(() => (this.loading = false)))
-			.subscribe({
-				next: () => this.handleAuthSuccess(),
-				error: (err) => this.handleLoginError(err),
-			});
+		this.loginAction$.next();
 	}
 
-	/**
-	 * Validates form and submits registration request
-	 */
 	register(): void {
-		// Validate form inputs
-		if (!this.validateRegisterForm()) {
+		if (this.registerForm.invalid) {
 			return;
 		}
+		this.registerAction$.next();
+	}
 
-		this.loading = true;
-		this.registerError = '';
-
-		this.authSubscription = this.authService
-			.register(this.registerCredentials)
-			.pipe(finalize(() => (this.loading = false)))
-			.subscribe({
-				next: () => this.handleAuthSuccess(),
-				error: (err) => this.handleRegisterError(err),
+	private handleLoginAction(): void {
+		this.loginAction$
+			.pipe(
+				exhaustMap(() => {
+					this.isLoading = true;
+					const rawCreds = this.loginForm.getRawValue();
+					const credentials = {
+						email: rawCreds.email ?? '',
+						password: rawCreds.password ?? '',
+					};
+					return this.authService.login(credentials).pipe(
+						finalize(() => (this.isLoading = false)),
+						catchError((err) => {
+							this.handleAuthError(err, 'login');
+							return of(null);
+						})
+					);
+				}),
+				takeUntilDestroyed(this.destroyRef)
+			)
+			.subscribe((response) => {
+				if (response) {
+					this.handleAuthSuccess();
+				}
 			});
 	}
 
-	/**
-	 * Validates the login form fields
-	 * @returns true if form is valid, false otherwise
-	 */
-	private validateLoginForm(): boolean {
-		if (!this.loginCredentials.email || !this.loginCredentials.password) {
-			this.loginError = 'AUTH.FILL_ALL_FIELDS';
-			this.notificationService.showWarning('AUTH.FILL_ALL_FIELDS');
-			return false;
-		}
+	private handleRegisterAction(): void {
+		this.registerAction$
+			.pipe(
+				exhaustMap(() => {
+					this.isLoading = true;
+					const rawData = this.registerForm.getRawValue();
+					const nameParts = (rawData.fullName ?? '').split(' ');
+					const firstName = nameParts.shift() || '';
+					const lastName = nameParts.join(' ');
 
-		// Basic email validation
-		const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-		if (!emailPattern.test(this.loginCredentials.email)) {
-			this.loginError = 'AUTH.VALID_EMAIL';
-			this.notificationService.showWarning('AUTH.VALID_EMAIL');
-			return false;
-		}
-
-		return true;
+					const userData = {
+						firstName: firstName,
+						lastName: lastName,
+						email: rawData.email ?? '',
+						password: rawData.password ?? '',
+					};
+					return this.authService.register(userData).pipe(
+						finalize(() => (this.isLoading = false)),
+						catchError((err) => {
+							this.handleAuthError(err, 'register');
+							return of(null);
+						})
+					);
+				}),
+				takeUntilDestroyed(this.destroyRef)
+			)
+			.subscribe((response) => {
+				if (response) {
+					this.handleAuthSuccess();
+				}
+			});
 	}
 
-	/**
-	 * Validates the registration form fields
-	 * @returns true if form is valid, false otherwise
-	 */
-	private validateRegisterForm(): boolean {
-		if (
-			!this.registerCredentials.username ||
-			!this.registerCredentials.email ||
-			!this.registerCredentials.password ||
-			!this.registerCredentials.firstName ||
-			!this.registerCredentials.lastName
-		) {
-			this.registerError = 'AUTH.FILL_ALL_FIELDS';
-			this.notificationService.showWarning('AUTH.FILL_ALL_FIELDS');
-			return false;
-		}
-
-		// Basic email validation
-		const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-		if (!emailPattern.test(this.registerCredentials.email)) {
-			this.registerError = 'AUTH.VALID_EMAIL';
-			this.notificationService.showWarning('AUTH.VALID_EMAIL');
-			return false;
-		}
-
-		// Password strength validation (minimum 6 characters)
-		if (this.registerCredentials.password.length < 6) {
-			this.registerError = 'AUTH.PASSWORD_MIN_LENGTH';
-			this.notificationService.showWarning('AUTH.PASSWORD_MIN_LENGTH');
-			return false;
-		}
-
-		return true;
-	}
-
-	/**
-	 * Handles successful authentication response (both login and register)
-	 */
 	private handleAuthSuccess(): void {
-		this.notificationService.showSuccess('AUTH.LOGIN_SUCCESS');
+		const message = this.translate.instant('AUTH.LOGIN_SUCCESS');
+		this.notificationService.showSuccess(message);
 		this.router.navigate(['/chat']);
 	}
 
-	/**
-	 * Handles login error response
-	 * @param err - Error response from the server
-	 */
-	private handleLoginError(err: any): void {
-		console.error('Login error:', err);
-		this.loginError = 'AUTH.LOGIN_ERROR';
-		this.notificationService.showError('AUTH.LOGIN_ERROR');
-	}
-
-	/**
-	 * Handles registration error response
-	 * @param err - Error response from the server
-	 */
-	private handleRegisterError(err: any): void {
-		console.error('Registration error:', err);
-		this.registerError = 'AUTH.REGISTER_ERROR';
-		this.notificationService.showError('AUTH.REGISTER_ERROR');
+	private handleAuthError(err: any, type: 'login' | 'register'): void {
+		const messageKey =
+			type === 'login' ? 'AUTH.LOGIN_ERROR' : 'AUTH.REGISTER_ERROR';
+		const message = this.translate.instant(messageKey);
+		this.notificationService.showError(message);
+		console.error(`${type} error:`, err);
 	}
 }

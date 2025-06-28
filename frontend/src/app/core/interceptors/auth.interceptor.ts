@@ -28,7 +28,7 @@ export const AuthInterceptor: HttpInterceptorFn = (
 	const storageService = inject(StorageService);
 	const notificationService = inject(NotificationService);
 	const router = inject(Router);
-	const token = storageService.getItem('token');
+	const token = storageService.getItem('authToken');
 
 	// Clone the request and add authorization header if token exists
 	let request = req;
@@ -47,7 +47,7 @@ export const AuthInterceptor: HttpInterceptorFn = (
 
 			// Handle authentication errors by redirecting to login
 			if (error.status === 401) {
-				storageService.removeItem('token');
+				storageService.removeItem('authToken');
 				storageService.removeItem('user');
 				router.navigate(['/auth/login']);
 			}

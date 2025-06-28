@@ -1,30 +1,25 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { ApiService } from './api.service';
-import { Observable, tap } from 'rxjs';
+import { Observable, tap, of, catchError, concatMap, map } from 'rxjs';
 import { StorageService } from './storage.service';
 import { ChatStateService } from '../../features/chat/chat-state.service';
+import { Router } from '@angular/router';
+import { DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 export interface User {
-	id: string;
-	username: string;
+	id: number;
 	email: string;
+	firstName?: string;
+	lastName?: string;
+	department?: string;
+	name?: string;
+	avatar?: string;
 }
 
-export interface RegisterRequest {
-	username: string;
-	email: string;
-	password: string;
-	firstName: string;
-	lastName: string;
-}
-
-export interface LoginRequest {
-	email: string;
-	password: string;
-}
-
-export interface LoginResponse {
+export interface AuthResponse {
 	token: string;
+	expiresAt: Date;
 	user: User;
 }
 
@@ -32,96 +27,95 @@ export interface LoginResponse {
 	providedIn: 'root',
 })
 export class AuthService {
-	private api = inject(ApiService);
-	private storage = inject(StorageService);
+	private apiService = inject(ApiService);
+	private storageService = inject(StorageService);
+	private router = inject(Router);
 	private chatState = inject(ChatStateService);
+	private destroyRef = inject(DestroyRef);
 
 	private currentUserSignal = signal<User | null>(null);
-	public readonly currentUser = this.currentUserSignal.asReadonly();
+	readonly currentUser = this.currentUserSignal.asReadonly();
 
-	constructor() {}
+	constructor() {
+		// No longer calling initialization here
+	}
 
-	init(): void {
-		// Try to load user from storage on service initialization
-		const savedUser = this.storage.getItem('user');
-		if (savedUser) {
-			try {
-				this.currentUserSignal.set(JSON.parse(savedUser));
-				this.chatState.initialize();
-			} catch (error) {
-				this.storage.removeItem('user');
-			}
+	init(): Observable<User | null> {
+		const token = this.storageService.getItem('authToken');
+		if (!token) {
+			return of(null);
 		}
-	}
 
-	/**
-	 * Register a new user
-	 */
-	register(userData: RegisterRequest): Observable<LoginResponse> {
-		return this.api.post<LoginResponse>('/auth/register', userData).pipe(
-			tap((response) => {
-				this.handleAuthSuccess(response);
+		return this.getCurrentUser().pipe(
+			tap((user) => {
+				this.currentUserSignal.set(this.formatUser(user));
 				this.chatState.initialize();
 			}),
+			catchError(() => {
+				this.logout();
+				return of(null);
+			})
 		);
 	}
 
-	/**
-	 * Log in user with username and password
-	 */
-	login(credentials: LoginRequest): Observable<LoginResponse> {
-		return this.api.post<LoginResponse>('/auth/login', credentials).pipe(
+	login(credentials: { email: string; password: string }): Observable<AuthResponse> {
+		return this.apiService.post<AuthResponse>('/auth/login', credentials).pipe(
 			tap((response) => {
-				this.handleAuthSuccess(response);
+				this.storageService.setItem('authToken', response.token);
+			}),
+			concatMap((response) => this.getCurrentUser().pipe(
+				map((user) => ({
+					response,
+					user,
+				}))
+			)),
+			tap(({ user }) => {
+				this.currentUserSignal.set(this.formatUser(user));
 				this.chatState.initialize();
 			}),
+			map(({ response }) => response)
 		);
 	}
 
-	/**
-	 * Log out the current user
-	 */
-	logout(): void {
-		// Clear stored data
-		this.storage.removeItem('token');
-		this.storage.removeItem('user');
-
-		// Reset current user
-		this.currentUserSignal.set(null);
-
-		// Destroy chat state
-		this.chatState.destroy();
-	}
-
-	/**
-	 * Check if user is logged in
-	 */
-	isLoggedIn(): boolean {
-		return !!this.storage.getItem('token');
-	}
-
-	/**
-	 * Get the current user's information
-	 */
 	getCurrentUser(): Observable<User> {
-		return this.api.get<User>('/auth/me');
+		return this.apiService.get<User>('/user/me');
 	}
 
-	/**
-	 * Get the auth token
-	 */
-	getToken(): string | null {
-		return this.storage.getItem('token');
+	register(userInfo: Omit<User, 'id'>): Observable<AuthResponse> {
+		return this.apiService.post<AuthResponse>('/auth/register', userInfo).pipe(
+			tap((response) => {
+				this.storageService.setItem('authToken', response.token);
+			}),
+			concatMap((response) => this.getCurrentUser().pipe(
+				map((user) => ({
+					response,
+					user,
+				}))
+			)),
+			tap(({ response, user }) => {
+				this.currentUserSignal.set(this.formatUser(user));
+				this.chatState.initialize();
+			}),
+			map(({ response }) => response)
+		);
 	}
 
-	private handleAuthSuccess(response: LoginResponse): void {
-		// Save token
-		this.storage.setItem('token', response.token);
+	logout(): void {
+		this.storageService.removeItem('authToken');
+		this.currentUserSignal.set(null);
+		this.chatState.destroy();
+		this.router.navigate(['/auth/login']);
+	}
 
-		// Save user
-		this.storage.setItem('user', JSON.stringify(response.user));
+	isAuthenticated(): boolean {
+		return !!this.storageService.getItem('authToken');
+	}
 
-		// Update current user signal
-		this.currentUserSignal.set(response.user);
+	private formatUser(user: User): User {
+		return {
+			...user,
+			name: `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email,
+			department: user.department || 'General',
+		};
 	}
 }

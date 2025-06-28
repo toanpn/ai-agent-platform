@@ -1,67 +1,63 @@
-<div class="chat-input-wrapper" role="form" aria-label="Message input form">
-	<mat-form-field appearance="outline" class="message-input">
-		<mat-label>{{ 'CHAT.TYPE_MESSAGE' | translate }}</mat-label>
+<div class="chat-input-container">
+	<div class="main-input-area">
 		<textarea
-			matInput
+			#promptInput
+			class="message-textarea"
 			[placeholder]="'CHAT.TYPE_MESSAGE' | translate"
 			[value]="messageText()"
 			(input)="onMessageTextChanged($event)"
 			(keydown)="onKeyDown($event)"
 			[disabled]="disabled() || isEnhancing()"
-			aria-label="Message text input"
-			autocomplete="off"
-			rows="3"
-			cdkTextareaAutosize
-			cdkAutosizeMinRows="1"
-			cdkAutosizeMaxRows="5"
+			rows="1"
 		></textarea>
-		@if (disabled()) {
-			<mat-hint>{{ 'COMMON.LOADING' | translate }}</mat-hint>
-		}
-		@if (isEnhancing()) {
-			<mat-hint>{{ 'CHAT.ENHANCING_PROMPT' | translate }}</mat-hint>
-		}
-	</mat-form-field>
-
-	<div class="input-actions">
-		@if (isSpeechSupported) {
-			<button
-				mat-icon-button
-				[color]="isListening() ? 'warn' : 'primary'"
-				class="mic-button"
-				(click)="toggleListening()"
-				[matTooltip]="(isListening() ? 'CHAT.STOP_LISTENING' : 'CHAT.START_LISTENING') | translate"
-				[attr.aria-label]="(isListening() ? 'CHAT.STOP_LISTENING' : 'CHAT.START_LISTENING') | translate"
-				[disabled]="disabled() || isEnhancing()"
-			>
-				<mat-icon aria-hidden="true">{{ isListening() ? 'mic_off' : 'mic' }}</mat-icon>
+		<div class="input-actions">
+			<button class="action-btn" [title]="'CHAT.ATTACH_FILE' | translate">
+				<img src="assets/icons/attach-file.svg" alt="" />
 			</button>
-		}
-		<button
-			mat-icon-button
-			color="accent"
-			class="enhance-button"
-			[disabled]="!messageText().trim() || disabled() || isEnhancing()"
-			(click)="onEnhanceClick()"
-			[matTooltip]="'CHAT.ENHANCE_PROMPT' | translate"
-			[attr.aria-label]="'CHAT.ENHANCE_PROMPT' | translate"
-		>
-			@if (isEnhancing()) {
-				<mat-spinner diameter="20" aria-hidden="true"></mat-spinner>
-			} @else {
-				<mat-icon aria-hidden="true">auto_fix_high</mat-icon>
-			}
-		</button>
-
-		<button
-			mat-fab
-			color="primary"
-			class="send-button"
-			[disabled]="!messageText().trim() || disabled() || isEnhancing()"
-			(click)="onSendClick()"
-			[attr.aria-label]="'CHAT.SEND_MESSAGE' | translate"
-		>
-			<mat-icon aria-hidden="true">send</mat-icon>
-		</button>
+			<div class="voice-actions">
+				@if(isSpeechSupported) {
+				<button
+					(click)="toggleListening()"
+					[title]="
+						(isListening() ? 'CHAT.STOP_LISTENING' : 'CHAT.START_LISTENING') | translate
+					"
+					class="icon-button action-btn"
+					[class.listening]="isListening()"
+				>
+					<img src="assets/icons/mic.svg" alt="Microphone Icon" />
+				</button>
+				}
+			</div>
+			<button class="action-btn" [title]="'CHAT.ADD_IMAGE' | translate">
+				<img src="assets/icons/image.svg" alt="" />
+			</button>
+			<button
+				class="send-btn"
+				[disabled]="!messageText().trim() || disabled() || isEnhancing()"
+				(click)="onSendClick()"
+				[title]="'CHAT.SEND_MESSAGE' | translate"
+			>
+				<img src="assets/icons/send.svg" alt="" />
+			</button>
+		</div>
+	</div>
+	<div class="formatting-toolbar">
+		<div class="format-actions">
+			<button class="format-btn" [title]="'CHAT.FORMAT_CODE' | translate">
+				<img src="assets/icons/code.svg" alt="" />
+				<span>{{ 'CHAT.CODE_FORMAT' | translate }}</span>
+			</button>
+			<button class="format-btn" [title]="'CHAT.FORMAT_TABLE' | translate">
+				<img src="assets/icons/table.svg" alt="" />
+				<span>{{ 'CHAT.TABLE_FORMAT' | translate }}</span>
+			</button>
+			<button class="format-btn" [title]="'CHAT.FORMAT_LIST' | translate">
+				<img src="assets/icons/list.svg" alt="" />
+				<span>{{ 'CHAT.LIST_FORMAT' | translate }}</span>
+			</button>
+		</div>
+		<div class="response-note">
+			<span>{{ 'CHAT.AGENT_RESPONSE_NOTE' | translate }}</span>
+		</div>
 	</div>
 </div>

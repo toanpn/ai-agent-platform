@@ -167,9 +167,36 @@
 	--color-login-text-link: #0284c7;
 	--color-login-icon: #9ca3af;
 	--color-login-border: #d1d5db;
-	--color-login-divider: #e5e7eb;
+	--color-border-light: #e5e7eb;
 	--color-login-gradient-start: #0ea5e9;
 	--color-login-gradient-end: #0c4a6e;
+
+	/* Chat Page Specific Colors */
+	--color-background-grey: #f9fafb;
+	--color-background-subtle: #f3f4f6;
+	--color-text-strong: #1f2937;
+	--color-text-subtle: #4b5563;
+
+	/* Chat Sidebar Specific Colors */
+	--color-sidebar-active-bg: #f0f9ff;
+	--color-sidebar-active-border: #0ea5e9;
+	--color-sidebar-new-chat-text: #0284c7;
+
+	/* Agent Message Colors */
+	--color-agent-purple-bg: #ede9fe;
+	--color-agent-purple-text: #6d28d9;
+	--color-agent-purple-tag-bg: #ddd6fe;
+	--color-agent-purple-tag-text: #5b21b6;
+
+	--color-agent-blue-bg: #e0f2fe;
+	--color-agent-blue-text: #0369a1;
+	--color-agent-blue-tag-bg: #bae6fd;
+	--color-agent-blue-tag-text: #075985;
+
+	--color-agent-green-bg: #dcfce7;
+	--color-agent-green-text: #15803d;
+	--color-agent-green-tag-bg: #bbf7d0;
+	--color-agent-green-tag-text: #166534;
 }
 
 /* Dark theme variables - applied via both system preference and programmatic class */

@@ -103,7 +103,27 @@ The project will be organized into feature modules to ensure a clean and scalabl
 │       └── environment.prod.ts
 ```
 
-## 4. State Management Strategy
+## 4. Application Layout
+
+The application will feature a main layout component that provides a consistent structure across all pages. This shell will consist of a main navigation sidebar on the left and a content area on the right.
+
+### 4.1. Global Header
+
+- **Figma Node:** `15:1760`
+- A global header will be displayed at the top of the main content area.
+- **Appearance:**
+    - **Background:** White (`#FFFFFF`)
+    - **Border:** 1px bottom border (`#E5E7EB`)
+- **Content:** The header contains user-specific information and actions, aligned to the right.
+    - **User Information:**
+        - User Avatar
+        - User's full name (e.g., "David Chen")
+        - User's role or title (e.g., "Product Manager")
+    - **Action Icons:**
+        - A notification icon.
+        - A language/region selection icon.
+
+## 5. State Management Strategy
 
 A reactive state management approach using **Angular Services and RxJS** will be employed.
 
@@ -114,7 +134,7 @@ A reactive state management approach using **Angular Services and RxJS** will be
 
 This approach avoids the boilerplate of more complex libraries like NgRx while providing a robust, scalable, and reactive solution suitable for this application's needs.
 
-## 5. Component Breakdown & Architecture
+## 6. Component Breakdown & Architecture
 
 The application will be broken down into the following key components, aligning with the UI specification.
 
@@ -156,7 +176,7 @@ The application will be broken down into the following key components, aligning 
         -   Uploads the new file and processes deletions concurrently with the agent update when the form is saved.
     -   **Department Field**: In the agent form, the `Department` field is a dropdown (select box) with a fixed, client-side list of department options. This ensures data consistency for agent categorization.
 
-## 6. Internationalization (i18n) Strategy
+## 7. Internationalization (i18n) Strategy
 
 The application implements comprehensive internationalization using the ngx-translate library:
 
@@ -182,7 +202,7 @@ The application implements comprehensive internationalization using the ngx-tran
 }
 ```
 
-## 7. API Integration and Data Flow
+## 8. API Integration and Data Flow
 
 All communication with the backend will be centralized through the `AgentPlatform.API`.
 
@@ -217,7 +237,7 @@ All communication with the backend will be centralized through the `AgentPlatfor
 4.  **UI Update:** Tools are loaded into the dropdown with loading states and error handling.
 5.  **User Selection:** User selects multiple tools which are stored in the form state.
 
-## 8. Key Feature Implementation Strategy
+## 9. Key Feature Implementation Strategy
 
 -   **Conversation Handling & Message Threading:** Managed by the `ChatService`, which tracks the `activeConversationId` and fetches message history for that ID from the `/api/chat/conversations/{id}` endpoint.
 -   **User Authentication:**

@@ -2,32 +2,42 @@
 	<app-chat-sidebar
 		class="chat-sidebar"
 		[conversations]="chatState.conversations()"
+		[selectedConversation]="chatState.activeConversation()"
 		(conversationSelected)="onConversationSelected($event)"
 		(startNewChat)="onStartNewChat()"
-		(agentSelected)="onAgentSelected($event)"
-		[agents]="chatState.agents()"
-		[selectedAgent]="chatState.selectedAgent()"
 	></app-chat-sidebar>
 
 	<div class="chat-main">
 		<div class="chat-header">
-			<h2 class="chat-title">
-				@if (chatState.selectedAgent(); as agent) {
-					{{ agent.name }}
-				} @else {
-					{{ 'CHAT.DEFAULT_AGENT_NAME' | translate }}
-				}
-			</h2>
+			<h2 class="chat-title">{{ chatState.activeConversation()?.title || ('CHAT.DEFAULT_TITLE' | translate) }}</h2>
+			<div class="header-actions">
+				<button class="header-action-btn" [title]="'COMMON.SHARE' | translate">
+					<img src="assets/icons/share.svg" alt="" />
+				</button>
+				<button class="header-action-btn" [title]="'COMMON.MORE_OPTIONS' | translate">
+					<img src="assets/icons/more-horiz.svg" alt="" />
+				</button>
+			</div>
 		</div>
 		<app-chat-messages
 			class="chat-messages"
 			[messages]="chatState.messages()"
 			[isLoading]="chatState.isLoading()"
 		></app-chat-messages>
+		<div class="suggested-prompts">
+			@for (prompt of suggestedPrompts; track prompt) {
+			<button class="prompt-btn" (click)="onPromptClicked(prompt)">{{ prompt | translate }}</button>
+			}
+		</div>
 		<app-chat-input
 			class="chat-input"
 			(sendMessage)="onSendMessage($event)"
 			[disabled]="chatState.isLoading()"
 		></app-chat-input>
 	</div>
+
+	<app-agent-participants-list
+		class="agent-participants-sidebar"
+		[agents]="chatState.agents()"
+	></app-agent-participants-list>
 </div> 

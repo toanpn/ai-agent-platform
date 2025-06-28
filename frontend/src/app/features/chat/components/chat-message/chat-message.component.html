@@ -1,37 +1,33 @@
-@let isUserMessageValue = isUserMessage();
-@let displayMessage = message();
+@let msg = message();
+@let isUser = isUserMessage();
 
-<div
-	class="message-container"
-	[class]="isUserMessageValue ? 'user-message' : 'assistant-message'"
->
-	<div class="message-sender">
-		{{ isUserMessageValue ? ('CHAT.YOU' | translate) : (displayMessage.agentName || ('CHAT.ASSISTANT' | translate)) }}
-		<span class="message-time">{{ formattedTimestamp() }}</span>
+@if (msg.sender === 'system') {
+	<div class="system-message-container">
+		<span class="system-message">{{ msg.text }}</span>
 	</div>
-	<mat-card>
-		<mat-card-content>
-            @if (displayMessage.masterAgentThinking) {
-			<div class="thinking-block">
-				<mat-icon>psychology</mat-icon>
-				<p>{{ displayMessage.masterAgentThinking }}</p>
-			</div>
-            }
-
-			<p>{{ displayMessage.text }}</p>
-
-            @if (displayMessage.executionDetails) {
-			<app-execution-details 
-				[details]="displayMessage.executionDetails!"
-			></app-execution-details>
-            }
-
-            @if (displayMessage.error) {
-			<div class="error-block">
-				<mat-icon>error_outline</mat-icon>
-				<p>Error: {{ displayMessage.error }}</p>
-			</div>
-            }
-		</mat-card-content>
-	</mat-card>
-</div>
+} @else {
+	<div class="message-container" [class.user-message]="isUser" [class.agent-message]="!isUser">
+		<img
+			*ngIf="!isUser"
+			class="avatar"
+			[src]="getAgentAvatar(msg.agentName)"
+			alt=""
+		/>
+		<div
+			class="message-bubble"
+			[attr.data-agent-type]="!isUser ? getAgentType(msg.agentName) : null"
+		>
+			@if (!isUser) {
+				<div class="agent-header">
+					<span class="agent-name">{{ msg.agentName }}</span>
+					<span class="agent-specialty-tag">{{ getAgentSpecialty(msg.agentName) }}</span>
+				</div>
+			}
+			<p class="message-text">{{ msg.text }}</p>
+		</div>
+		<img *ngIf="isUser" class="avatar" src="assets/icons/user-avatar.png" alt="" />
+	</div>
+	<div class="timestamp" [class.user-message]="isUser" [class.agent-message]="!isUser">
+		{{ formattedTimestamp() }}
+	</div>
+}

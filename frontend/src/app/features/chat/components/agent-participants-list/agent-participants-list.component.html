@@ -1,0 +1,39 @@
+<div class="sidebar-container">
+	<div class="sidebar-header">
+		<h2 class="sidebar-title">{{ 'CHAT.AGENT_LIST_TITLE' | translate }}</h2>
+	</div>
+	<div class="agent-list">
+		@for (agent of agents(); track agent.id) {
+			<div class="agent-card" [attr.data-agent-type]="getAgentType(agent.name)">
+				<div class="card-header">
+					<img class="avatar" [src]="getAgentAvatar(agent.name)" alt="" />
+					<div class="agent-info">
+						<span class="agent-name">{{ agent.name }}</span>
+						<span class="agent-privacy-tag">{{ 'COMMON.PRIVATE' | translate }}</span>
+					</div>
+				</div>
+				<div class="card-body">
+					<div class="agent-section">
+						<h3 class="section-title">{{ 'CHAT.AGENT_SPECIALTIES' | translate }}</h3>
+						<div class="tags">
+							@for (tool of agent.tools; track tool) {
+								<span class="tag">{{ tool }}</span>
+							}
+						</div>
+					</div>
+					<div class="agent-section">
+						<h3 class="section-title">{{ 'CHAT.AGENT_CAPABILITIES' | translate }}</h3>
+						<ul class="capabilities-list">
+							@for (func of agent.functions; track func.id) {
+								<li>
+									<img src="assets/icons/check.svg" alt="" />
+									<span>{{ func.name }}</span>
+								</li>
+							}
+						</ul>
+					</div>
+				</div>
+			</div>
+		}
+	</div>
+</div> 
