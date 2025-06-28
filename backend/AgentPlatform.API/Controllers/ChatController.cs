@@ -22,8 +22,17 @@ namespace AgentPlatform.API.Controllers
         /// Send a message to the agent system and receive an enhanced response
         /// </summary>
         /// <param name="request">The message request containing the message text and optional session/agent information</param>
-        /// <returns>Enhanced chat response with agent execution details, available agents, and tools information</returns>
-        /// <response code="200">Returns the enhanced chat response with execution details</response>
+        /// <returns>
+        /// Enhanced chat response with comprehensive information including:
+        /// - Main response from the appropriate agent
+        /// - List of agents used during execution
+        /// - List of tools used during execution  
+        /// - Complete list of available sub-agents in the master agent system
+        /// - List of available tools with descriptions
+        /// - Detailed execution steps showing the agent routing and tool usage
+        /// - Session information and metadata
+        /// </returns>
+        /// <response code="200">Returns the enhanced chat response with execution details, list of available sub-agents, and tools</response>
         /// <response code="400">If the request is invalid</response>
         /// <response code="500">If there's an error processing the message</response>
         [HttpPost("message")]

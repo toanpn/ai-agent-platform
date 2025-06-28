@@ -262,6 +262,17 @@ class AgentSystemManager:
             return {"total_agents": 0, "agents": []}
         
         return self.master_agent.get_agent_info()
+    
+    def get_system_info(self) -> Dict[str, Any]:
+        """Get comprehensive system information including agents and tools."""
+        system_info = {
+            "system_manager_initialized": True,
+            "master_agent_initialized": self.master_agent is not None,
+            "available_agents": self.get_agent_info(),
+            "available_tools": self.agent_manager.get_available_tools_details() if self.agent_manager else []
+        }
+        
+        return system_info
 
 
 @app.route('/health', methods=['GET'])
