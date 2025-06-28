@@ -16,12 +16,19 @@
 	&.collapsed {
 		width: 60px;
 
+		.sidebar-header {
+			padding-left: 0;
+			padding-right: 0;
+			justify-content: center;
+		}
+
 		.sidebar-title,
 		.agent-list {
 			display: none;
 		}
 
 		.header-actions {
+			gap: var(--spacing-smd);
 			.collapse-icon {
 				transform: rotate(-90deg);
 			}
@@ -35,12 +42,17 @@
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
+	gap: var(--spacing-sm);
 
 	.sidebar-title {
 		font-size: 16px;
 		font-weight: 600;
 		color: var(--color-text-strong);
 		margin: 0;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		min-width: 0;
 	}
 }
 
@@ -48,6 +60,7 @@
 	display: flex;
 	align-items: center;
 	gap: var(--spacing-sm);
+	flex-shrink: 0;
 }
 
 .header-action-btn {

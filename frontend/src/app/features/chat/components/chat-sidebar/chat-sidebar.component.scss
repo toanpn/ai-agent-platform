@@ -17,6 +17,12 @@
 	&.collapsed {
 		width: 60px;
 
+		.sidebar-header {
+			padding-left: 0;
+			padding-right: 0;
+			justify-content: center;
+		}
+
 		.sidebar-title,
 		.sidebar-content {
 			display: none;
@@ -33,11 +39,17 @@
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
+	gap: var(--spacing-sm);
 	.sidebar-title {
 		font-size: 16px;
 		font-weight: 600;
 		color: var(--color-text-strong);
 		margin: 0;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		flex-shrink: 1;
+		min-width: 0;
 	}
 }
 
@@ -49,10 +61,11 @@
 	display: flex;
 	align-items: center;
 	justify-content: center;
+	flex-shrink: 0;
 
 	.collapse-icon {
-		width: 24px;
-		height: 24px;
+		width: 16px;
+		height: 16px;
 		transition: transform 0.3s ease-in-out;
 		transform: rotate(-90deg);
 	}
