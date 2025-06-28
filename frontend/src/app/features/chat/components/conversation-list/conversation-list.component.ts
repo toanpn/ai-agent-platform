@@ -8,9 +8,9 @@ import {
 	HostListener
 } from '@angular/core';
 import { DatePipe } from '@angular/common';
-import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { TranslateModule } from '@ngx-translate/core';
 import { Conversation } from '../../../../core/services/chat.service';
-import { trigger, state, style, transition, animate } from '@angular/animations';
+import { trigger, style, transition, animate, keyframes } from '@angular/animations';
 import { ChatStateService } from '../../chat-state.service';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -29,12 +29,21 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 				animate('1.5s ease-out', style({ backgroundColor: 'transparent', opacity: 1 })),
 			]),
 		]),
+		trigger('justMoved', [
+			transition(':increment', [
+				animate('1.5s ease-out', keyframes([
+					style({ boxShadow: '0 0 8px 2px var(--color-primary-light)', offset: 0 }),
+					style({ boxShadow: '0 0 8px 2px var(--color-primary-light)', offset: 0.7 }),
+					style({ boxShadow: 'none', offset: 1.0 })
+				]))
+			])
+		])
 	],
 })
 export class ConversationListComponent {
 	private readonly chatState = inject(ChatStateService);
-	private readonly translate = inject(TranslateService);
 	readonly conversations = this.chatState.conversations;
+	readonly isSearching = this.chatState.isSearching;
 	selectedConversation = input<Conversation | null>(null);
 
 	selectConversation = output<Conversation>();

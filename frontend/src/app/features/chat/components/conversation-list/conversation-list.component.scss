@@ -1,42 +1,49 @@
 :host {
-	display: block;
+	display: flex;
+	flex-direction: column;
 	height: 100%;
-	overflow-y: auto;
+	overflow: hidden;
 }
 
 .search-container {
-	position: relative;
-	padding: var(--spacing-smd) var(--spacing-md);
-	border-bottom: 1px solid var(--color-background-subtle);
+	display: flex;
+	align-items: center;
+	gap: var(--spacing-sm);
+	background-color: var(--color-background-subtle);
+	border-radius: 6px;
+	padding: var(--spacing-sm) var(--spacing-smd);
+	margin: 0 var(--spacing-md) var(--spacing-md);
+	flex-shrink: 0;
+
+	.search-icon {
+		width: 14px;
+		height: 14px;
+		margin-left: var(--spacing-sm);
+	}
 
 	.search-input {
+		background: none;
+		border: none;
+		outline: none;
 		width: 100%;
-		padding: var(--spacing-sm) var(--spacing-md);
-		padding-left: 30px; /* space for icon */
-		border-radius: var(--border-radius-md);
-		border: 1px solid var(--color-border);
-		background-color: var(--color-background-alt);
-		color: var(--color-text);
+		font-family: 'Inter', sans-serif;
 		font-size: 14px;
-		transition: border-color 0.2s;
-
-		&:focus {
-			outline: none;
-			border-color: var(--color-primary);
+		color: var(--color-text);
+		padding: 0;
+		&::placeholder {
+			color: var(--color-text-tertiary);
 		}
 	}
 
-	.icon-search {
-		position: absolute;
-		left: var(--spacing-md);
-		top: 50%;
-		transform: translateY(-50%);
+	.loading-spinner {
 		width: 16px;
 		height: 16px;
-		background-image: url('/assets/icons/search.svg');
-		background-size: contain;
-		background-repeat: no-repeat;
-		opacity: 0.6;
+		border: 2px solid var(--color-primary);
+		border-top-color: transparent;
+		border-radius: 50%;
+		animation: spin 1s linear infinite;
+		margin-left: auto;
+		margin-right: var(--spacing-sm);
 	}
 }
 
@@ -44,6 +51,8 @@
 	list-style: none;
 	padding: 0;
 	margin: 0;
+	flex: 1;
+	overflow-y: auto;
 
 	.conversation-item {
 		display: flex;
@@ -51,8 +60,10 @@
 		align-items: center;
 		padding: var(--spacing-smd) var(--spacing-md);
 		border-bottom: 1px solid var(--color-background-subtle);
+		border-left: 4px solid transparent;
 		cursor: pointer;
 		position: relative;
+		transition: border-left-color 0.3s ease;
 
 		.conversation-details {
 			overflow: hidden;
@@ -91,7 +102,7 @@
 
 		&.active {
 			background-color: var(--color-sidebar-active-bg);
-			border-left: 4px solid var(--color-sidebar-active-border);
+			border-left-color: var(--color-sidebar-active-border);
 			padding-left: calc(var(--spacing-md) - 4px);
 		}
 

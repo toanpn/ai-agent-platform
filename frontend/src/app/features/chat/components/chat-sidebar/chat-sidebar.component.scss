@@ -107,37 +107,9 @@
 	}
 }
 
-.search-bar {
-	display: flex;
-	align-items: center;
-	gap: var(--spacing-sm);
-	background-color: var(--color-background-subtle);
-	border-radius: 6px;
-	padding: var(--spacing-sm) var(--spacing-smd);
-	margin: 0 var(--spacing-md);
-
-	.search-icon {
-		width: 14px;
-		height: 14px;
-	}
-
-	input {
-		background: none;
-		border: none;
-		outline: none;
-		width: 100%;
-		font-family: 'Inter', sans-serif;
-		font-size: 14px;
-		color: var(--color-text);
-		&::placeholder {
-			color: var(--color-text-tertiary);
-		}
-	}
-}
-
 .conversations-list-container {
 	flex: 1;
-	margin-top: var(--spacing-lg);
+	margin-top: var(--spacing-md);
 	min-height: 0;
 }
 

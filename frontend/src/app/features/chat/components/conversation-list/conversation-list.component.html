@@ -1,6 +1,9 @@
 <div class="search-container">
-    <input type="text" [formControl]="searchControl" [placeholder]="'CHAT.SEARCH_CONVERSATIONS' | translate" class="search-input">
-    <i class="icon-search"></i>
+    <img src="assets/icons/search.svg" alt="Search" class="search-icon" />
+    <input type="text" [formControl]="searchControl" [placeholder]="'CHAT.SEARCH_PLACEHOLDER' | translate" class="search-input">
+    @if (isSearching()) {
+        <div class="loading-spinner"></div>
+    }
 </div>
 <ul class="conversations-list">
   @for (conversation of conversations(); track conversation.id) {
@@ -9,6 +12,7 @@
       [class.active]="conversation.id === selectedConversation()?.id"
       [class.loading]="conversation.loading"
       (click)="onSelectConversation(conversation)"
+      [@justMoved]="conversation.timestamp.getTime()"
     >
       <div class="conversation-details">
         <div class="conversation-title" [@titleChanged]="conversation.title">{{ conversation.title || ('CHAT.NEW_CONVERSATION_TITLE' | translate) }}</div>

@@ -25,6 +25,7 @@ export class ChatStateService {
 	readonly activeConversation = signal<Conversation | null>(null);
 	readonly messages = signal<Message[]>([]);
 	readonly isLoading = signal<boolean>(false);
+	readonly isSearching = signal<boolean>(false);
 	readonly agents = this.agentState.agents$;
 	readonly selectedAgent = signal<Agent | null>(null);
 
@@ -56,7 +57,7 @@ export class ChatStateService {
 			.pipe(
 				debounceTime(300),
 				distinctUntilChanged(),
-				tap(() => this.isLoading.set(true)),
+				tap(() => this.isSearching.set(true)),
 				switchMap((query) => {
 					const request = query
 						? this.chatService.searchConversations(query)
@@ -70,7 +71,7 @@ export class ChatStateService {
 						}),
 					);
 				}),
-				tap(() => this.isLoading.set(false)),
+				tap(() => this.isSearching.set(false)),
 				takeUntilDestroyed(this.destroyRef),
 			)
 			.subscribe((conversations) => {
