@@ -16,7 +16,7 @@ import { Subject, of, forkJoin } from 'rxjs';
 import { TextFieldModule } from '@angular/cdk/text-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatListModule } from '@angular/material/list';
-import { exhaustMap, tap, catchError, switchMap, finalize } from 'rxjs/operators';
+import { exhaustMap, tap, catchError, switchMap, finalize, filter } from 'rxjs/operators';
 import {
 	AgentService,
 	CreateAgentRequest,
@@ -38,8 +38,6 @@ import { Observable } from 'rxjs';
 interface UpdateAgentPayload {
 	id: number;
 	request: UpdateAgentRequest;
-	fileToUpload: File | null;
-	filesToDelete: number[];
 }
 
 @Component({
@@ -99,7 +97,7 @@ export class AgentFormComponent implements OnInit {
 	// Files
 	agentFiles: AgentFile[] = [];
 	fileUploadLoading = false;
-	selectedFile: File | null = null;
+	selectedFiles: File[] = [];
 	private filesToDelete: number[] = [];
 	isDragging = false;
 
@@ -177,6 +175,7 @@ export class AgentFormComponent implements OnInit {
 			// Initialize empty toolConfigs and connectedTools for new agents
 			this.toolConfigs = [];
 			this.connectedTools = [];
+			this.agentFiles = [];
 		}
 	}
 
@@ -268,31 +267,40 @@ export class AgentFormComponent implements OnInit {
 	private setupCreateAgentHandler(): void {
 		this.createAgentTrigger$
 			.pipe(
-				tap(() => {
-					this.loading = true;
-					this.saveError = '';
-				}),
+				tap(() => (this.loading = true)),
 				exhaustMap(request =>
 					this.agentService.createAgent(request).pipe(
-						tap(createdAgent => {
-							this.loading = false;
-							this.notificationService.showSuccess(
-								this.translateService.instant('AGENTS.CREATE_SUCCESS_NOTIFICATION'),
+						switchMap(createdAgent => {
+							if (this.selectedFiles.length === 0) {
+								return of(createdAgent);
+							}
+							const uploadOperations = this.selectedFiles.map(file =>
+								this.fileService.uploadFile(createdAgent.id, file),
 							);
-							this.router.navigate(['/agents/result'], {
-								state: { agent: createdAgent, action: 'create' },
-							});
+							return forkJoin(uploadOperations).pipe(
+								switchMap(() => of(createdAgent)), // Return the agent after uploads
+							);
 						}),
-						catchError(error => {
+						catchError(err => {
+							console.error('Error during agent creation process:', err);
+							this.saveError = 'AGENTS.CREATE_ERROR';
 							this.loading = false;
-							this.saveError = this.translateService.instant(
-								'AGENTS.CREATE_ERROR_NOTIFICATION',
+							this.notificationService.showError(
+								'Failed to create agent or upload files.',
 							);
-							console.error('Error creating agent:', error);
 							return of(null);
 						}),
 					),
 				),
+				tap(response => {
+					this.loading = false;
+					if (response) {
+						this.notificationService.showSuccess('Agent created successfully!');
+						this.router.navigate(['/agents/result'], {
+							state: { agent: response, action: 'create' },
+						});
+					}
+				}),
 				takeUntilDestroyed(this.destroyRef),
 			)
 			.subscribe();
@@ -304,39 +312,49 @@ export class AgentFormComponent implements OnInit {
 	private setupUpdateAgentHandler(): void {
 		this.updateAgentTrigger$
 			.pipe(
-				tap(() => {
-					this.loading = true;
-					this.saveError = '';
-				}),
-				exhaustMap(({ id, request, fileToUpload, filesToDelete }) => {
+				tap(() => (this.loading = true)),
+				exhaustMap(({ id, request }) => {
 					const updateAgent$ = this.agentService.updateAgent(id, request);
-					const fileUpload$ = fileToUpload
-						? this.fileService.uploadFile(id, fileToUpload)
-						: of(null);
-					const fileDelete$ =
-						filesToDelete.length > 0
-							? forkJoin(filesToDelete.map(fileId => this.fileService.deleteFile(fileId)))
+
+					const uploadOperations$ =
+						this.selectedFiles.length > 0
+							? forkJoin(
+									this.selectedFiles.map(file =>
+										this.fileService.uploadFile(id, file),
+									),
+							  )
 							: of(null);
 
-					return forkJoin([updateAgent$, fileUpload$, fileDelete$]).pipe(
-						tap(([updatedAgentResponse]) => {
-							this.loading = false;
-							this.notificationService.showSuccess(
-								this.translateService.instant('AGENTS.UPDATE_SUCCESS_NOTIFICATION'),
-							);
-							this.router.navigate(['/agents/result'], {
-								state: { agent: updatedAgentResponse, action: 'update' },
-							});
-						}),
-						catchError(error => {
-							this.loading = false;
-							this.saveError = this.translateService.instant(
-								'AGENTS.UPDATE_ERROR_NOTIFICATION',
-							);
+					const deleteOperations$ =
+						this.filesToDelete.length > 0
+							? forkJoin(
+									this.filesToDelete.map(fileId =>
+										this.fileService.deleteFile(fileId),
+									),
+							  )
+							: of(null);
+
+					return forkJoin([updateAgent$, uploadOperations$, deleteOperations$]).pipe(
+						catchError(err => {
+							console.error('Error during agent update process:', err);
+							this.saveError = 'AGENTS.UPDATE_ERROR';
 							return of(null);
 						}),
 					);
 				}),
+				filter(result => !!result),
+				tap(([updateResult, uploadResult, deleteResult]) => {
+					this.loading = false;
+					if (updateResult) {
+						this.notificationService.showSuccess('Agent updated successfully!');
+						this.router.navigate(['/agents/result'], {
+							state: { agent: updateResult, action: 'update' },
+						});
+						this.selectedFiles = [];
+						this.filesToDelete = [];
+					}
+				}),
+				finalize(() => (this.loading = false)),
 				takeUntilDestroyed(this.destroyRef),
 			)
 			.subscribe();
@@ -482,18 +500,18 @@ export class AgentFormComponent implements OnInit {
 
 	onSubmit(): void {
 		if (this.agentForm.invalid) {
+			this.agentForm.markAllAsTouched();
+			this.notificationService.showError('Please fill all required fields');
 			return;
 		}
 
-		this.loading = true;
-		const formValue = this.agentForm.value;
+		this.saveError = '';
+		const formValue = this.agentForm.getRawValue();
 
-		// Convert toolConfigs array back to dictionary format for backend
 		let toolConfigsJson: string | undefined = undefined;
 		if (this.toolConfigs.length > 0) {
 			const toolConfigsDict: { [toolKey: string]: { [key: string]: string } } = {};
 			this.toolConfigs.forEach(config => {
-				// Find the tool by ID
 				const tool = this.tools.find(t => t.id === config.toolId);
 				if (tool) {
 					toolConfigsDict[tool.id] = config.configuration;
@@ -504,23 +522,18 @@ export class AgentFormComponent implements OnInit {
 
 		const request: CreateAgentRequest | UpdateAgentRequest = {
 			name: formValue.name,
-			department: formValue.department,
 			description: formValue.description,
 			instructions: formValue.instructions,
-			tools: this.connectedTools.length > 0 ? this.connectedTools : undefined,
+			department: formValue.department,
+			llmConfig: formValue.llmConfig as LlmConfig,
 			toolConfigs: toolConfigsJson,
-			llmConfig: {
-				modelName: formValue.llmConfig.modelName,
-				temperature: formValue.llmConfig.temperature,
-			},
+			tools: this.connectedTools,
 		};
 
 		if (this.isEditMode && this.agentId) {
 			const payload: UpdateAgentPayload = {
 				id: this.agentId,
 				request: request as UpdateAgentRequest,
-				fileToUpload: this.selectedFile,
-				filesToDelete: this.filesToDelete,
 			};
 			this.updateAgentTrigger$.next(payload);
 		} else {
@@ -812,33 +825,49 @@ export class AgentFormComponent implements OnInit {
 		event.preventDefault();
 		event.stopPropagation();
 		this.isDragging = false;
-
 		const files = event.dataTransfer?.files;
+
 		if (files && files.length > 0) {
-			this.selectedFile = files[0];
-			this.cdr.detectChanges();
+			const newFiles = Array.from(files);
+			this.addFiles(newFiles);
 		}
 	}
 
 	onFileSelected(event: Event): void {
-		const element = event.currentTarget as HTMLInputElement;
-		if (element.files && element.files.length > 0) {
-			this.selectedFile = element.files[0];
+		const input = event.target as HTMLInputElement;
+		if (input.files) {
+			const newFiles = Array.from(input.files);
+			this.addFiles(newFiles);
+			input.value = ''; // Reset file input
 		}
 	}
 
-	/**
-	 * Clears the selected file and resets the file input.
-	 * @param fileInput The file input element to reset.
-	 */
-	removeSelectedFile(fileInput: HTMLInputElement): void {
-		this.selectedFile = null;
-		fileInput.value = ''; // Reset the file input to allow re-selection of the same file
+	private addFiles(newFiles: File[]): void {
+		const currentFileNames = new Set([
+			...this.selectedFiles.map(f => f.name),
+			...this.agentFiles.map(f => f.fileName),
+		]);
+
+		const uniqueNewFiles = newFiles.filter(file => !currentFileNames.has(file.name));
+		
+		if (uniqueNewFiles.length < newFiles.length) {
+			this.notificationService.showWarning('Duplicate files were ignored.');
+		}
+
+		this.selectedFiles = [...this.selectedFiles, ...uniqueNewFiles];
+	}
+
+	removeSelectedFile(fileToRemove: File): void {
+		this.selectedFiles = this.selectedFiles.filter(file => file !== fileToRemove);
 	}
 
 	deleteFile(fileId: number): void {
-		this.filesToDelete.push(fileId);
-		this.agentFiles = this.agentFiles.filter((f) => f.id !== fileId);
+		// Immediately remove from UI
+		this.agentFiles = this.agentFiles.filter(file => file.id !== fileId);
+		// Add to the list of files to be deleted on submit
+		if (!this.filesToDelete.includes(fileId)) {
+			this.filesToDelete.push(fileId);
+		}
 	}
 
 	formatFileSize(bytes: number, decimals = 2): string {
