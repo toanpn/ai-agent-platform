@@ -29,5 +29,15 @@ namespace AgentPlatform.API.Services
 
             return tools ?? new List<ToolDto>();
         }
+
+        public async Task<string> GetToolsJsonContentAsync()
+        {
+            if (!File.Exists(_toolsJsonPath))
+            {
+                throw new FileNotFoundException($"Tools JSON file not found at path: {_toolsJsonPath}");
+            }
+            
+            return await File.ReadAllTextAsync(_toolsJsonPath);
+        }
     }
 } 

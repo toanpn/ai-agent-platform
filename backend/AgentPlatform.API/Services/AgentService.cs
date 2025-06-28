@@ -350,5 +350,15 @@ namespace AgentPlatform.API.Services
 
             return agent.ToolsArray.ToList();
         }
+
+        public async Task<string> GetAgentsJsonContentAsync()
+        {
+            if (!File.Exists(_agentsJsonPath))
+            {
+                throw new FileNotFoundException($"Agents JSON file not found at path: {_agentsJsonPath}");
+            }
+            
+            return await File.ReadAllTextAsync(_agentsJsonPath);
+        }
     }
 } 

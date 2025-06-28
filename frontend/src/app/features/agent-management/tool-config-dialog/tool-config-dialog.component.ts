@@ -57,10 +57,12 @@ export class ToolConfigDialogComponent implements OnInit {
 			return;
 		}
 
-		this.parameters = Object.entries(this.tool.parameters).map(([key, details]) => ({
-			key,
-			details,
-		}));
+		this.parameters = Object.entries(this.tool.parameters)
+			.filter(([key]) => key.toLowerCase() !== 'query')
+			.map(([key, details]) => ({
+				key,
+				details,
+			}));
 
 		for (const { key, details } of this.parameters) {
 			const initialValue = this.data.existingConfig[key] || details.default || '';
