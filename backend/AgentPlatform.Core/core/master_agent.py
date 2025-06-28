@@ -7,7 +7,7 @@ and agent descriptions.
 """
 
 import os
-from typing import List
+from typing import List, Dict, Any
 from langchain.agents import AgentExecutor, create_tool_calling_agent
 from langchain.tools import BaseTool
 from langchain_core.prompts import ChatPromptTemplate
@@ -190,6 +190,123 @@ Remember: Your job is to be a smart router, not to provide direct answers. Trust
                 "total_steps": 0,
                 "error": str(e)
             }
+
+    def process_request_with_details_and_history(self, user_input: str, history: List[dict]) -> dict:
+        """
+        Process a user request with conversation history and return both response and execution details.
+        
+        Args:
+            user_input: The user's current query or request
+            history: List of previous conversation messages with format:
+                    [{"role": "user|assistant", "content": "message", "agentName": "name", "timestamp": "..."}]
+            
+        Returns:
+            dict: Contains response, agents used, tools used, and execution details
+        """
+        try:
+            # Log the incoming request with history
+            print(f"Master Agent received request with history: {user_input}")
+            print(f"Conversation history: {len(history)} messages")
+            
+            # Format conversation history for context
+            conversation_context = self._format_conversation_history(history)
+            
+            # Create context-aware input that includes conversation history
+            contextual_input = f"""Conversation History:
+{conversation_context}
+
+Current User Message: {user_input}
+
+Please respond to the current user message while taking into account the conversation history above. Maintain context and continuity from previous exchanges."""
+            
+            # Process the request through the agent executor with context
+            result = self.agent_executor.invoke({"input": contextual_input})
+            
+            # Extract the output
+            output = result.get("output", "No response generated")
+            
+            # Extract execution details
+            intermediate_steps = result.get("intermediate_steps", [])
+            
+            # Analyze intermediate steps to extract agents and tools used
+            agents_used = set()
+            tools_used = set()
+            execution_steps = []
+            
+            for step in intermediate_steps:
+                if len(step) >= 2:
+                    action, observation = step[0], step[1]
+                    
+                    # Extract tool/agent name from action
+                    if hasattr(action, 'tool'):
+                        tool_name = action.tool
+                        tools_used.add(tool_name)
+                        
+                        # Check if this tool is actually a sub-agent
+                        for agent in self.sub_agents:
+                            if agent.name == tool_name:
+                                agents_used.add(tool_name)
+                                break
+                        else:
+                            # It's a regular tool, not a sub-agent
+                            pass
+                    
+                    # Record execution step
+                    execution_steps.append({
+                        "tool_name": getattr(action, 'tool', 'unknown'),
+                        "tool_input": getattr(action, 'tool_input', ''),
+                        "observation": str(observation)[:200] + "..." if len(str(observation)) > 200 else str(observation)
+                    })
+            
+            return {
+                "response": output,
+                "agents_used": list(agents_used),
+                "tools_used": list(tools_used),
+                "execution_steps": execution_steps,
+                "total_steps": len(intermediate_steps)
+            }
+            
+        except Exception as e:
+            error_msg = f"Master Agent encountered an error: {str(e)}"
+            print(f"Error: {error_msg}")
+            return {
+                "response": error_msg,
+                "agents_used": [],
+                "tools_used": [],
+                "execution_steps": [],
+                "total_steps": 0,
+                "error": str(e)
+            }
+    
+    def _format_conversation_history(self, history: List[dict]) -> str:
+        """
+        Format conversation history into a readable context string.
+        
+        Args:
+            history: List of conversation messages
+            
+        Returns:
+            str: Formatted conversation history
+        """
+        if not history:
+            return "No previous conversation history."
+        
+        formatted_history = []
+        for msg in history:
+            role = msg.get('role', 'unknown')
+            content = msg.get('content', '')
+            agent_name = msg.get('agentName')
+            timestamp = msg.get('timestamp', '')
+            
+            if role == 'user':
+                formatted_history.append(f"User: {content}")
+            elif role == 'assistant':
+                agent_info = f" ({agent_name})" if agent_name else ""
+                formatted_history.append(f"Assistant{agent_info}: {content}")
+            else:
+                formatted_history.append(f"{role}: {content}")
+        
+        return "\n".join(formatted_history)
     
     def update_sub_agents(self, new_sub_agents: List[BaseTool]):
         """

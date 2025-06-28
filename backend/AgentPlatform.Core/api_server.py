@@ -132,8 +132,8 @@ class AgentSystemManager:
             logger.error(f"Error processing request: {e}")
             return f"❌ Error processing request: {str(e)}"
     
-    def process_user_request_with_details(self, user_input: str) -> Dict[str, Any]:
-        """Process a user request and return detailed execution information."""
+    def process_user_request_with_details(self, user_input: str, history: List[Dict[str, Any]] = None) -> Dict[str, Any]:
+        """Process a user request with conversation history and return detailed execution information."""
         if not self.master_agent:
             return {
                 "response": "❌ System not initialized properly",
@@ -147,7 +147,11 @@ class AgentSystemManager:
             }
         
         try:
-            result = self.master_agent.process_request_with_details(user_input)
+            # Process with conversation history if provided
+            if history:
+                result = self.master_agent.process_request_with_details_and_history(user_input, history)
+            else:
+                result = self.master_agent.process_request_with_details(user_input)
             
             # Add available agents list to the result
             result["available_agents"] = self.get_agent_info()
@@ -225,6 +229,28 @@ def chat():
     """
     Main chat endpoint that processes user messages through the agent system.
     
+    Expected Request Format:
+    {
+        "message": "User's message",
+        "userId": "user_id", 
+        "sessionId": "session_id",
+        "agentName": "agent_name",
+        "history": [
+            {
+                "role": "user",
+                "content": "Previous user message",
+                "agentName": null,
+                "timestamp": "2024-01-01T12:00:00.000Z"
+            },
+            {
+                "role": "assistant", 
+                "content": "Previous assistant response",
+                "agentName": "AgentName",
+                "timestamp": "2024-01-01T12:00:30.000Z"
+            }
+        ]
+    }
+    
     Enhanced Response Format:
     {
         "success": true,
@@ -276,8 +302,11 @@ def chat():
         user_id = data.get('userId', 'anonymous')
         session_id = data.get('sessionId')
         agent_name = data.get('agentName')
+        history = data.get('history', [])
         
         logger.info(f"Processing message from user {user_id}: {message[:100]}...")
+        logger.info(f"Session ID: {session_id}")
+        logger.info(f"Conversation history length: {len(history)} messages")
         
         # Process the message through the agent system
         if not system_manager or not system_manager.master_agent:
@@ -301,8 +330,8 @@ def chat():
                 }
             }), 500
         
-        # Use the detailed processing method
-        execution_result = system_manager.process_user_request_with_details(message)
+        # Use the detailed processing method with conversation history
+        execution_result = system_manager.process_user_request_with_details(message, history)
         
         # Return enhanced response with detailed information
         return jsonify({
@@ -333,7 +362,6 @@ def chat():
             "response": "I apologize, but I'm having trouble processing your request right now. Please try again later.",
             "agents_used": [],
             "tools_used": [],
-            "available_agents": {"total_agents": 0, "agents": []},
             "available_tools": [],
             "execution_details": {
                 "execution_steps": [],

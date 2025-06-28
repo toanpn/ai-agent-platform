@@ -50,6 +50,26 @@ class GoogleSearchTool(BaseTool):
             if not GOOGLE_SEARCH_AVAILABLE:
                 return "❌ Google Search API không khả dụng. Cần cài đặt: pip install langchain-google-community"
             
+            # Enhanced query validation
+            if query is None:
+                return "❌ Lỗi: Tham số query là bắt buộc"
+            
+            if not isinstance(query, str):
+                return "❌ Lỗi: Query phải là chuỗi văn bản"
+            
+            query = query.strip()
+            if not query:
+                return "❌ Lỗi: Câu truy vấn tìm kiếm không thể để trống hoặc chỉ chứa khoảng trắng"
+            
+            if len(query) < 2:
+                return "❌ Lỗi: Câu truy vấn tìm kiếm phải có ít nhất 2 ký tự"
+            
+            # Validate num_results
+            if num_results is not None and (not isinstance(num_results, int) or num_results < 1 or num_results > 10):
+                num_results = 5
+                
+            logger.info(f"Executing Google search for query: '{query}' with {num_results} results")
+            
             # Check for required environment variables
             api_key = os.getenv("GOOGLE_API_KEY")
             cse_id = os.getenv("GOOGLE_CSE_ID")
@@ -58,11 +78,20 @@ class GoogleSearchTool(BaseTool):
                 # Return mock results for demo
                 return self._mock_search_results(query, num_results)
             
+            # Final validation before API call
+            if not query or len(query.strip()) == 0:
+                return "❌ Lỗi: Không thể thực hiện tìm kiếm với query rỗng"
+            
             # Initialize Google Search API wrapper
             search = GoogleSearchAPIWrapper(k=num_results or 5)
             
             # Perform search and get detailed results
-            results = search.results(query, num_results or 5)
+            # Double-check query before sending to API
+            final_query = query.strip()
+            if not final_query:
+                return "❌ Lỗi: Query bị rỗng sau khi xử lý"
+                
+            results = search.results(final_query, num_results or 5)
             
             if not results:
                 return f"Không tìm thấy kết quả cho: {query}"
