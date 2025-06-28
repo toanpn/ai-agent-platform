@@ -185,7 +185,9 @@
       "SEO": "I need help with SEO strategy",
       "MARKETING_MIX": "What's my ideal marketing mix?",
       "CONVERSION_RATE": "How to improve conversion rate?"
-    }
+    },
+    "DATE_TODAY": "Today",
+    "DATE_YESTERDAY": "Yesterday"
   },
   "AGENTS": {
     "CREATE_AGENT": "Create Agent",
