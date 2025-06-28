@@ -21,7 +21,7 @@ async def enhance_prompt_async(query: str, agent_info: Dict[str, Any]) -> Dict[s
         - user_facing_prompt: rewritten, polite sentence for chatbot UI
     """
     try:
-        llm = ChatGoogleGenerativeAI(model="gemini-2.0-flash", temperature=0)
+        llm = ChatGoogleGenerativeAI(model="gemini-2.5-flash", temperature=0)
 
         # Stage 1: Intent Classification
         intents = await _classify_intents(llm, query, agent_info)

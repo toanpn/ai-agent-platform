@@ -81,7 +81,7 @@ class AgentManager:
         # Initialize the LLM for the sub-agent
         try:
             llm = ChatGoogleGenerativeAI(
-                model=llm_config.get("model_name", "gemini-2.0-flash"),
+                model=llm_config.get("model_name", "gemini-2.5-flash"),
                 temperature=llm_config.get("temperature", 0.2)
             )
         except Exception as e:
