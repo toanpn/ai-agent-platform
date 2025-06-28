@@ -10,17 +10,17 @@
 		<img
 			*ngIf="!isUser"
 			class="avatar"
-			[src]="getAgentAvatar(msg.agentName)"
+			[src]="getAgentAvatar()"
 			alt=""
 		/>
 		<div
 			class="message-bubble"
-			[attr.data-agent-type]="!isUser ? getAgentType(msg.agentName) : null"
+			[attr.data-agent-type]="!isUser ? agentType() : null"
 		>
 			@if (!isUser) {
 				<div class="agent-header">
 					<span class="agent-name">{{ msg.agentName }}</span>
-					<span class="agent-specialty-tag">{{ getAgentSpecialty(msg.agentName) }}</span>
+					<span class="agent-specialty-tag">{{ getAgentSpecialty() }}</span>
 				</div>
 			}
 			<p class="message-text">{{ msg.text }}</p>

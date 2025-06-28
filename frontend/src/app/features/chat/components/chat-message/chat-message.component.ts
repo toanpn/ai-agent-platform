@@ -1,7 +1,9 @@
-import { Component, input, ChangeDetectionStrategy, computed } from '@angular/core';
+import { Component, input, ChangeDetectionStrategy, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Message } from '../../../../core/services/chat.service';
 import { TranslateModule } from '@ngx-translate/core';
+import { AgentTypeService } from '../../../../core/services/agent-type.service';
+import { AgentStateService } from '../../agent-state.service';
 
 @Component({
 	selector: 'app-chat-message',
@@ -13,25 +15,29 @@ import { TranslateModule } from '@ngx-translate/core';
 })
 export class ChatMessageComponent {
 	message = input.required<Message>();
+	private agentTypeService = inject(AgentTypeService);
+	private agentStateService = inject(AgentStateService);
 
 	isUserMessage = computed(() => this.message().sender === 'user');
-	
+
+	private agent = computed(() => {
+		if (this.isUserMessage() || !this.message().agentName) {
+			return undefined;
+		}
+		return this.agentStateService.getAgentByName(this.message().agentName!);
+	});
+
+	agentType = computed(() => {
+		return this.agentTypeService.getAgentType(this.agent());
+	});
+
 	formattedTimestamp = computed(() => {
 		const date = new Date(this.message().timestamp);
 		return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 	});
 
-	getAgentType(agentName?: string): string {
-		if (!agentName) return '';
-		if (agentName.toLowerCase().includes('marketing')) return 'marketing';
-		if (agentName.toLowerCase().includes('financial')) return 'finance';
-		if (agentName.toLowerCase().includes('data')) return 'data';
-		return 'default';
-	}
-
-	getAgentSpecialty(agentName?: string): string {
-		if (!agentName) return '';
-		const type = this.getAgentType(agentName);
+	getAgentSpecialty(): string {
+		const type = this.agentType();
 		switch (type) {
 			case 'marketing':
 				return 'Marketing';
@@ -40,22 +46,12 @@ export class ChatMessageComponent {
 			case 'data':
 				return 'Analytics';
 			default:
-				return '';
+				// Return a capitalized version of the type for other cases
+				return type.charAt(0).toUpperCase() + type.slice(1);
 		}
 	}
 
-	getAgentAvatar(agentName?: string): string {
-		if (!agentName) return 'assets/icons/agent.svg';
-		const type = this.getAgentType(agentName);
-		switch (type) {
-			case 'marketing':
-				return 'assets/icons/agent-marketing-avatar.png';
-			case 'finance':
-				return 'assets/icons/agent-finance-avatar.png';
-			case 'data':
-				return 'assets/icons/agent-data-avatar.png';
-			default:
-				return 'assets/icons/agent.svg';
-		}
+	getAgentAvatar(): string {
+		return this.agentTypeService.getAgentAvatar(this.agent());
 	}
 }

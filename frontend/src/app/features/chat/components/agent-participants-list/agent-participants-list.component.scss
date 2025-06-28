@@ -8,6 +8,7 @@
 	flex-direction: column;
 	height: 100%;
 	background-color: var(--color-surface);
+	border-right: 1px solid var(--color-border-light);
 }
 
 .sidebar-header {
@@ -24,29 +25,33 @@
 .agent-list {
 	flex: 1;
 	overflow-y: auto;
-	padding: var(--spacing-md);
+	padding: var(--spacing-smd);
 	display: flex;
 	flex-direction: column;
-	gap: var(--spacing-md);
+	gap: var(--spacing-smd);
 }
 
 .agent-card {
 	border-radius: 8px;
-	border: 1px solid transparent;
+	border: 1px solid var(--color-border-light);
+	background-color: var(--color-surface);
 
 	.card-header {
 		display: flex;
 		align-items: center;
 		gap: var(--spacing-smd);
 		padding: var(--spacing-smd);
+		border-bottom: 1px solid var(--color-border-light);
 
 		.avatar {
 			width: 40px;
 			height: 40px;
 			border-radius: 50%;
+			flex-shrink: 0;
 		}
 
 		.agent-info {
+			flex-grow: 1;
 			.agent-name {
 				font-size: 16px;
 				font-weight: 500;
@@ -56,14 +61,16 @@
 			.agent-privacy-tag {
 				font-size: 12px;
 				border-radius: 9999px;
-				padding: 2px var(--spacing-xs);
+				padding: 2px var(--spacing-sm);
+				background-color: var(--color-agent-green-bg);
+				color: var(--color-agent-green-tag-text);
+				font-weight: 500;
 			}
 		}
 	}
 
 	.card-body {
 		padding: var(--spacing-smd);
-		border-top: 1px solid transparent;
 
 		.agent-section {
 			margin-bottom: var(--spacing-md);
@@ -82,11 +89,12 @@
 		.tags {
 			display: flex;
 			flex-wrap: wrap;
-			gap: var(--spacing-xs);
+			gap: var(--spacing-sm);
 			.tag {
 				font-size: 12px;
 				padding: 4px var(--spacing-sm);
 				border-radius: 9999px;
+				font-weight: 500;
 			}
 		}
 
@@ -96,7 +104,7 @@
 			margin: 0;
 			display: flex;
 			flex-direction: column;
-			gap: var(--spacing-sm);
+			gap: var(--spacing-xs);
 
 			li {
 				display: flex;
@@ -118,14 +126,11 @@
 .agent-card[data-agent-type='marketing'] {
 	border-color: var(--color-agent-purple-tag-bg);
 	.card-header {
-		background-color: var(--color-agent-purple-bg);
-	}
-	.card-body {
-		border-top-color: var(--color-agent-purple-tag-bg);
-	}
-	.agent-privacy-tag,
-	.tag {
 		background-color: var(--color-agent-purple-tag-bg);
+		border-bottom-color: var(--color-agent-purple-tag-bg);
+	}
+	.tag {
+		background-color: var(--color-agent-purple-bg);
 		color: var(--color-agent-purple-tag-text);
 	}
 }
@@ -133,14 +138,11 @@
 .agent-card[data-agent-type='finance'] {
 	border-color: var(--color-agent-blue-tag-bg);
 	.card-header {
-		background-color: var(--color-agent-blue-bg);
-	}
-	.card-body {
-		border-top-color: var(--color-agent-blue-tag-bg);
-	}
-	.agent-privacy-tag,
-	.tag {
 		background-color: var(--color-agent-blue-tag-bg);
+		border-bottom-color: var(--color-agent-blue-tag-bg);
+	}
+	.tag {
+		background-color: var(--color-agent-blue-bg);
 		color: var(--color-agent-blue-tag-text);
 	}
 }
@@ -148,14 +150,11 @@
 .agent-card[data-agent-type='data'] {
 	border-color: var(--color-agent-green-tag-bg);
 	.card-header {
-		background-color: var(--color-agent-green-bg);
-	}
-	.card-body {
-		border-top-color: var(--color-agent-green-tag-bg);
-	}
-	.agent-privacy-tag,
-	.tag {
 		background-color: var(--color-agent-green-tag-bg);
+		border-bottom-color: var(--color-agent-green-tag-bg);
+	}
+	.tag {
+		background-color: var(--color-agent-green-bg);
 		color: var(--color-agent-green-tag-text);
 	}
 }
@@ -164,4 +163,137 @@
 .agent-privacy-tag {
 	background-color: var(--color-agent-green-tag-bg);
 	color: var(--color-agent-green-tag-text);
+}
+
+/* Add new department styles here */
+.agent-card[data-agent-type='hr'] {
+	border-color: var(--color-agent-red-tag-bg);
+	.card-header {
+		background-color: var(--color-agent-red-header-bg);
+		border-bottom-color: var(--color-agent-red-tag-bg);
+	}
+	.tag {
+		background-color: var(--color-agent-red-bg);
+		color: var(--color-agent-red-tag-text);
+	}
+}
+
+.agent-card[data-agent-type='ld'] {
+	border-color: var(--color-agent-lime-tag-bg);
+	.card-header {
+		background-color: var(--color-agent-lime-header-bg);
+		border-bottom-color: var(--color-agent-lime-tag-bg);
+	}
+	.tag {
+		background-color: var(--color-agent-lime-bg);
+		color: var(--color-agent-lime-tag-text);
+	}
+}
+
+.agent-card[data-agent-type='ic'] {
+	border-color: var(--color-agent-emerald-tag-bg);
+	.card-header {
+		background-color: var(--color-agent-emerald-header-bg);
+		border-bottom-color: var(--color-agent-emerald-tag-bg);
+	}
+	.tag {
+		background-color: var(--color-agent-emerald-bg);
+		color: var(--color-agent-emerald-tag-text);
+	}
+}
+
+.agent-card[data-agent-type='om'] {
+	border-color: var(--color-agent-orange-tag-bg);
+	.card-header {
+		background-color: var(--color-agent-orange-header-bg);
+		border-bottom-color: var(--color-agent-orange-tag-bg);
+	}
+	.tag {
+		background-color: var(--color-agent-orange-bg);
+		color: var(--color-agent-orange-tag-text);
+	}
+}
+
+.agent-card[data-agent-type='cnb'] {
+	border-color: var(--color-agent-yellow-tag-bg);
+	.card-header {
+		background-color: var(--color-agent-yellow-header-bg);
+		border-bottom-color: var(--color-agent-yellow-tag-bg);
+	}
+	.tag {
+		background-color: var(--color-agent-yellow-bg);
+		color: var(--color-agent-yellow-tag-text);
+	}
+}
+
+.agent-card[data-agent-type='booking'] {
+	border-color: var(--color-agent-pink-tag-bg);
+	.card-header {
+		background-color: var(--color-agent-pink-header-bg);
+		border-bottom-color: var(--color-agent-pink-tag-bg);
+	}
+	.tag {
+		background-color: var(--color-agent-pink-bg);
+		color: var(--color-agent-pink-tag-text);
+	}
+}
+
+.agent-card[data-agent-type='retail'] {
+	border-color: var(--color-agent-indigo-tag-bg);
+	.card-header {
+		background-color: var(--color-agent-indigo-header-bg);
+		border-bottom-color: var(--color-agent-indigo-tag-bg);
+	}
+	.tag {
+		background-color: var(--color-agent-indigo-bg);
+		color: var(--color-agent-indigo-tag-text);
+	}
+}
+
+.agent-card[data-agent-type='fnb'] {
+	border-color: var(--color-agent-cyan-tag-bg);
+	.card-header {
+		background-color: var(--color-agent-cyan-header-bg);
+		border-bottom-color: var(--color-agent-cyan-tag-bg);
+	}
+	.tag {
+		background-color: var(--color-agent-cyan-bg);
+		color: var(--color-agent-cyan-tag-text);
+	}
+}
+
+.agent-card[data-agent-type='it'] {
+	border-color: var(--color-agent-sky-tag-bg);
+	.card-header {
+		background-color: var(--color-agent-sky-header-bg);
+		border-bottom-color: var(--color-agent-sky-tag-bg);
+	}
+	.tag {
+		background-color: var(--color-agent-sky-bg);
+		color: var(--color-agent-sky-tag-text);
+	}
+}
+
+.agent-card[data-agent-type='ai-research'] {
+	border-color: var(--color-agent-teal-tag-bg);
+	.card-header {
+		background-color: var(--color-agent-teal-header-bg);
+		border-bottom-color: var(--color-agent-teal-tag-bg);
+	}
+	.tag {
+		background-color: var(--color-agent-teal-bg);
+		color: var(--color-agent-teal-tag-text);
+	}
+}
+
+.agent-card[data-agent-type='kms'] {
+	border-color: var(--color-agent-gray-tag-bg);
+	.card-header {
+		background-color: var(--color-agent-gray-header-bg);
+		border-bottom-color: var(--color-agent-gray-tag-bg);
+	}
+	.tag {
+		background-color: var(--color-agent-gray-bg);
+		color: var(--color-agent-gray-tag-text);
+	}
 } 
