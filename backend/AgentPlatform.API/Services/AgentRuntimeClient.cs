@@ -662,5 +662,133 @@ namespace AgentPlatform.API.Services
                 };
             }
         }
+
+        public async Task<ToolsResponse?> GetToolsAsync()
+        {
+            try
+            {
+                _logger.LogInformation("Getting tools from Agent Core");
+                
+                var stopwatch = System.Diagnostics.Stopwatch.StartNew();
+                var response = await _httpClient.GetAsync("/api/tools");
+                stopwatch.Stop();
+                
+                _logger.LogInformation("Tools request responded in {ElapsedMs}ms with status {StatusCode}", 
+                    stopwatch.ElapsedMilliseconds, response.StatusCode);
+                
+                var responseJson = await response.Content.ReadAsStringAsync();
+                _logger.LogDebug("Tools response: {Response}", responseJson);
+                
+                if (!response.IsSuccessStatusCode)
+                {
+                    _logger.LogError("Tools request failed: {StatusCode}, Content: {Content}", 
+                        response.StatusCode, responseJson);
+                    
+                    // Try to parse error from response
+                    try
+                    {
+                        var errorResponse = JsonSerializer.Deserialize<Dictionary<string, object>>(responseJson, _jsonOptions);
+                        var errorMessage = errorResponse?.ContainsKey("error") == true 
+                            ? errorResponse["error"].ToString() 
+                            : "Unknown error";
+                            
+                        return new ToolsResponse
+                        {
+                            Success = false,
+                            Error = errorMessage
+                        };
+                    }
+                    catch
+                    {
+                        return new ToolsResponse
+                        {
+                            Success = false,
+                            Error = $"HTTP {response.StatusCode}"
+                        };
+                    }
+                }
+                
+                // Parse successful response
+                try
+                {
+                    var toolsResponse = JsonSerializer.Deserialize<Dictionary<string, object>>(responseJson, _jsonOptions);
+                    
+                    var success = toolsResponse?.ContainsKey("success") == true && 
+                                 toolsResponse["success"] is JsonElement successElement && 
+                                 successElement.ValueKind == JsonValueKind.True;
+                    
+                    var toolsData = new List<ToolInfo>();
+                    var totalTools = 0;
+                    
+                    if (toolsResponse?.ContainsKey("data") == true && 
+                        toolsResponse["data"] is JsonElement dataElement && 
+                        dataElement.ValueKind == JsonValueKind.Array)
+                    {
+                        foreach (var toolElement in dataElement.EnumerateArray())
+                        {
+                            var toolInfo = new ToolInfo();
+                            
+                            if (toolElement.TryGetProperty("id", out var idProp))
+                                toolInfo.Id = idProp.GetString() ?? string.Empty;
+                            
+                            if (toolElement.TryGetProperty("name", out var nameProp))
+                                toolInfo.Name = nameProp.GetString() ?? string.Empty;
+                            
+                            if (toolElement.TryGetProperty("description", out var descProp))
+                                toolInfo.Description = descProp.GetString();
+                            
+                            if (toolElement.TryGetProperty("file", out var fileProp))
+                                toolInfo.File = fileProp.GetString();
+                            
+                            if (toolElement.TryGetProperty("parameters", out var paramsProp))
+                            {
+                                try
+                                {
+                                    toolInfo.Parameters = JsonSerializer.Deserialize<Dictionary<string, object>>(paramsProp.GetRawText(), _jsonOptions);
+                                }
+                                catch
+                                {
+                                    toolInfo.Parameters = new Dictionary<string, object>();
+                                }
+                            }
+                            
+                            toolsData.Add(toolInfo);
+                        }
+                    }
+                    
+                    if (toolsResponse?.ContainsKey("total_tools") == true && 
+                        toolsResponse["total_tools"] is JsonElement totalElement && 
+                        totalElement.ValueKind == JsonValueKind.Number)
+                    {
+                        totalTools = totalElement.GetInt32();
+                    }
+                    
+                    return new ToolsResponse
+                    {
+                        Success = success,
+                        Data = toolsData,
+                        TotalTools = totalTools
+                    };
+                }
+                catch (JsonException ex)
+                {
+                    _logger.LogError(ex, "Failed to parse tools response: {Response}", responseJson);
+                    return new ToolsResponse
+                    {
+                        Success = false,
+                        Error = "Failed to parse response"
+                    };
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Exception occurred while getting tools");
+                return new ToolsResponse
+                {
+                    Success = false,
+                    Error = ex.Message
+                };
+            }
+        }
     }
 } 

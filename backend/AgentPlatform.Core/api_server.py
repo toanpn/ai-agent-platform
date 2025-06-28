@@ -647,6 +647,31 @@ def get_agents():
         }), 500
 
 
+@app.route('/api/tools', methods=['GET'])
+def get_tools():
+    """Get information about available tools."""
+    try:
+        if not system_manager:
+            return jsonify({
+                "success": False,
+                "error": "System not initialized"
+            }), 500
+        
+        tools_info = system_manager.agent_manager.get_available_tools_details() if system_manager.agent_manager else []
+        return jsonify({
+            "success": True,
+            "data": tools_info,
+            "total_tools": len(tools_info)
+        })
+        
+    except Exception as e:
+        logger.error(f"Error getting tools info: {e}")
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        }), 500
+
+
 @app.route('/api/reload', methods=['POST'])
 def reload_agents_endpoint():
     """Reload the agent configuration."""
