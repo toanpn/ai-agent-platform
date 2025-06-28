@@ -1,12 +1,15 @@
 <div class="sidebar-container">
 	<div class="sidebar-header">
 		<h2 class="sidebar-title">{{ 'CHAT.AGENT_LIST_TITLE' | translate }}</h2>
+		<button class="header-action-btn" [routerLink]="['/agents']" [title]="'CHAT.AGENT_LIST_VIEW_ALL' | translate">
+			<img src="assets/icons/list.svg" alt="" />
+		</button>
 	</div>
 	<div class="agent-list">
 		@for (agent of agents(); track agent.id) {
-			<div class="agent-card" [attr.data-agent-type]="getAgentType(agent.name)">
+			<div class="agent-card" [attr.data-agent-type]="getAgentType(agent)">
 				<div class="card-header">
-					<img class="avatar" [src]="getAgentAvatar(agent.name)" alt="" />
+					<img class="avatar" [src]="getAgentAvatar(agent)" alt="" />
 					<div class="agent-info">
 						<span class="agent-name">{{ agent.name }}</span>
 						<span class="agent-privacy-tag">{{ 'COMMON.PRIVATE' | translate }}</span>
