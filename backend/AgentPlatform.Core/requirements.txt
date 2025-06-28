@@ -7,7 +7,7 @@ requests>=2.31.0
 fastapi>=0.100.0
 uvicorn>=0.23.0
 pydantic>=2.0.0
-flask>=2.3.0
+flask[async]>=2.3.0
 flask-cors>=4.0.0
 # RAG Dependencies
 chromadb>=0.4.18
