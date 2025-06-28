@@ -40,7 +40,8 @@ services:
         condition: service_started
     volumes:
       - ./backend/uploads:/app/uploads
-      - ./backend/AgentPlatform.Core:/AgentPlatform.Core
+      - ./backend/AgentPlatform.Core/agents.json:/app/agents.json:ro
+      - ./backend/AgentPlatform.Core:/app/AgentPlatform.Core:ro
       - agent_shared_data:/app/shared
     networks:
       - agentplatform-network
