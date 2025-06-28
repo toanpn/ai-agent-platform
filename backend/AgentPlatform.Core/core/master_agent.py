@@ -70,8 +70,8 @@ Remember: Your job is to be a smart router, not to provide direct answers. Trust
         # Initialize the LLM for the master agent
         try:
             llm = ChatGoogleGenerativeAI(
-                model="gemini-2.5-flash", 
-                temperature=0.5  # Low temperature for consistent routing decisions
+                model="gemini-2.0-flash", 
+                temperature=0.1  # Low temperature for consistent routing decisions
             )
         except Exception as e:
             raise RuntimeError(f"Failed to initialize LLM for Master Agent: {e}")
@@ -390,7 +390,7 @@ async def summarize_conversation_async(messages: List[dict]) -> str:
             ("human", "{history}")
         ])
 
-        llm = ChatGoogleGenerativeAI(model="gemini-2.5-flash", temperature=0.2)
+        llm = ChatGoogleGenerativeAI(model="gemini-2.0-flash", temperature=0.2)
         
         chain = prompt_template | llm
         

@@ -121,7 +121,7 @@ export class AgentFormComponent implements OnInit {
 	];
 
 	// LLM Configuration
-	llmModels: string[] = ['gemini-2.5-flash', 'gemini-2.5-flash', 'gemini-2.5-flash-lite-preview-06-17', 'gemini-2.5-pro'];
+	llmModels: string[] = ['gemini-2.0-flash', 'gemini-2.5-flash', 'gemini-2.5-flash-lite-preview-06-17', 'gemini-2.5-pro'];
 
 	// Tools related properties
 	tools: Tool[] = [];
