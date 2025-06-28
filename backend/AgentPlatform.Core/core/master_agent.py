@@ -241,12 +241,12 @@ Vui lòng thử lại hoặc liên hệ với bộ phận hỗ trợ kỹ thuậ
                             # It's a regular tool, not a sub-agent
                             pass
                     
-                    # Record execution step
-                    execution_steps.append({
-                        "tool_name": getattr(action, 'tool', 'unknown'),
-                        "tool_input": getattr(action, 'tool_input', ''),
-                        "observation": str(observation)[:200] + "..." if len(str(observation)) > 200 else str(observation)
-                    })
+                                    # Record execution step
+                execution_steps.append({
+                    "tool_name": getattr(action, 'tool', 'unknown'),
+                    "tool_input": getattr(action, 'tool_input', ''),
+                    "observation": str(observation)
+                })
             
             return {
                 "response": output,
@@ -332,7 +332,7 @@ Please respond to the current user message while taking into account the convers
                     execution_steps.append({
                         "tool_name": getattr(action, 'tool', 'unknown'),
                         "tool_input": getattr(action, 'tool_input', ''),
-                        "observation": str(observation)[:200] + "..." if len(str(observation)) > 200 else str(observation)
+                        "observation": str(observation)
                     })
             
             return {
