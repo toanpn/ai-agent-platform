@@ -14,10 +14,25 @@ namespace AgentPlatform.API.Services
             _environment = environment;
             _logger = logger;
             
-            // Use absolute path for Docker, fallback to relative for development
-            _toolsJsonPath = File.Exists("/AgentPlatform.Core/toolkit/tools.json") 
-                ? "/AgentPlatform.Core/toolkit/tools.json"
-                : Path.Combine(_environment.ContentRootPath, "..", "AgentPlatform.Core", "toolkit", "tools.json");
+            // Try multiple paths in order of preference
+            var possiblePaths = new[]
+            {
+                // Docker paths
+                "/AgentPlatform.Core/toolkit/tools.json",
+                "/app/AgentPlatform.Core/toolkit/tools.json",
+                
+                // Local development paths
+                Path.Combine(_environment.ContentRootPath, "..", "AgentPlatform.Core", "toolkit", "tools.json"),
+                Path.Combine(Directory.GetCurrentDirectory(), "..", "AgentPlatform.Core", "toolkit", "tools.json"),
+                
+                // Fallback paths
+                Path.Combine(_environment.ContentRootPath, "AgentPlatform.Core", "toolkit", "tools.json"),
+                "toolkit/tools.json"
+            };
+
+            _toolsJsonPath = possiblePaths.FirstOrDefault(File.Exists) ?? possiblePaths[2]; // Default to local dev path
+            
+            _logger.LogInformation("Using tools.json path: {ToolsJsonPath}", _toolsJsonPath);
         }
 
         public async Task<List<ToolDto>> GetToolsAsync()
