@@ -7,10 +7,13 @@
       <span class="agent-name">{{ msg.agentName }}</span>
       <span class="agent-specialty-tag">{{ getAgentSpecialty() }}</span>
     </div>
-    <p class="message-text">{{ msg.text }}</p>
+    <div class="message-text">
+      <markdown [data]="msg.text"></markdown>
+    </div>
     @if (msg.masterAgentThinking) {
     <div class="master-agent-thinking">
-      <p>{{ msg.masterAgentThinking }}</p>
+      <img src="assets/icons/more-horiz.svg" alt="Thinking icon" class="thinking-icon">
+      <markdown [data]="msg.masterAgentThinking"></markdown>
     </div>
     }
   </div>

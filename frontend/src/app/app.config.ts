@@ -18,6 +18,7 @@ import { HttpClient } from '@angular/common/http';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { environment } from '../environments/environment';
 import { provideHashbrown } from '@hashbrownai/angular';
+import { provideMarkdown } from 'ngx-markdown';
 
 // AoT requires an exported function for factories
 export function HttpLoaderFactory(http: HttpClient) {
@@ -31,6 +32,7 @@ export const appConfig: ApplicationConfig = {
 		provideRouter(routes, withComponentInputBinding()),
 		provideAnimationsAsync(),
 		provideHttpClient(withInterceptors([AuthInterceptor])),
+		provideMarkdown(),
 		provideHashbrown(environment.hashbrown.config),
 		// Import Angular Material SnackBar module for the notification service
 		importProvidersFrom(MatSnackBarModule),

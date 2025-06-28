@@ -5,11 +5,12 @@ import { AgentTypeService } from '../../../../core/services/agent-type.service';
 import { AgentStateService } from '../../agent-state.service';
 import { ExecutionDetailsComponent } from '../execution-details/execution-details.component';
 import { TranslateModule } from '@ngx-translate/core';
+import { MarkdownModule } from 'ngx-markdown';
 
 @Component({
   selector: 'app-agent-message',
   standalone: true,
-  imports: [CommonModule, ExecutionDetailsComponent, TranslateModule],
+  imports: [CommonModule, ExecutionDetailsComponent, TranslateModule, MarkdownModule],
   templateUrl: './agent-message.component.html',
   styleUrls: ['./agent-message.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
