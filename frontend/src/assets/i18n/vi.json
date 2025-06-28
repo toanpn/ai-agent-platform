@@ -177,7 +177,9 @@
       "SEO": "Tôi cần trợ giúp về chiến lược SEO",
       "MARKETING_MIX": "Hỗn hợp tiếp thị lý tưởng của tôi là gì?",
       "CONVERSION_RATE": "Làm thế nào để cải thiện tỷ lệ chuyển đổi?"
-    }
+    },
+    "DATE_TODAY": "Hôm nay",
+    "DATE_YESTERDAY": "Hôm qua"
   },
   "AGENTS": {
     "CREATE_AGENT": "Tạo Agent",

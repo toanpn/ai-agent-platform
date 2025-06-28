@@ -6,26 +6,39 @@
     }
 </div>
 <ul class="conversations-list">
-  @for (conversation of conversations(); track conversation.id) {
-    <li
-      class="conversation-item"
-      [class.active]="conversation.id === selectedConversation()?.id"
-      [class.loading]="conversation.loading"
-      (click)="onSelectConversation(conversation)"
-      [@justMoved]="conversation.timestamp.getTime()"
-    >
-      <div class="conversation-details">
-        <div class="conversation-title" [@titleChanged]="conversation.title">{{ conversation.title || ('CHAT.NEW_CONVERSATION_TITLE' | translate) }}</div>
-        <div class="conversation-time">{{ conversation.timestamp | date: 'shortTime' }}</div>
+  @for (group of groupedConversations(); track group.id) {
+    <li class="conversation-group">
+      <div class="conversation-group-header">
+        @if (isString(group.display)) {
+          {{ group.display | translate }}
+        } @else {
+          {{ group.display | date: 'yMMMMd' }}
+        }
       </div>
-      <button class="delete-button" (click)="deleteConversation(conversation.id, $event)">
-          <i class="icon-trash"></i>
-      </button>
-      @if (conversation.loading) {
-        <div class="loading-spinner-wrapper">
-          <div class="loading-spinner"></div>
-        </div>
-      }
+      <ul>
+        @for (conversation of group.conversations; track conversation.id) {
+          <li
+            class="conversation-item"
+            [class.active]="conversation.id === selectedConversation()?.id"
+            [class.loading]="conversation.loading"
+            (click)="onSelectConversation(conversation)"
+            [@justMoved]="conversation.timestamp.getTime()"
+          >
+            <div class="conversation-details">
+              <div class="conversation-title" [@titleChanged]="conversation.title">{{ conversation.title || ('CHAT.NEW_CONVERSATION_TITLE' | translate) }}</div>
+              <div class="conversation-time">{{ conversation.timestamp | date: 'shortTime' }}</div>
+            </div>
+            <button class="delete-button" (click)="deleteConversation(conversation.id, $event)">
+                <i class="icon-trash"></i>
+            </button>
+            @if (conversation.loading) {
+              <div class="loading-spinner-wrapper">
+                <div class="loading-spinner"></div>
+              </div>
+            }
+          </li>
+        }
+      </ul>
     </li>
   }
 </ul> 
