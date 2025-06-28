@@ -1,3 +1,5 @@
+@use 'agent-card' as agent;
+
 :host {
 	display: block;
 	height: 100%;
@@ -8,7 +10,7 @@
 	display: flex;
 	flex-direction: column;
 	height: 100%;
-	background-color: var(--color-surface);
+	background-color: var(--color-background-alt);
 	border-left: 1px solid var(--color-border-light);
 	transition: width 0.3s ease-in-out;
 	width: var(--agent-sidebar-width, 320px);
@@ -102,6 +104,20 @@
 	border-radius: 8px;
 	border: 1px solid var(--color-border-light);
 	background-color: var(--color-surface);
+	display: block;
+	text-decoration: none;
+	transition:
+		transform 0.2s ease-in-out,
+		box-shadow 0.2s ease-in-out,
+		border-color 0.2s ease-in-out;
+
+	@include agent.apply-agent-card-styles('.card-header');
+
+	&:hover {
+		transform: translateY(-2px);
+		border-color: var(--color-primary);
+		box-shadow: 0 4px 12px var(--shadow-color-card-hover);
+	}
 
 	.card-header {
 		display: flex;
@@ -186,43 +202,6 @@
 				}
 			}
 		}
-	}
-}
-
-/* Agent type specific styles */
-.agent-card[data-agent-type='marketing'] {
-	border-color: var(--color-agent-purple-tag-bg);
-	.card-header {
-		background-color: var(--color-agent-purple-tag-bg);
-		border-bottom-color: var(--color-agent-purple-tag-bg);
-	}
-	.tag {
-		background-color: var(--color-agent-purple-bg);
-		color: var(--color-agent-purple-tag-text);
-	}
-}
-
-.agent-card[data-agent-type='finance'] {
-	border-color: var(--color-agent-blue-tag-bg);
-	.card-header {
-		background-color: var(--color-agent-blue-tag-bg);
-		border-bottom-color: var(--color-agent-blue-tag-bg);
-	}
-	.tag {
-		background-color: var(--color-agent-blue-bg);
-		color: var(--color-agent-blue-tag-text);
-	}
-}
-
-.agent-card[data-agent-type='data'] {
-	border-color: var(--color-agent-green-tag-bg);
-	.card-header {
-		background-color: var(--color-agent-green-tag-bg);
-		border-bottom-color: var(--color-agent-green-tag-bg);
-	}
-	.tag {
-		background-color: var(--color-agent-green-bg);
-		color: var(--color-agent-green-tag-text);
 	}
 }
 

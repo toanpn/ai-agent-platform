@@ -20,6 +20,7 @@ import { switchMap, tap, catchError, exhaustMap, map, startWith, debounceTime, d
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmationDialogComponent, ConfirmationDialogData } from '../../../shared/components/confirmation-dialog/confirmation-dialog.component';
 import { MatMenuModule } from '@angular/material/menu';
+import { AgentTypeService } from '../../../core/services/agent-type.service';
 
 interface AgentListAction {
 	type: 'LOAD_AGENTS' | 'REFRESH_AGENTS' | 'DELETE_AGENT';
@@ -56,6 +57,7 @@ export class AgentListComponent implements OnInit, AfterViewInit {
 	private router = inject(Router);
 	private destroyRef = inject(DestroyRef);
 	private dialog = inject(MatDialog);
+	private agentTypeService = inject(AgentTypeService);
 
 	// Action subjects
 	private loadAgentsAction$ = new Subject<void>();
@@ -260,5 +262,13 @@ export class AgentListComponent implements OnInit, AfterViewInit {
 	getDepartmentClass(department: string): string {
 		if (!department) return '';
 		return `department-${department.toLowerCase()}`;
+	}
+
+	getAgentType(agent?: Agent): string {
+		return this.agentTypeService.getAgentType(agent);
+	}
+
+	getAgentAvatar(agent?: Agent): string {
+		return this.agentTypeService.getAgentAvatar(agent);
 	}
 }
