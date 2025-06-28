@@ -61,6 +61,9 @@ export interface Conversation {
 
 	/** Messages in this conversation */
 	messages?: Message[];
+
+	/** Whether the conversation is currently loading messages */
+	loading?: boolean;
 }
 
 /**
@@ -136,13 +139,12 @@ export interface PromptEnhancementResponseDto {
 export class ChatService {
 	private api = inject(ApiService);
 	private hashbrown = inject(HashbrownService);
-	private notificationService = inject(NotificationService);
 
 	/**
 	 * Fetch chat history (paginated list of chat sessions) and transform to the
 	 * local `Conversation` model expected by the UI components.
 	 */
-	loadConversations(page: number = 1, pageSize: number = 50): Observable<Conversation[]> {
+	loadConversations(page: number = 1, pageSize: number = 100): Observable<Conversation[]> {
 		const params = new HttpParams().set('page', page).set('pageSize', pageSize);
 
 		return this.api.get<ChatHistoryDto>('/Chat/history', params).pipe(

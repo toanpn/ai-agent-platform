@@ -1,7 +1,6 @@
 <div class="chat-container">
 	<app-chat-sidebar
 		class="chat-sidebar"
-		[conversations]="chatState.conversations()"
 		[selectedConversation]="chatState.activeConversation()"
 		(conversationSelected)="onConversationSelected($event)"
 		(startNewChat)="onStartNewChat()"

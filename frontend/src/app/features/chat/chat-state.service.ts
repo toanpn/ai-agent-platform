@@ -88,6 +88,11 @@ export class ChatStateService {
 
 		this.messages.update((msgs) => [...msgs, optimisticMessage]);
 		this.isLoading.set(true);
+		if (conversationId) {
+			this.conversations.update((convos) =>
+				convos.map((c) => (c.id === conversationId ? { ...c, loading: true } : c)),
+			);
+		}
 
 		try {
 			const response = await lastValueFrom(
@@ -137,6 +142,11 @@ export class ChatStateService {
 			this.messages.update((msgs) => msgs.filter((m) => m.id !== optimisticMessage.id));
 		} finally {
 			this.isLoading.set(false);
+			if (conversationId) {
+				this.conversations.update((convos) =>
+					convos.map((c) => (c.id === conversationId ? { ...c, loading: false } : c)),
+				);
+			}
 		}
 	}
 
@@ -161,15 +171,25 @@ export class ChatStateService {
 	}
 
 	private loadMessagesForConversation(conversationId: string): void {
-		this.isLoading.set(true);
+		this.conversations.update(convos =>
+			convos.map(c => (c.id === conversationId ? { ...c, loading: true } : c)),
+		);
+
 		this.chatService
 			.loadChat(conversationId)
 			.pipe(
 				catchError(() => {
 					this.notificationService.showError('Failed to load chat messages.');
+					this.conversations.update(convos =>
+						convos.map(c => (c.id === conversationId ? { ...c, loading: false } : c)),
+					);
 					return EMPTY;
 				}),
-				tap(() => this.isLoading.set(false)),
+				tap(() => {
+					this.conversations.update(convos =>
+						convos.map(c => (c.id === conversationId ? { ...c, loading: false } : c)),
+					);
+				}),
 				takeUntilDestroyed(this.destroyRef),
 			)
 			.subscribe((chat) => {

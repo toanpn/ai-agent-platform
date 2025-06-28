@@ -16,6 +16,7 @@
 		padding: var(--spacing-smd) var(--spacing-md);
 		border-bottom: 1px solid var(--color-background-subtle);
 		cursor: pointer;
+		position: relative;
 
 		.conversation-details {
 			overflow: hidden;
@@ -36,6 +37,22 @@
 			}
 		}
 
+		.loading-spinner-wrapper {
+			position: absolute;
+			top: 50%;
+			right: var(--spacing-md);
+			transform: translateY(-50%);
+		}
+
+		.loading-spinner {
+			width: 16px;
+			height: 16px;
+			border: 2px solid var(--color-primary);
+			border-top-color: transparent;
+			border-radius: 50%;
+			animation: spin 1s linear infinite;
+		}
+
 		&.active {
 			background-color: var(--color-sidebar-active-bg);
 			border-left: 4px solid var(--color-sidebar-active-border);
@@ -45,5 +62,18 @@
 		&:hover:not(.active) {
 			background-color: var(--color-background-alt);
 		}
+
+		&.loading {
+			cursor: wait;
+			.conversation-details {
+				opacity: 0.5;
+			}
+		}
+	}
+}
+
+@keyframes spin {
+	to {
+		transform: rotate(360deg);
 	}
 } 

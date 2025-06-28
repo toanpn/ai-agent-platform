@@ -128,9 +128,12 @@ namespace AgentPlatform.API.Services
             await _context.SaveChangesAsync();
 
             string? sessionTitle = null;
-            // Check if session needs summarization
-            var messageCount = await _context.ChatMessages.CountAsync(m => m.ChatSessionId == session.Id);
-            if (messageCount > 0 && messageCount % 5 == 0)
+            // Check if session needs summarization based on user messages
+            var userMessageCount = await _context.ChatMessages
+                .CountAsync(m => m.ChatSessionId == session.Id && m.Role == "user");
+
+            // Summarize on the first user message, and every 3 user messages thereafter (1, 4, 7, ...)
+            if (userMessageCount % 3 == 1)
             {
                 var messagesForSummary = await _context.ChatMessages
                     .Where(m => m.ChatSessionId == session.Id)
