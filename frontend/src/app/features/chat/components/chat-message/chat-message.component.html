@@ -1,33 +1,11 @@
 @let msg = message();
-@let isUser = isUserMessage();
 
-@if (msg.sender === 'system') {
+@if (isSystemMessage()) {
 	<div class="system-message-container">
 		<span class="system-message">{{ msg.text }}</span>
 	</div>
+} @else if (isUserMessage()) {
+	<app-user-message [message]="msg" />
 } @else {
-	<div class="message-container" [class.user-message]="isUser" [class.agent-message]="!isUser">
-		<img
-			*ngIf="!isUser"
-			class="avatar"
-			[src]="getAgentAvatar()"
-			alt=""
-		/>
-		<div
-			class="message-bubble"
-			[attr.data-agent-type]="!isUser ? agentType() : null"
-		>
-			@if (!isUser) {
-				<div class="agent-header">
-					<span class="agent-name">{{ msg.agentName }}</span>
-					<span class="agent-specialty-tag">{{ getAgentSpecialty() }}</span>
-				</div>
-			}
-			<p class="message-text">{{ msg.text }}</p>
-		</div>
-		<img *ngIf="isUser" class="avatar" src="assets/icons/user-avatar.png" alt="" />
-	</div>
-	<div class="timestamp" [class.user-message]="isUser" [class.agent-message]="!isUser">
-		{{ formattedTimestamp() }}
-	</div>
+	<app-agent-message [message]="msg" />
 }
