@@ -165,6 +165,20 @@ namespace AgentPlatform.API.Services
                 // Enhanced fields
                 AgentsUsed = runtimeResponse.AgentsUsed,
                 ToolsUsed = runtimeResponse.ToolsUsed,
+                AvailableAgents = new AvailableAgentsDto
+                {
+                    TotalAgents = runtimeResponse.AvailableAgents.TotalAgents,
+                    Agents = runtimeResponse.AvailableAgents.Agents.Select(a => new AgentInfoDto
+                    {
+                        Name = a.Name,
+                        Description = a.Description
+                    }).ToList()
+                },
+                AvailableTools = runtimeResponse.AvailableTools.Select(t => new AvailableToolDto
+                {
+                    Name = t.Name,
+                    Description = t.Description
+                }).ToList(),
                 ExecutionDetails = new ExecutionDetailsDto
                 {
                     TotalSteps = runtimeResponse.ExecutionDetails!.TotalSteps,

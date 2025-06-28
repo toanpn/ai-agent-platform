@@ -44,6 +44,8 @@ namespace AgentPlatform.API.DTOs
         // Enhanced response fields
         public List<string> AgentsUsed { get; set; } = new();
         public List<string> ToolsUsed { get; set; } = new();
+        public AvailableAgentsDto AvailableAgents { get; set; } = new();
+        public List<AvailableToolDto> AvailableTools { get; set; } = new();
         public ExecutionDetailsDto ExecutionDetails { get; set; } = new();
         public Dictionary<string, object> Metadata { get; set; } = new();
     }
