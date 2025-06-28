@@ -225,7 +225,7 @@ Each agent has the following configuration:
   "description": "Handles technical support requests...",
   "tools": ["jira_ticket_creator", "it_knowledge_base_search"],
   "llm_config": {
-    "model_name": "gemini-2.5-flash",
+    "model_name": "gemini-2.0-flash",
     "temperature": 0.0
   }
 }
@@ -266,7 +266,7 @@ POST /api/agent
   "description": "Sales support agent",
   "tools": ["crm_search", "lead_tracker"],
   "llmConfig": {
-    "modelName": "gemini-2.5-flash",
+    "modelName": "gemini-2.0-flash",
     "temperature": 0.3
   }
 }
@@ -280,7 +280,7 @@ POST /api/agent
   "department": "Sales",
   "tools": ["crm_search", "lead_tracker"],
   "llmConfig": {
-    "modelName": "gemini-2.5-flash",
+    "modelName": "gemini-2.0-flash",
     "temperature": 0.3
   },
   "isActive": true,

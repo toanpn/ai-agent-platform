@@ -154,7 +154,7 @@ Edit `agents.json` to add new agents:
   "description": "Description of what this agent does...",
   "tools": ["tool1", "tool2"],
   "llm_config": {
-    "model_name": "gemini-2.5-flash",
+    "model_name": "gemini-2.0-flash",
     "temperature": 0.5
   }
 }

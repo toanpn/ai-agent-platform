@@ -5,6 +5,7 @@ using AgentPlatform.API.Data;
 using AgentPlatform.API.DTOs;
 using AgentPlatform.API.Models;
 using System.Text.Json;
+using Microsoft.Extensions.Logging;
 
 namespace AgentPlatform.API.Services
 {
@@ -14,29 +15,36 @@ namespace AgentPlatform.API.Services
         private readonly IMapper _mapper;
         private readonly IWebHostEnvironment _environment;
         private readonly IToolService _toolService;
+        private readonly ILogger<AgentService> _logger;
         private readonly string _agentsJsonPath;
 
-        public AgentService(ApplicationDbContext context, IMapper mapper, IWebHostEnvironment environment, IToolService toolService, IOptions<AgentManagementConfig> agentConfig)
+        public AgentService(ApplicationDbContext context, IMapper mapper, IWebHostEnvironment environment, IToolService toolService, ILogger<AgentService> logger, IOptions<AgentManagementConfig> agentConfig)
         {
             _context = context;
             _mapper = mapper;
             _environment = environment;
             _toolService = toolService;
+            _logger = logger;
             
-            // Use configured path or fall back to relative path for development
-            var configPath = agentConfig.Value.AgentsJsonPath;
-            if (Path.IsPathRooted(configPath))
+            // Try multiple paths in order of preference
+            var possiblePaths = new[]
             {
-                _agentsJsonPath = configPath;
-            }
-            else
-            {
-                // For Docker environment, try absolute path first, then fallback to relative
-                var dockerPath = "/AgentPlatform.Core/agents.json";
-                _agentsJsonPath = File.Exists(dockerPath) 
-                    ? dockerPath 
-                    : Path.Combine(_environment.ContentRootPath, configPath);
-            }
+                // Docker paths
+                "/AgentPlatform.Core/agents.json",
+                "/app/AgentPlatform.Core/agents.json",
+                
+                // Local development paths
+                Path.Combine(_environment.ContentRootPath, "..", "AgentPlatform.Core", "agents.json"),
+                Path.Combine(Directory.GetCurrentDirectory(), "..", "AgentPlatform.Core", "agents.json"),
+                
+                // Fallback paths
+                Path.Combine(_environment.ContentRootPath, "AgentPlatform.Core", "agents.json"),
+                "agents.json"
+            };
+
+            _agentsJsonPath = possiblePaths.FirstOrDefault(File.Exists) ?? possiblePaths[2]; // Default to local dev path
+            
+            _logger.LogInformation("Using agents.json path: {AgentsJsonPath}", _agentsJsonPath);
         }
 
         public async Task<List<AgentDto>> GetAgentsAsync(int userId)
@@ -262,7 +270,7 @@ namespace AgentPlatform.API.Services
             catch (Exception ex)
             {
                 // Log the error but don't throw - JSON sync shouldn't break the main operations
-                Console.WriteLine($"Failed to sync agents.json: {ex.Message}");
+                _logger.LogError(ex, "Failed to sync agents.json");
             }
         }
 
@@ -342,7 +350,7 @@ namespace AgentPlatform.API.Services
             catch (Exception ex)
             {
                 // Log the error and re-throw for the controller to handle
-                Console.WriteLine($"Failed to sync agents from JSON: {ex.Message}");
+                _logger.LogError(ex, "Failed to sync agents from JSON");
                 throw new InvalidOperationException($"Failed to sync agents from JSON: {ex.Message}", ex);
             }
         }

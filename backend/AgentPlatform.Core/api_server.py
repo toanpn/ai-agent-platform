@@ -8,6 +8,7 @@ functionality as REST endpoints for integration with the AgentPlatform.API.
 import os
 import json
 import logging
+import time
 from datetime import datetime
 from typing import Dict, Any, List, Optional
 from flask import Flask, request, jsonify, send_from_directory
@@ -15,6 +16,9 @@ from flask_cors import CORS
 from dotenv import load_dotenv
 import asyncio
 from werkzeug.utils import secure_filename
+from watchdog.observers import Observer
+from watchdog.events import FileSystemEventHandler
+import atexit
 
 # Import our custom modules
 from core.agent_manager import AgentManager
@@ -51,6 +55,35 @@ def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
+class AgentConfigHandler(FileSystemEventHandler):
+    """Handles file system events for the agents configuration file."""
+    
+    def __init__(self, system_manager: 'AgentSystemManager'):
+        self.system_manager = system_manager
+        self.last_modified = 0
+        
+    def on_modified(self, event):
+        """Called when the agents.json file is modified."""
+        if event.is_directory:
+            return
+            
+        # Check if it's the agents.json file
+        if event.src_path.endswith('agents.json'):
+            # Prevent multiple rapid reloads
+            current_time = time.time()
+            if current_time - self.last_modified < 2:  # 2 second cooldown
+                return
+            self.last_modified = current_time
+            
+            logger.info(f"📁 Configuration file changed: {event.src_path}")
+            logger.info("🔄 Reloading agents...")
+            
+            try:
+                self.system_manager.reload_agents()
+                logger.info("✅ System reloaded successfully!")
+            except Exception as e:
+                logger.error(f"❌ Failed to reload system: {e}")
+
 def init_rag_service():
     """Initialize the RAG service."""
     global rag_service
@@ -75,6 +108,7 @@ class AgentSystemManager:
             
         self.agent_manager = AgentManager()
         self.master_agent: Optional[MasterAgent] = None
+        self.observer: Optional[Observer] = None
         
     def initialize_system(self):
         """Initialize the agent system with initial configuration."""
@@ -119,6 +153,55 @@ class AgentSystemManager:
             logger.error(f"❌ Error type: {type(e).__name__}")
             # Reset master_agent to None on failure
             self.master_agent = None
+            raise
+    
+    def start_file_monitoring(self):
+        """Start monitoring the configuration file for changes."""
+        try:
+            # Set up file monitoring
+            self.observer = Observer()
+            event_handler = AgentConfigHandler(self)
+            
+            # Monitor the directory containing the agents.json file
+            config_dir = os.path.dirname(self.config_path)
+            if not config_dir:
+                config_dir = '.'
+            
+            self.observer.schedule(event_handler, path=config_dir, recursive=False)
+            self.observer.start()
+            
+            logger.info("👁️  File monitoring started - agents.json changes will trigger automatic reload")
+            
+        except Exception as e:
+            logger.warning(f"⚠️  Warning: Could not start file monitoring: {e}")
+    
+    def stop_monitoring(self):
+        """Stop file monitoring."""
+        if self.observer:
+            self.observer.stop()
+            self.observer.join()
+            logger.info("🛑 File monitoring stopped")
+    
+    def reload_agents(self):
+        """Reload the entire agent system with new configuration."""
+        try:
+            # Reload agents
+            new_sub_agents = self.agent_manager.reload_agents(self.config_path)
+            
+            if not new_sub_agents:
+                logger.warning("⚠️  No agents loaded after reload - keeping existing configuration")
+                return
+            
+            # Update master agent
+            if self.master_agent:
+                self.master_agent.update_sub_agents(new_sub_agents)
+            else:
+                self.master_agent = create_master_agent(new_sub_agents)
+            
+            logger.info(f"✅ System reloaded with {len(new_sub_agents)} agents")
+            
+        except Exception as e:
+            logger.error(f"❌ Error during system reload: {e}")
             raise
     
     def process_user_request(self, user_input: str) -> str:
@@ -427,7 +510,7 @@ def get_agents():
 
 
 @app.route('/api/reload', methods=['POST'])
-def reload_agents():
+def reload_agents_endpoint():
     """Reload the agent configuration."""
     try:
         if not system_manager:
@@ -436,12 +519,16 @@ def reload_agents():
                 "error": "System not initialized"
             }), 500
         
-        # Reinitialize the system
-        system_manager.initialize_system()
+        # Use the new reload_agents method
+        system_manager.reload_agents()
+        
+        # Get updated agent info
+        agent_info = system_manager.get_agent_info()
         
         return jsonify({
             "success": True,
-            "message": "Agents reloaded successfully"
+            "message": f"Successfully reloaded {agent_info['total_agents']} agents",
+            "agents": agent_info['agents']
         })
         
     except Exception as e:
@@ -465,6 +552,9 @@ def manual_initialize():
         
         # Try to initialize
         system_manager.initialize_system()
+        
+        # Start file monitoring
+        system_manager.start_file_monitoring()
         
         return jsonify({
             "success": True,
@@ -500,6 +590,9 @@ def initialize_system():
         
         logger.info("🔧 Initializing agent system components...")
         system_manager.initialize_system()
+        
+        logger.info("👁️  Starting file monitoring...")
+        system_manager.start_file_monitoring()
         
         logger.info("🧠 Initializing RAG service...")
         init_rag_service()
@@ -968,29 +1061,21 @@ async def summarize_chat():
         }), 500
 
 
+def cleanup_system():
+    """Cleanup function called on application shutdown."""
+    global system_manager
+    if system_manager:
+        logger.info("🧹 Cleaning up system...")
+        system_manager.stop_monitoring()
+        logger.info("✅ System cleanup completed")
+
+
+# Register cleanup function
+atexit.register(cleanup_system)
+
+
 if __name__ == '__main__':
-    # Initialize the system
+    # This will only run if the script is executed directly
+    # In production, the Flask app is typically run via WSGI server
     initialize_system()
-    
-    # Start the Flask server
-    port = int(os.getenv('PORT', 8000))
-    debug = os.getenv('FLASK_ENV') == 'development'
-    
-    logger.info(f"🚀 Starting Flask API server on port {port}")
-    logger.info(f"📡 API endpoints available at: http://localhost:{port}")
-    logger.info(f"   - Health check: GET /health")
-    logger.info(f"   - Debug info: GET /debug")
-    logger.info(f"   - Chat: POST /api/chat")
-    logger.info(f"   - Agents info: GET /api/agents")
-    logger.info(f"   - Reload: POST /api/reload")
-    logger.info(f"   - Manual init: POST /api/initialize")
-    logger.info(f"   - Enhance prompt: POST /api/enhance-prompt")
-    logger.info(f"🧠 RAG endpoints:")
-    logger.info(f"   - Upload document: POST /api/rag/upload")
-    logger.info(f"   - Add web content: POST /api/rag/web-content")
-    logger.info(f"   - Search knowledge: POST /api/rag/search")
-    logger.info(f"   - Knowledge stats: GET /api/rag/stats")
-    logger.info(f"   - Delete agent docs: DELETE /api/rag/agent/<agent_id>/documents")
-    logger.info(f"   - Supported formats: GET /api/rag/supported-formats")
-    
-    app.run(host='0.0.0.0', port=port, debug=debug) 
+    app.run(debug=True, host='0.0.0.0', port=8000) 

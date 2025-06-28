@@ -1,0 +1,216 @@
+:host {
+  display: block;
+  margin-bottom: var(--spacing-md);
+}
+
+.message-container {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-sm);
+  max-width: 90%;
+  margin-right: auto;
+
+  .avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    object-fit: cover;
+  }
+
+  .message-bubble {
+    background-color: var(--color-surface);
+    padding: var(--spacing-smd);
+    border-radius: 8px;
+    box-shadow: var(--shadow-sm);
+    max-width: 100%;
+
+    .agent-header {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+      margin-bottom: var(--spacing-xs);
+
+      .agent-name {
+        font-weight: 500;
+        font-size: 16px;
+      }
+      .agent-specialty-tag {
+        padding: 2px var(--spacing-xs);
+        border-radius: 9999px;
+        font-size: 12px;
+        font-weight: 400;
+      }
+    }
+
+    .message-text {
+      color: var(--color-text-strong);
+      margin: 0;
+      font-family: 'Inter', sans-serif;
+      font-size: 16px;
+      line-height: 1.5;
+      white-space: pre-wrap;
+    }
+  }
+}
+
+/* Agent type specific styles */
+.message-bubble[data-agent-type='marketing'] {
+  background-color: var(--color-agent-purple-bg);
+  .agent-name {
+    color: var(--color-agent-purple-text);
+  }
+  .agent-specialty-tag {
+    background-color: var(--color-agent-purple-tag-bg);
+    color: var(--color-agent-purple-tag-text);
+  }
+}
+.message-bubble[data-agent-type='finance'] {
+  background-color: var(--color-agent-blue-bg);
+  .agent-name {
+    color: var(--color-agent-blue-text);
+  }
+  .agent-specialty-tag {
+    background-color: var(--color-agent-blue-tag-bg);
+    color: var(--color-agent-blue-tag-text);
+  }
+}
+.message-bubble[data-agent-type='data'] {
+  background-color: var(--color-agent-green-bg);
+  .agent-name {
+    color: var(--color-agent-green-text);
+  }
+  .agent-specialty-tag {
+    background-color: var(--color-agent-green-tag-bg);
+    color: var(--color-agent-green-tag-text);
+  }
+}
+
+.message-bubble[data-agent-type='hr'] {
+  background-color: var(--color-agent-red-bg);
+  .agent-name {
+    color: var(--color-agent-red-text);
+  }
+  .agent-specialty-tag {
+    background-color: var(--color-agent-red-tag-bg);
+    color: var(--color-agent-red-tag-text);
+  }
+}
+
+.message-bubble[data-agent-type='ld'] {
+  background-color: var(--color-agent-lime-bg);
+  .agent-name {
+    color: var(--color-agent-lime-text);
+  }
+  .agent-specialty-tag {
+    background-color: var(--color-agent-lime-tag-bg);
+    color: var(--color-agent-lime-tag-text);
+  }
+}
+
+.message-bubble[data-agent-type='ic'] {
+  background-color: var(--color-agent-emerald-bg);
+  .agent-name {
+    color: var(--color-agent-emerald-text);
+  }
+  .agent-specialty-tag {
+    background-color: var(--color-agent-emerald-tag-bg);
+    color: var(--color-agent-emerald-tag-text);
+  }
+}
+
+.message-bubble[data-agent-type='om'] {
+  background-color: var(--color-agent-orange-bg);
+  .agent-name {
+    color: var(--color-agent-orange-text);
+  }
+  .agent-specialty-tag {
+    background-color: var(--color-agent-orange-tag-bg);
+    color: var(--color-agent-orange-tag-text);
+  }
+}
+
+.message-bubble[data-agent-type='cnb'] {
+  background-color: var(--color-agent-yellow-bg);
+  .agent-name {
+    color: var(--color-agent-yellow-text);
+  }
+  .agent-specialty-tag {
+    background-color: var(--color-agent-yellow-tag-bg);
+    color: var(--color-agent-yellow-tag-text);
+  }
+}
+
+.message-bubble[data-agent-type='booking'] {
+  background-color: var(--color-agent-pink-bg);
+  .agent-name {
+    color: var(--color-agent-pink-text);
+  }
+  .agent-specialty-tag {
+    background-color: var(--color-agent-pink-tag-bg);
+    color: var(--color-agent-pink-tag-text);
+  }
+}
+
+.message-bubble[data-agent-type='retail'] {
+  background-color: var(--color-agent-indigo-bg);
+  .agent-name {
+    color: var(--color-agent-indigo-text);
+  }
+  .agent-specialty-tag {
+    background-color: var(--color-agent-indigo-tag-bg);
+    color: var(--color-agent-indigo-tag-text);
+  }
+}
+
+.message-bubble[data-agent-type='fnb'] {
+  background-color: var(--color-agent-cyan-bg);
+  .agent-name {
+    color: var(--color-agent-cyan-text);
+  }
+  .agent-specialty-tag {
+    background-color: var(--color-agent-cyan-tag-bg);
+    color: var(--color-agent-cyan-tag-text);
+  }
+}
+
+.message-bubble[data-agent-type='it'] {
+  background-color: var(--color-agent-sky-bg);
+  .agent-name {
+    color: var(--color-agent-sky-text);
+  }
+  .agent-specialty-tag {
+    background-color: var(--color-agent-sky-tag-bg);
+    color: var(--color-agent-sky-tag-text);
+  }
+}
+
+.message-bubble[data-agent-type='ai-research'] {
+  background-color: var(--color-agent-teal-bg);
+  .agent-name {
+    color: var(--color-agent-teal-text);
+  }
+  .agent-specialty-tag {
+    background-color: var(--color-agent-teal-tag-bg);
+    color: var(--color-agent-teal-tag-text);
+  }
+}
+
+.message-bubble[data-agent-type='kms'] {
+  background-color: var(--color-agent-gray-bg);
+  .agent-name {
+    color: var(--color-agent-gray-text);
+  }
+  .agent-specialty-tag {
+    background-color: var(--color-agent-gray-tag-bg);
+    color: var(--color-agent-gray-tag-text);
+  }
+}
+
+.timestamp {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  padding: 0 var(--spacing-sm);
+  margin-top: var(--spacing-xs);
+  margin-left: calc(32px + var(--spacing-sm));
+} 
