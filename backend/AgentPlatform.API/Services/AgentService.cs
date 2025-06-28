@@ -29,39 +29,126 @@ namespace AgentPlatform.API.Services
             // Try multiple paths in order of preference with better Docker support
             var possiblePaths = new[]
             {
-                // Docker production paths (exact mount points)
-                "/AgentPlatform.Core/agents.json",     // Main API container mount
-                "/app/shared/agents.json",             // Shared volume mount (preferred)
-                "/app/AgentPlatform.Core/agents.json", // Agent-Core mount point
-                "/app/agents.json",                    // Legacy mount (if exists)
+                // Docker production paths (exact mount points from docker-compose.yml)
+                "/AgentPlatform.Core/agents.json",                    // API container mount (preferred)
+                "/app/shared/agents.json",                            // Shared volume mount
+                "/app/AgentPlatform.Core/agents.json",               // Agent-Core mount point
                 
                 // Local development paths
                 Path.Combine(_environment.ContentRootPath, "..", "AgentPlatform.Core", "agents.json"),
                 Path.Combine(Directory.GetCurrentDirectory(), "..", "AgentPlatform.Core", "agents.json"),
                 
                 // Configuration-based path
-                agentConfig.Value.AgentsJsonPath,
+                agentConfig.Value?.AgentsJsonPath,
                 
-                // Fallback paths
-                Path.Combine(_environment.ContentRootPath, "AgentPlatform.Core", "agents.json"),
+                // Fallback paths with explicit directory creation
+                Path.Combine(_environment.WebRootPath ?? _environment.ContentRootPath, "agents.json"),
+                Path.Combine("/tmp", "agents.json"), // Temporary fallback
                 "agents.json"
             };
 
-            // Log all possible paths for debugging
-            _logger.LogInformation("Checking possible paths for agents.json:");
-            foreach (var path in possiblePaths)
+            // Log environment info for debugging
+            _logger.LogInformation("=== AgentService Path Resolution Debug ===");
+            _logger.LogInformation("Environment: {Environment}", _environment.EnvironmentName);
+            _logger.LogInformation("ContentRootPath: {ContentRootPath}", _environment.ContentRootPath);
+            _logger.LogInformation("WebRootPath: {WebRootPath}", _environment.WebRootPath);
+            _logger.LogInformation("Current Directory: {CurrentDirectory}", Directory.GetCurrentDirectory());
+            _logger.LogInformation("Configuration AgentsJsonPath: {ConfigPath}", agentConfig.Value?.AgentsJsonPath);
+            
+            // Check all root directories to understand container structure
+            _logger.LogInformation("=== Container Structure Analysis ===");
+            try
             {
-                var exists = File.Exists(path);
-                var canAccess = CanAccessPath(path);
-                _logger.LogInformation("Path: {Path} - Exists: {Exists}, Accessible: {CanAccess}", path, exists, canAccess);
+                var rootDirs = Directory.GetDirectories("/").Take(20);
+                _logger.LogInformation("Root directories: {RootDirs}", string.Join(", ", rootDirs));
+                
+                if (Directory.Exists("/AgentPlatform.Core"))
+                {
+                    var coreFiles = Directory.GetFiles("/AgentPlatform.Core").Take(10);
+                    _logger.LogInformation("Files in /AgentPlatform.Core: {Files}", string.Join(", ", coreFiles));
+                }
+                
+                if (Directory.Exists("/app"))
+                {
+                    var appDirs = Directory.GetDirectories("/app").Take(10);
+                    _logger.LogInformation("Directories in /app: {Dirs}", string.Join(", ", appDirs));
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to analyze container structure");
+            }
+
+            // Log all possible paths for debugging
+            _logger.LogInformation("=== Path Resolution Attempts ===");
+            foreach (var path in possiblePaths.Where(p => !string.IsNullOrEmpty(p)))
+            {
+                try
+                {
+                    var exists = File.Exists(path);
+                    var dirExists = Directory.Exists(Path.GetDirectoryName(path) ?? "");
+                    var canAccess = CanAccessPath(path);
+                    
+                    _logger.LogInformation("Path: {Path}", path);
+                    _logger.LogInformation("  - File Exists: {Exists}", exists);
+                    _logger.LogInformation("  - Directory Exists: {DirExists}", dirExists);
+                    _logger.LogInformation("  - Can Access: {CanAccess}", canAccess);
+                    
+                    if (exists)
+                    {
+                        var fileInfo = new FileInfo(path);
+                        _logger.LogInformation("  - File Size: {Size} bytes", fileInfo.Length);
+                        _logger.LogInformation("  - Last Modified: {LastModified}", fileInfo.LastWriteTime);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Error checking path: {Path}", path);
+                }
             }
 
             // Find the first existing and accessible path
-            _agentsJsonPath = possiblePaths.FirstOrDefault(path => File.Exists(path) && CanAccessPath(path)) 
-                              ?? possiblePaths[0]; // Fallback to first Docker path
+            _agentsJsonPath = possiblePaths
+                .Where(path => !string.IsNullOrEmpty(path))
+                .FirstOrDefault(path => File.Exists(path) && CanAccessPath(path));
             
-            _logger.LogInformation("Selected agents.json path: {AgentsJsonPath}", _agentsJsonPath);
-            
+            // If no existing file found, use the first preferred path and try to create it
+            if (string.IsNullOrEmpty(_agentsJsonPath))
+            {
+                _agentsJsonPath = possiblePaths.First(p => !string.IsNullOrEmpty(p));
+                _logger.LogWarning("No existing agents.json found. Will use fallback path: {FallbackPath}", _agentsJsonPath);
+                
+                // Try to create the directory and a default file synchronously
+                EnsureAgentsJsonExists();
+            }
+            else
+            {
+                _logger.LogInformation("✓ Successfully found agents.json at: {AgentsJsonPath}", _agentsJsonPath);
+            }
+        }
+
+        private void EnsureAgentsJsonExists()
+        {
+            try
+            {
+                var directory = Path.GetDirectoryName(_agentsJsonPath);
+                if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory))
+                {
+                    _logger.LogInformation("Creating directory: {Directory}", directory);
+                    Directory.CreateDirectory(directory);
+                }
+
+                if (!File.Exists(_agentsJsonPath))
+                {
+                    _logger.LogInformation("Creating default agents.json at: {Path}", _agentsJsonPath);
+                    var defaultContent = "[]"; // Empty JSON array
+                    File.WriteAllText(_agentsJsonPath, defaultContent);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to ensure agents.json exists at: {Path}", _agentsJsonPath);
+            }
         }
 
         private bool CanAccessPath(string path)

@@ -3,6 +3,9 @@ using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using AgentPlatform.API.DTOs;
 using AgentPlatform.API.Services;
+using Microsoft.Extensions.Hosting;
+using System.IO;
+using System.Linq;
 
 namespace AgentPlatform.API.Controllers
 {
@@ -12,10 +15,12 @@ namespace AgentPlatform.API.Controllers
     public class AgentController : ControllerBase
     {
         private readonly IAgentService _agentService;
+        private readonly IWebHostEnvironment _environment;
 
-        public AgentController(IAgentService agentService)
+        public AgentController(IAgentService agentService, IWebHostEnvironment environment)
         {
             _agentService = agentService;
+            _environment = environment;
         }
 
         [HttpGet]
@@ -163,13 +168,103 @@ namespace AgentPlatform.API.Controllers
                 var agentsJson = await _agentService.GetAgentsJsonContentAsync();
                 return Content(agentsJson, "application/json");
             }
-            catch (FileNotFoundException)
-            {
-                return NotFound(new { message = "Agents JSON file not found" });
-            }
             catch (Exception ex)
             {
                 return StatusCode(500, new { message = $"Error reading agents JSON: {ex.Message}" });
+            }
+        }
+
+        [HttpGet("health")]
+        public async Task<IActionResult> GetHealthStatus()
+        {
+            try
+            {
+                var healthStatus = new
+                {
+                    Status = "OK",
+                    Timestamp = DateTime.UtcNow,
+                    AgentsJsonPath = await GetAgentsJsonPathAsync(),
+                    AgentsJsonExists = await CheckAgentsJsonExistsAsync(),
+                    AgentsCount = await GetAgentsCountAsync(),
+                    EnvironmentInfo = new
+                    {
+                        Environment = _environment.EnvironmentName,
+                        ContentRootPath = _environment.ContentRootPath,
+                        WebRootPath = _environment.WebRootPath,
+                        CurrentDirectory = Directory.GetCurrentDirectory()
+                    },
+                    ContainerInfo = await GetContainerInfoAsync()
+                };
+
+                return Ok(healthStatus);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Status = "Error", Message = ex.Message, Details = ex.ToString() });
+            }
+        }
+
+        private async Task<string> GetAgentsJsonPathAsync()
+        {
+            try
+            {
+                return await _agentService.GetAgentsJsonContentAsync();
+            }
+            catch (Exception ex)
+            {
+                return $"Error: {ex.Message}";
+            }
+        }
+
+        private async Task<bool> CheckAgentsJsonExistsAsync()
+        {
+            try
+            {
+                await _agentService.GetAgentsJsonContentAsync();
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        private async Task<int> GetAgentsCountAsync()
+        {
+            try
+            {
+                var agents = await _agentService.GetAgentsAsync(1); // Using admin user for health check
+                return agents.Count;
+            }
+            catch
+            {
+                return -1;
+            }
+        }
+
+        private async Task<object> GetContainerInfoAsync()
+        {
+            try
+            {
+                var containerInfo = new
+                {
+                    RootDirectories = Directory.GetDirectories("/").Take(10).ToList(),
+                    AppDirectoryExists = Directory.Exists("/app"),
+                    AgentPlatformCoreExists = Directory.Exists("/AgentPlatform.Core"),
+                    SharedDirectoryExists = Directory.Exists("/app/shared"),
+                    AgentPlatformCoreFiles = Directory.Exists("/AgentPlatform.Core") 
+                        ? Directory.GetFiles("/AgentPlatform.Core").Take(10).ToList() 
+                        : new List<string>(),
+                    SharedFiles = Directory.Exists("/app/shared") 
+                        ? Directory.GetFiles("/app/shared").Take(10).ToList() 
+                        : new List<string>()
+                };
+
+                return containerInfo;
+            }
+            catch (Exception ex)
+            {
+                return new { Error = ex.Message };
             }
         }
     }
