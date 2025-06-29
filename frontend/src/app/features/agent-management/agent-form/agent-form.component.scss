@@ -968,3 +968,19 @@
 	margin: 2rem calc(-1 * var(--spacing-lg));
 }
 
+.form-group-toggle {
+	::ng-deep {
+		.mdc-switch.mdc-switch--unselected .mdc-switch__track::after {
+			background: #e5e7eb;
+			border-color: #e5e7eb;
+		}
+		.mdc-switch.mdc-switch--unselected:enabled .mdc-switch__handle::after {
+			background: #ffffff;
+		}
+	}
+}
+
+.settings-section {
+	// ... existing code ...
+}
+
