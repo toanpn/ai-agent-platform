@@ -3,17 +3,12 @@ import { BehaviorSubject, Subject } from 'rxjs';
 import { NotificationService } from './notification.service';
 import { TranslateService } from '@ngx-translate/core';
 
-export interface SpeechTranscript {
-	text: string;
-	isFinal: boolean;
-}
-
 @Injectable({
 	providedIn: 'root',
 })
 export class SpeechService {
 	isListening$ = new BehaviorSubject<boolean>(false);
-	transcript$ = new Subject<SpeechTranscript>();
+	transcript$ = new Subject<string>();
 
 	private recognition!: SpeechRecognition;
 	private readonly isSupported: boolean;
@@ -95,16 +90,15 @@ export class SpeechService {
 		};
 
 		this.recognition.onresult = (event: SpeechRecognitionEvent) => {
-            this.currentTranscript = event.results[0][0].transcript;
-            const isFinal = event.results[0].isFinal;
-            this.transcript$.next({ text: this.currentTranscript.trim(), isFinal });
+			this.currentTranscript = event.results[0][0].transcript;
+			this.transcript$.next(this.currentTranscript.trim());
 		};
 
-        this.recognition.onerror = this.handleRecognitionError.bind(this);
-        
-        this.recognition.onspeechend = () => {
-            this.isListening$.next(false);
-            this.currentTranscript = '';
+		this.recognition.onerror = this.handleRecognitionError.bind(this);
+		
+		this.recognition.onspeechend = () => {
+			this.isListening$.next(false);
+			this.currentTranscript = '';
 			this.recognition.stop();
 		};
 	}

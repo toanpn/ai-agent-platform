@@ -68,6 +68,7 @@ import {
 	ToolConfigDialogComponent,
 	ToolConfigDialogData,
 } from '../tool-config-dialog/tool-config-dialog.component';
+import { AgentStateService } from '../../../features/chat/agent-state.service';
 
 interface UpdateAgentPayload {
 	id: number;
@@ -174,6 +175,7 @@ export class AgentFormComponent implements OnInit {
 	private chatService = inject(ChatService);
 	private notificationService = inject(NotificationService);
 	private translateService = inject(TranslateService);
+	private agentStateService = inject(AgentStateService);
 	private route = inject(ActivatedRoute);
 	private router = inject(Router);
 	private destroyRef = inject(DestroyRef);
@@ -319,9 +321,11 @@ export class AgentFormComponent implements OnInit {
 						}),
 					),
 				),
+				filter(response => !!response),
 				tap(response => {
 					this.loading = false;
 					if (response) {
+						this.agentStateService.refreshAgents();
 						this.notificationService.showSuccess('Agent created successfully!');
 						this.router.navigate(['/agents/result'], {
 							state: { agent: response, action: 'create' },
@@ -353,6 +357,7 @@ export class AgentFormComponent implements OnInit {
 				tap(updateResult => {
 					this.loading = false;
 					if (updateResult) {
+						this.agentStateService.refreshAgents();
 						this.notificationService.showSuccess('Agent updated successfully!');
 						this.router.navigate(['/agents/result'], {
 							state: { agent: updateResult, action: 'update' },
