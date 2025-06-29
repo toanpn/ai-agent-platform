@@ -105,7 +105,7 @@
 				@if (agents.length > 0) {
 				<div [ngClass]="(viewMode$ | async) === 'grid' ? 'agent-grid' : 'agent-list'">
 					@for (agent of agents; track agent.id) {
-					<mat-card class="agent-card" [attr.data-agent-type]="getAgentType(agent)">
+					<mat-card class="agent-card" [attr.data-agent-type]="getAgentType(agent)" (click)="editAgent(agent.id)">
 						<mat-card-header>
 							<div mat-card-avatar class="agent-avatar-wrapper">
 								<img [src]="getAgentAvatar(agent)" alt="Agent Avatar" />
@@ -116,7 +116,7 @@
 									{{ 'AGENTS.STATUS_PUBLIC' | translate }}
 								</span>
 							</div>
-							<button mat-icon-button class="more-options-btn" [matMenuTriggerFor]="agentMenu">
+							<button mat-icon-button class="more-options-btn" [matMenuTriggerFor]="agentMenu" (click)="$event.stopPropagation()">
 								<mat-icon>more_vert</mat-icon>
 							</button>
 							<mat-menu #agentMenu="matMenu">
