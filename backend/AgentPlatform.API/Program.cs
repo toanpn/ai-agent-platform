@@ -12,6 +12,9 @@ using FluentValidation;
 using System.Text;
 using Serilog;
 using AspNetCoreRateLimit;
+using Microsoft.AspNetCore.Http.Features;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
+using Microsoft.AspNetCore.Server.IIS;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -56,11 +59,47 @@ builder.Services.AddSingleton<IProcessingStrategy, AsyncKeyLockProcessingStrateg
 // Add Configuration Options
 builder.Services.Configure<AgentManagementConfig>(builder.Configuration.GetSection(AgentManagementConfig.SectionName));
 
+// Configure file upload limits
+builder.Services.Configure<FormOptions>(options =>
+{
+    // Set the multipart body length limit to 100MB
+    options.MultipartBodyLengthLimit = 100 * 1024 * 1024; // 100MB
+    // Set the value length limit to 100MB for large file uploads
+    options.ValueLengthLimit = 100 * 1024 * 1024; // 100MB
+    // Set the value count limit (number of form fields)
+    options.ValueCountLimit = 1024;
+    // Set the key length limit
+    options.KeyLengthLimit = 8192;
+    // Buffer body reads
+    options.BufferBody = true;
+    // Set memory threshold for buffering
+    options.MemoryBufferThreshold = 1024 * 1024; // 1MB
+});
+
+// Configure Kestrel server limits
+builder.Services.Configure<KestrelServerOptions>(options =>
+{
+    // Set the maximum request body size to 100MB
+    options.Limits.MaxRequestBodySize = 100 * 1024 * 1024; // 100MB
+    // Set request timeout to 10 minutes for large file uploads
+    options.Limits.KeepAliveTimeout = TimeSpan.FromMinutes(10);
+    // Set max request header size
+    options.Limits.MaxRequestHeadersTotalSize = 32768; // 32KB
+});
+
+// Configure IIS Integration (if running under IIS)
+builder.Services.Configure<IISServerOptions>(options =>
+{
+    options.MaxRequestBodySize = 100 * 1024 * 1024; // 100MB
+});
+
 // Add HttpClient
 builder.Services.AddHttpClient<IAgentRuntimeClient, AgentRuntimeClient>(client =>
 {
-    // Increase timeout to 5 minutes for long-running agent processing
-    client.Timeout = TimeSpan.FromMinutes(5);
+    // Increase timeout to 10 minutes for long-running agent processing and large file uploads
+    client.Timeout = TimeSpan.FromMinutes(10);
+    // Set max response content buffer size
+    client.MaxResponseContentBufferSize = 100 * 1024 * 1024; // 100MB
 });
 
 // Add AutoMapper

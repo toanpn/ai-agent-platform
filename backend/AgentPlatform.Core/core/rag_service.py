@@ -147,7 +147,7 @@ class RAGService:
     
     def __init__(self, 
                  collection_name: str = "agent_knowledge_base",
-                 embedding_model: str = "text-multilingual-embedding-002",
+                 embedding_model: str = "gemini-embedding-001",
                  persist_directory: Optional[str] = None):
         """
         Initialize RAG service.
@@ -169,8 +169,8 @@ class RAGService:
         # Initialize components
         self.document_processor = DocumentProcessor()
         self.text_splitter = RecursiveCharacterTextSplitter(
-            chunk_size=1000,
-            chunk_overlap=200,
+            chunk_size=1500,  # Increased chunk size for better performance with larger files
+            chunk_overlap=300,  # Increased overlap to maintain context
             length_function=len,
         )
         

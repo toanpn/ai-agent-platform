@@ -49,10 +49,17 @@ namespace AgentPlatform.API.Services
                 throw new ArgumentException("File is required");
             }
 
-            var maxSizeMB = int.Parse(_configuration["FileStorage:MaxFileSizeMB"] ?? "50");
+            var maxSizeMB = int.Parse(_configuration["FileStorage:MaxFileSizeMB"] ?? "100");
+            var fileSizeMB = file.Length / (1024.0 * 1024.0);
+            
+            _logger.LogInformation("Uploading file: {FileName}, Size: {FileSizeMB:F2}MB, Max allowed: {MaxSizeMB}MB", 
+                file.FileName, fileSizeMB, maxSizeMB);
+            
             if (file.Length > maxSizeMB * 1024 * 1024)
             {
-                throw new ArgumentException($"File size exceeds maximum allowed size of {maxSizeMB}MB");
+                var errorMessage = $"File size ({fileSizeMB:F2}MB) exceeds maximum allowed size of {maxSizeMB}MB";
+                _logger.LogWarning("File upload rejected: {Error}", errorMessage);
+                throw new ArgumentException(errorMessage);
             }
 
             // Check if agent exists and belongs to user

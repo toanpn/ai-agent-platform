@@ -18,6 +18,8 @@ namespace AgentPlatform.API.Controllers
         }
 
         [HttpPost("upload/{agentId}")]
+        [RequestSizeLimit(100 * 1024 * 1024)] // 100MB limit for this specific endpoint
+        [RequestFormLimits(MultipartBodyLengthLimit = 100 * 1024 * 1024)] // 100MB limit for multipart forms
         public async Task<ActionResult<string>> UploadFile(int agentId, IFormFile file)
         {
             var userId = GetUserId();
