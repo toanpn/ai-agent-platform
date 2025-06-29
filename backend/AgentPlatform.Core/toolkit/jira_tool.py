@@ -227,9 +227,10 @@ class JiraTool(BaseTool):
                 fields = issue.get("fields", {})
                 summary = fields.get("summary", "N/A")
                 status = fields.get("status", {}).get("name", "N/A")
+                priority = fields.get("priority", {}).get("name", "N/A")
                 assignee = fields.get("assignee")
                 assignee_name = assignee.get("displayName", "Unassigned") if assignee else "Unassigned"
-                issue_str = f'Issue Key: {issue["key"]}, Summary: "{summary}", Status: "{status}", Assignee: "{assignee_name}"'
+                issue_str = f'Issue Key: {issue["key"]}, Summary: "{summary}", Status: "{status}", Priority: "{priority}", Assignee: "{assignee_name}"'
                 formatted_issues.append(issue_str)
             
             result = "\n".join(formatted_issues)
@@ -241,39 +242,55 @@ class JiraTool(BaseTool):
             return f"❌ Lỗi khi tìm kiếm JIRA: {str(e)}"
     
     def _get_issue(self, tools: List[BaseTool], parameters: dict) -> str:
-        """Get JIRA issue details using JQL search."""
-        print(f"JIRA_TOOL: Getting issue with parameters: {parameters}")
-        
-        search_tool = None
-        for tool in tools:
-            # The tool name is 'jql_query' as per the debug output.
-            if tool.name == "jql_query":
-                search_tool = tool
-                break
-        
-        if not search_tool:
-            return "❌ Không tìm thấy công cụ tìm kiếm JQL của JIRA."
+        """Get JIRA issue details."""
+        if not self.jira_api_wrapper:
+            return self._mock_result("get_issue", **parameters)
 
         try:
             issue_key = parameters.get("issue_key") or parameters.get("issue_id")
             if not issue_key:
                 return "❌ Thiếu 'issue_key' hoặc 'issue_id' để lấy thông tin issue"
-            
-            # Use JQL to search for the specific issue key
+
             jql = f'key = "{issue_key.strip()}"'
-            print(f"JIRA_TOOL: Using JQL: {jql}")
-            
-            result = search_tool.run(jql)
-            
-            # Check if the result is empty or indicates no issues found
-            if not result or "no issues found" in result.lower():
+            search_results = self.jira_api_wrapper.jira.jql(jql, limit=1)
+
+            if not search_results or not search_results.get("issues"):
                 return f"❌ Không tìm thấy thông tin cho issue '{issue_key}'. Vui lòng kiểm tra lại mã ticket."
 
+            issue = search_results["issues"][0]
+            fields = issue.get("fields", {})
+
+            summary = fields.get("summary", "N/A")
+            status = fields.get("status", {}).get("name", "N/A")
+            priority = fields.get("priority", {}).get("name", "N/A")
+            assignee = fields.get("assignee")
+            assignee_name = assignee.get("displayName", "Unassigned") if assignee else "Unassigned"
+            reporter = fields.get("reporter")
+            reporter_name = reporter.get("displayName", "N/A") if reporter else "N/A"
+            description = fields.get("description", "No description available.")
+            created = fields.get("created", "N/A")
+            updated = fields.get("updated", "N/A")
+
+            # Formatting the output nicely
+            details = [
+                f"**Summary:** {summary}",
+                f"**Status:** {status}",
+                f"**Priority:** {priority}",
+                f"**Assignee:** {assignee_name}",
+                f"**Reporter:** {reporter_name}",
+                f"**Created:** {created}",
+                f"**Updated:** {updated}",
+                "**Description:**",
+                str(description) if description else ""
+            ]
+
+            result = "\n".join(details)
+
             return f"🎫 Chi tiết JIRA issue {issue_key}:\n\n{result}"
-            
+
         except Exception as e:
-            print(f"JIRA_TOOL: Error getting issue: {e}")
-            return f"❌ Lỗi khi lấy JIRA issue bằng JQL: {str(e)}"
+            logger.error(f"Error in JIRA get_issue: {e}", exc_info=True)
+            return f"❌ Lỗi khi lấy JIRA issue '{issue_key}': {str(e)}"
     
     def _get_projects(self, tools: List[BaseTool], parameters: dict) -> str:
         """Get all JIRA projects."""
