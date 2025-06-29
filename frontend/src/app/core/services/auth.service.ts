@@ -70,7 +70,7 @@ export class AuthService {
 			tap((user) => {
 				this.currentUserSignal.set(this.formatUser(user));
 				this.injector.get(ChatStateService).initialize();
-				this.injector.get(AgentStateService).initialize().subscribe();
+				this.injector.get(AgentStateService).initialize();
 			}),
 			map(() => true),
 			catchError(() => {
@@ -94,7 +94,7 @@ export class AuthService {
 			tap(({ user }) => {
 				this.currentUserSignal.set(this.formatUser(user));
 				this.injector.get(ChatStateService).initialize();
-				this.injector.get(AgentStateService).initialize().subscribe();
+				this.injector.get(AgentStateService).initialize();
 			}),
 			map(({ response }) => response)
 		);
@@ -118,7 +118,7 @@ export class AuthService {
 			tap(({ user }) => {
 				this.currentUserSignal.set(this.formatUser(user));
 				this.injector.get(ChatStateService).initialize();
-				this.injector.get(AgentStateService).initialize().subscribe();
+				this.injector.get(AgentStateService).initialize();
 			}),
 			map(({ response }) => response)
 		);
