@@ -98,6 +98,9 @@ namespace AgentPlatform.API.DTOs
         [JsonPropertyName("description")]
         public string? Description { get; set; }
 
+        [JsonPropertyName("instruction")]
+        public string? Instruction { get; set; }
+
         [JsonPropertyName("tools")]
         public string[]? Tools { get; set; }
 
