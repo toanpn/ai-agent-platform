@@ -27,6 +27,7 @@ export class ChatStateService {
 	readonly activeConversation = signal<Conversation | null>(null);
 	readonly messages = signal<Message[]>([]);
 	readonly isLoading = signal<boolean>(false);
+	readonly isSending = signal<boolean>(false);
 	readonly isSearching = signal<boolean>(false);
 	readonly agents = this.agentState.agents;
 	readonly selectedAgent = signal<Agent | null>(null);
@@ -149,20 +150,28 @@ export class ChatStateService {
 		const conversationId = this.currentConversationId();
 		const optimisticMessage = this.createOptimisticMessage(messageText, conversationId);
 
+		this.isSending.set(true);
 		this.messages.update((msgs) => [...msgs, optimisticMessage]);
-		this.isLoading.set(true);
-		if (conversationId) {
-			this.conversations.update((convos) =>
-				convos.map((c) => (c.id === conversationId ? { ...c, loading: true } : c)),
-			);
-		}
 
 		try {
 			const response = await lastValueFrom(
 				this.chatService.sendMessageNonStreaming(messageText, agent?.name, conversationId),
 			);
 
-			const userMessage: Message = { ...optimisticMessage, id: `msg-user-${Date.now()}` };
+			// Update the optimistic message with the final content
+			this.messages.update((msgs) =>
+				msgs.map((m) =>
+					m.id === optimisticMessage.id
+						? {
+								...m,
+								id: `msg-user-${Date.now()}`, // Final ID
+								conversationId: response.sessionId.toString(),
+						  }
+						: m,
+				),
+			);
+
+			// Add the assistant's message
 			const assistantMessage: Message = {
 				id: `msg-assistant-${Date.now()}`,
 				text: response.response,
@@ -177,13 +186,9 @@ export class ChatStateService {
 				metadata: response.metadata,
 				error: response.success ? undefined : response.error,
 			};
+			this.messages.update((msgs) => [...msgs, assistantMessage]);
 
-			this.messages.update((msgs) => [
-				...msgs.filter((m) => m.id !== optimisticMessage.id),
-				userMessage,
-				assistantMessage,
-			]);
-
+			// Conversation management
 			if (!conversationId) {
 				const newConversation = {
 					id: response.sessionId.toString(),
@@ -191,45 +196,29 @@ export class ChatStateService {
 					timestamp: new Date(),
 				};
 				this.conversations.update((convos) => [newConversation, ...convos]);
-				this.activeConversation.set(newConversation);
-			} else if (response.sessionTitle) {
-				this.conversations.update((convos) =>
-					convos.map((c) => (c.id === conversationId ? { ...c, title: response.sessionTitle! } : c)),
-				);
-				if (this.activeConversation()?.id === conversationId) {
-					this.activeConversation.update((ac) => (ac ? { ...ac, title: response.sessionTitle! } : null));
+				this.activeConversation.set(newConversation); // This triggers the effect to load messages
+			} else {
+				// Update existing conversation title and move to top
+				const convos = this.conversations();
+				const updatedConvo = convos.find((c) => c.id === conversationId);
+				if (updatedConvo) {
+					const updatedTitle = response.sessionTitle || updatedConvo.title;
+					const otherConvos = convos.filter((c) => c.id !== conversationId);
+					this.conversations.set([
+						{ ...updatedConvo, title: updatedTitle, timestamp: new Date() },
+						...otherConvos,
+					]);
+					if (this.activeConversation()?.id === conversationId) {
+						this.activeConversation.update((ac) => (ac ? { ...ac, title: updatedTitle } : null));
+					}
 				}
-			}
-
-			// Move conversation to the top
-			const convos = this.conversations();
-			const updatedConvo = convos.find(c => c.id === conversationId);
-			if (updatedConvo) {
-				const filteredConvos = convos.filter(c => c.id !== conversationId);
-				this.conversations.set([{...updatedConvo, timestamp: new Date()}, ...filteredConvos]);
 			}
 		} catch (error) {
 			this.notificationService.showError('Failed to send message.');
+			// Remove optimistic message on failure
 			this.messages.update((msgs) => msgs.filter((m) => m.id !== optimisticMessage.id));
 		} finally {
-			this.isLoading.set(false);
-			if (conversationId) {
-				// Stop loading indicator
-				this.conversations.update((convos) =>
-					convos.map((c) => (c.id === conversationId ? { ...c, loading: false } : c)),
-				);
-				
-				// Move updated conversation to the top
-				const conversations = this.conversations();
-				const conversationToMove = conversations.find(c => c.id === conversationId);
-				if (conversationToMove) {
-					const otherConversations = conversations.filter(c => c.id !== conversationId);
-					this.conversations.set([
-						{ ...conversationToMove, timestamp: new Date() }, 
-						...otherConversations
-					]);
-				}
-			}
+			this.isSending.set(false);
 		}
 	}
 
