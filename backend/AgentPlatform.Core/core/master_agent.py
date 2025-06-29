@@ -7,6 +7,7 @@ and agent descriptions.
 """
 
 import os
+import re
 from typing import List, Dict, Any
 from langchain.agents import AgentExecutor, create_tool_calling_agent
 from langchain.tools import BaseTool
@@ -22,8 +23,36 @@ class MasterAgent:
         Args:
             sub_agents_as_tools: List of sub-agents wrapped as BaseTool objects
         """
-        self.sub_agents = sub_agents_as_tools
+        self.sub_agents = self._sanitize_sub_agent_tools(sub_agents_as_tools)
         self.agent_executor = self._create_master_agent_executor()
+    
+    def _sanitize_sub_agent_tools(self, sub_agents: List[BaseTool]) -> List[BaseTool]:
+        """
+        Sanitizes sub-agent names to be compliant with Gemini's function naming rules.
+        """
+        for agent_tool in sub_agents:
+            original_name = agent_tool.name
+            
+            # Gemini function name rules:
+            # - Must start with a letter or an underscore.
+            # - Must be alphanumeric (a-z, A-Z, 0-9), underscores (_), dots (.), or dashes (-).
+            # - Maximum length of 64.
+            
+            # Replace invalid characters with an underscore
+            sanitized_name = re.sub(r'[^a-zA-Z0-9_.-]', '_', original_name)
+            
+            # Ensure it starts with a letter or underscore
+            if not re.match(r'^[a-zA-Z_]', sanitized_name):
+                sanitized_name = '_' + sanitized_name
+            
+            # Enforce maximum length of 64 characters
+            sanitized_name = sanitized_name[:64]
+            
+            if sanitized_name != original_name:
+                print(f"Warning: Sanitized invalid agent name from '{original_name}' to '{sanitized_name}'")
+                agent_tool.name = sanitized_name
+        
+        return sub_agents
     
     def _create_master_agent_executor(self) -> AgentExecutor:
         """Creates the Master Agent executor with sub-agents as its tools."""
@@ -394,7 +423,7 @@ Please respond to the current user message while taking into account the convers
             new_sub_agents: Updated list of sub-agents as tools
         """
         print("Updating Master Agent with new sub-agents configuration...")
-        self.sub_agents = new_sub_agents
+        self.sub_agents = self._sanitize_sub_agent_tools(new_sub_agents)
         self.agent_executor = self._create_master_agent_executor()
         print(f"Master Agent updated with {len(new_sub_agents)} sub-agents")
     
