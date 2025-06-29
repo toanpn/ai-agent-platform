@@ -429,5 +429,15 @@
     "UNKNOWN_ERROR": "Đã xảy ra lỗi không xác định.",
     "UNKNOWN": "Đã xảy ra lỗi không xác định.",
     "NETWORK_ERROR": "Lỗi mạng. Vui lòng kiểm tra kết nối của bạn."
+  },
+  "SETTINGS": {
+    "TITLE": "Cài đặt"
+  },
+  "EXECUTION_STEP": {
+    "TOOL_INPUT": "Đầu vào công cụ",
+    "OBSERVATION": "Quan sát"
+  },
+  "EXECUTION_DETAILS": {
+    "TITLE": "Chi tiết thực thi ({{totalSteps}} bước)"
   }
 }

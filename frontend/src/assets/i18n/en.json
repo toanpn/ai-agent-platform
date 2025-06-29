@@ -466,5 +466,12 @@
   },
   "SETTINGS": {
     "TITLE": "Settings"
+  },
+  "EXECUTION_STEP": {
+    "TOOL_INPUT": "Tool Input",
+    "OBSERVATION": "Observation"
+  },
+  "EXECUTION_DETAILS": {
+    "TITLE": "Execution Details ({{totalSteps}} steps)"
   }
 }
