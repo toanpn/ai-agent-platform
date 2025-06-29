@@ -23,8 +23,9 @@ export class SpeechService {
 		if (SpeechRecognition) {
 			this.isSupported = true;
 			this.recognition = new SpeechRecognition();
-			this.recognition.continuous = false;
-			this.recognition.interimResults = true;
+			this.recognition.continuous = true;
+			this.recognition.interimResults = false;
+			this.recognition.maxAlternatives = 1;
 			this.setupRecognitionListeners();
 		} else {
 			this.isSupported = false;
@@ -90,16 +91,19 @@ export class SpeechService {
 		};
 
 		this.recognition.onresult = (event: SpeechRecognitionEvent) => {
-			this.currentTranscript = event.results[0][0].transcript;
+			const transcript = Array.from(event.results)
+				.map((result) => result[0])
+				.map((result) => result.transcript)
+				.join('');
+			this.currentTranscript = transcript;
 			this.transcript$.next(this.currentTranscript.trim());
 		};
 
 		this.recognition.onerror = this.handleRecognitionError.bind(this);
-		
-		this.recognition.onspeechend = () => {
+
+		this.recognition.onend = () => {
 			this.isListening$.next(false);
 			this.currentTranscript = '';
-			this.recognition.stop();
 		};
 	}
 
