@@ -47,8 +47,8 @@
     "MORE_OPTIONS": "More Options",
     "PRIVATE": "Private",
     "FULL_NAME": "Full Name",
-    "REGISTRATION_KEY": "Registration Key",
-    "REGISTRATION_KEY_PLACEHOLDER": "Enter your registration key"
+    "REGISTRATION_KEY": "Invitation Code",
+    "REGISTRATION_KEY_PLACEHOLDER": "Enter your invitation code"
   },
   "AUTH": {
     "LOGIN": "Login",
@@ -119,8 +119,8 @@
     "FOOTER_HELP": "Help",
     "FOOTER_CONTACT": "Contact",
     "FULL_NAME": "Full Name",
-    "REGISTRATION_KEY": "Registration Key",
-    "REGISTRATION_KEY_PLACEHOLDER": "Enter your registration key"
+    "REGISTRATION_KEY": "Invitation Code",
+    "REGISTRATION_KEY_PLACEHOLDER": "Enter your invitation code"
   },
   "CHAT": {
     "NEW_CHAT": "New Chat",

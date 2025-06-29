@@ -109,8 +109,8 @@
     "FOOTER_HELP": "Trợ giúp",
     "FOOTER_CONTACT": "Liên hệ",
     "FULL_NAME": "Họ và Tên",
-    "REGISTRATION_KEY": "Khóa đăng ký",
-    "REGISTRATION_KEY_PLACEHOLDER": "Nhập khóa đăng ký của bạn"
+    "REGISTRATION_KEY": "Mã giới thiệu",
+    "REGISTRATION_KEY_PLACEHOLDER": "Nhập mã giới thiệu của bạn"
   },
   "CHAT": {
     "NEW_CHAT": "Cuộc Trò Chuyện Mới",
@@ -396,7 +396,7 @@
     "PASSWORD_MIN_LENGTH": "Mật khẩu phải có ít nhất 6 ký tự.",
     "CONFIRM_PASSWORD_REQUIRED": "Yêu cầu xác nhận mật khẩu.",
     "EMAIL_INVALID": "Vui lòng nhập một địa chỉ email hợp lệ.",
-    "REGISTRATION_KEY_REQUIRED": "Yêu cầu khóa đăng ký."
+    "REGISTRATION_KEY_REQUIRED": "Mã giới thiệu là bắt buộc."
   },
   "ERRORS": {
     "GENERIC_TITLE": "Đã xảy ra lỗi",
