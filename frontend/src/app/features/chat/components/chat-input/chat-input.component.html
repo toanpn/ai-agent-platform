@@ -8,9 +8,19 @@
 			(input)="onMessageTextChanged($event)"
 			(keydown)="onKeyDown($event)"
 			[disabled]="disabled() || isEnhancing()"
-			rows="1"
+			rows="3"
 		></textarea>
 		<div class="input-actions">
+			<button
+				type="button"
+				class="action-btn enhance-button"
+				(click)="onEnhanceClick()"
+				[disabled]="!messageText().trim() || disabled() || isEnhancing()"
+				[title]="'CHAT.ENHANCE_PROMPT' | translate"
+			>
+				<span *ngIf="!isEnhancing()" class="material-icons">auto_awesome</span>
+				<div *ngIf="isEnhancing()" class="loading-spinner"></div>
+			</button>
 			<button class="action-btn" [title]="'CHAT.ATTACH_FILE' | translate">
 				<img src="assets/icons/attach-file.svg" alt="" />
 			</button>

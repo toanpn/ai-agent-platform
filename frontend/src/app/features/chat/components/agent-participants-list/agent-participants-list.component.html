@@ -22,7 +22,7 @@
 		@for (agent of agents(); track agent.id) {
 			<a
 				class="agent-card"
-				[routerLink]="['/agents', agent.id]"
+				[routerLink]="['/agents', 'edit', agent.id]"
 				[attr.data-agent-type]="getAgentType(agent)"
 			>
 				<div class="card-header">

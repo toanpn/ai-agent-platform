@@ -28,7 +28,7 @@ export class ChatStateService {
 	readonly messages = signal<Message[]>([]);
 	readonly isLoading = signal<boolean>(false);
 	readonly isSearching = signal<boolean>(false);
-	readonly agents = this.agentState.agents$;
+	readonly agents = this.agentState.agents;
 	readonly selectedAgent = signal<Agent | null>(null);
 
 	// Computed Signals

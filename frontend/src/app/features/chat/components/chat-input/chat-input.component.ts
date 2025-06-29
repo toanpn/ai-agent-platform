@@ -67,10 +67,7 @@ export class ChatInputComponent implements OnInit {
 		}
 
 		this.speechService.transcript$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((transcript) => {
-			this.messageText.set(transcript.text);
-			if (transcript.isFinal && transcript.text) {
-				this.onSendClick();
-			}
+			this.messageText.set(transcript);
 		});
 	}
 
