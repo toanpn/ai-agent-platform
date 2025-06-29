@@ -1,26 +1,74 @@
-import { AfterViewInit, Component, OnInit, DestroyRef, inject, ViewChild } from '@angular/core';
+import {
+	CommonModule,
+	NgClass,
+} from '@angular/common';
+import {
+	AfterViewInit,
+	Component,
+	DestroyRef,
+	inject,
+	OnInit,
+	ViewChild,
+} from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { CommonModule, NgClass } from '@angular/common';
-import { Router, RouterModule } from '@angular/router';
-import { FormControl, ReactiveFormsModule } from '@angular/forms';
-import { TranslateModule } from '@ngx-translate/core';
+import {
+	FormControl,
+	ReactiveFormsModule,
+} from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
-import { MatCardModule } from '@angular/material/card';
-import { MatIconModule } from '@angular/material/icon';
-import { MatTooltipModule } from '@angular/material/tooltip';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatSelectModule } from '@angular/material/select';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
-import { AgentService, Agent } from '../../../core/services/agent.service';
-import { BehaviorSubject, Subject, EMPTY, merge, combineLatest, Observable } from 'rxjs';
-import { switchMap, tap, catchError, exhaustMap, map, startWith, debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { MatCardModule } from '@angular/material/card';
 import { MatDialog } from '@angular/material/dialog';
-import { ConfirmationDialogComponent, ConfirmationDialogData } from '../../../shared/components/confirmation-dialog/confirmation-dialog.component';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
+import { MatInputModule } from '@angular/material/input';
 import { MatMenuModule } from '@angular/material/menu';
+import {
+	MatPaginator,
+	MatPaginatorModule,
+} from '@angular/material/paginator';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatSelectModule } from '@angular/material/select';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import {
+	Router,
+	RouterModule,
+} from '@angular/router';
+
+import {
+	BehaviorSubject,
+	combineLatest,
+	EMPTY,
+	merge,
+	Observable,
+	Subject,
+} from 'rxjs';
+import {
+	catchError,
+	debounceTime,
+	distinctUntilChanged,
+	exhaustMap,
+	map,
+	startWith,
+	switchMap,
+	tap,
+} from 'rxjs/operators';
+
+import { TranslateModule } from '@ngx-translate/core';
+
 import { AgentTypeService } from '../../../core/services/agent-type.service';
+import {
+	Agent,
+	AgentService,
+} from '../../../core/services/agent.service';
+import {
+	AuthService,
+	User,
+} from '../../../core/services/auth.service';
+import {
+	ConfirmationDialogComponent,
+	ConfirmationDialogData,
+} from '../../../shared/components/confirmation-dialog/confirmation-dialog.component';
 
 interface AgentListAction {
 	type: 'LOAD_AGENTS' | 'REFRESH_AGENTS' | 'DELETE_AGENT';
@@ -58,6 +106,7 @@ export class AgentListComponent implements OnInit, AfterViewInit {
 	private destroyRef = inject(DestroyRef);
 	private dialog = inject(MatDialog);
 	private agentTypeService = inject(AgentTypeService);
+	private authService = inject(AuthService);
 
 	// Action subjects
 	private loadAgentsAction$ = new Subject<void>();
@@ -71,6 +120,8 @@ export class AgentListComponent implements OnInit, AfterViewInit {
 	loading$ = new BehaviorSubject<boolean>(false);
 	viewMode$ = new BehaviorSubject<'grid' | 'list'>('grid');
 	
+	private currentUser: User | null = null;
+
 	// Filter controls
 	departmentFilterControl = new FormControl('all');
 	searchControl = new FormControl('');
@@ -82,6 +133,7 @@ export class AgentListComponent implements OnInit, AfterViewInit {
 	@ViewChild(MatPaginator) paginator!: MatPaginator;
 
 	ngOnInit(): void {
+		this.currentUser = this.authService.currentUser();
 		this.loadViewMode();
 		this.setupActionHandlers();
 		this.setupFiltering();
@@ -270,5 +322,9 @@ export class AgentListComponent implements OnInit, AfterViewInit {
 
 	getAgentAvatar(agent?: Agent): string {
 		return this.agentTypeService.getAgentAvatar(agent);
+	}
+
+	canModifyAgent(agent: Agent): boolean {
+		return this.currentUser?.id === agent.createdBy?.id;
 	}
 }

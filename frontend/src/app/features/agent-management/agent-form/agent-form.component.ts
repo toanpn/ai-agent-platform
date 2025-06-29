@@ -64,11 +64,11 @@ import {
 import { ChatService } from '../../../core/services/chat.service';
 import { FileService } from '../../../core/services/file.service';
 import { NotificationService } from '../../../core/services/notification.service';
+import { AgentStateService } from '../../../features/chat/agent-state.service';
 import {
 	ToolConfigDialogComponent,
 	ToolConfigDialogData,
 } from '../tool-config-dialog/tool-config-dialog.component';
-import { AgentStateService } from '../../../features/chat/agent-state.service';
 
 interface UpdateAgentPayload {
 	id: number;
@@ -512,16 +512,17 @@ export class AgentFormComponent implements OnInit {
 	}
 
 	onSubmit(): void {
+		this.saveError = '';
 		if (this.agentForm.invalid) {
 			this.agentForm.markAllAsTouched();
-			this.notificationService.showError('Please fill all required fields');
+			this.translateService.get('AGENTS.FORM_INVALID_ERROR').subscribe(message => {
+				this.notificationService.showError(message);
+			});
 			return;
 		}
 
-		this.saveError = '';
-		const formValue = this.agentForm.getRawValue();
-
-		let toolConfigsJson: string | undefined = undefined;
+		// Prepare tool configurations
+		let toolConfigsJson: string | undefined;
 		if (this.toolConfigs.length > 0) {
 			const toolConfigsDict: { [toolKey: string]: { [key: string]: string } } = {};
 			this.toolConfigs.forEach(config => {
@@ -533,25 +534,21 @@ export class AgentFormComponent implements OnInit {
 			toolConfigsJson = JSON.stringify(toolConfigsDict);
 		}
 
-		const request: CreateAgentRequest | UpdateAgentRequest = {
-			name: formValue.name,
-			description: formValue.description,
-			instructions: formValue.instructions,
-			department: formValue.department,
-			isPublic: formValue.isPublic,
-			llmConfig: formValue.llmConfig as LlmConfig,
-			toolConfigs: toolConfigsJson,
+		const agentRequest: CreateAgentRequest | UpdateAgentRequest = {
+			name: this.agentForm.value.name,
+			department: this.agentForm.value.department,
+			description: this.agentForm.value.description,
+			instructions: this.agentForm.value.instructions,
+			llmConfig: this.agentForm.value.llmConfig as LlmConfig,
+			isPublic: this.agentForm.value.isPublic,
 			tools: this.connectedTools,
+			toolConfigs: toolConfigsJson,
 		};
 
 		if (this.isEditMode && this.agentId) {
-			const payload: UpdateAgentPayload = {
-				id: this.agentId,
-				request: request as UpdateAgentRequest,
-			};
-			this.updateAgentTrigger$.next(payload);
+			this.updateAgentTrigger$.next({ id: this.agentId, request: agentRequest });
 		} else {
-			this.createAgentTrigger$.next(request as CreateAgentRequest);
+			this.createAgentTrigger$.next(agentRequest as CreateAgentRequest);
 		}
 	}
 

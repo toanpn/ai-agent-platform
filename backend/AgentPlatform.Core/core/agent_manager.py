@@ -14,6 +14,7 @@ from langchain.agents import AgentExecutor, create_tool_calling_agent
 from langchain.tools import BaseTool, tool
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.prompts import ChatPromptTemplate
+from pydantic import Field
 
 # Import the new dynamic tool manager
 from core.dynamic_tool_manager import DynamicToolManager
@@ -21,12 +22,40 @@ from core.dynamic_tool_manager import DynamicToolManager
 # Import all available tools for backward compatibility
 from toolkit import jira_tool, rag_tool, confluence_tool
 
+class AgentAsTool(BaseTool):
+    """A custom tool that wraps a sub-agent, including its configuration."""
+    agent_executor: AgentExecutor = Field(...)
+    agent_config: Dict[str, Any] = Field(...)
+    
+    # The following fields are required by BaseTool
+    name: str
+    description: str
+    
+    def _run(self, input_query: str) -> str:
+        """Invokes the sub-agent executor with the given input."""
+        try:
+            result = self.agent_executor.invoke({"input": input_query})
+            return result.get("output", "No output from agent.")
+        except Exception as e:
+            print(f"Error invoking sub-agent {self.name}: {e}")
+            return f"Error: Could not get response from {self.name}."
+    
+    async def _arun(self, input_query: str) -> str:
+        """Asynchronously invokes the sub-agent executor."""
+        try:
+            result = await self.agent_executor.ainvoke({"input": input_query})
+            return result.get("output", "No output from agent.")
+        except Exception as e:
+            print(f"Error invoking sub-agent {self.name}: {e}")
+            return f"Error: Could not get response from {self.name}."
+
 class AgentManager:
     def __init__(self):
         """Initialize the Agent Manager with dynamic tool manager."""
         self.dynamic_tool_manager = DynamicToolManager()
         self.available_tools = {} # Keep for backward compatibility - changed to dict
         self.sub_agents = []
+        self.sub_agents_config: List[Dict[str, Any]] = []
     
     
     def create_sub_agent(self, config: Dict[str, Any]) -> BaseTool:
@@ -253,24 +282,12 @@ AVAILABLE TOOLS: {tools}
             raise RuntimeError(f"Failed to create agent executor for {agent_name}: {e}")
         
         # Wrap the agent executor into a single tool for the Master Agent
-        def create_agent_tool(executor, name, desc):
-            @tool
-            def agent_tool_func(input_query: str) -> str:
-                """
-                This is a specialized agent tool. The description is dynamically set based on the agent's capabilities.
-                """
-                try:
-                    result = executor.invoke({"input": input_query})
-                    return result.get("output", "No output generated")
-                except Exception as e:
-                    return f"Error processing request with {name}: {str(e)}"
-            
-            # Set the name and description
-            agent_tool_func.name = name
-            agent_tool_func.description = desc
-            return agent_tool_func
-        
-        agent_as_tool = create_agent_tool(agent_executor, agent_name, description)
+        agent_as_tool = AgentAsTool(
+            name=agent_name,
+            description=description,
+            agent_executor=agent_executor,
+            agent_config=config,
+        )
         
         return agent_as_tool
     
@@ -294,6 +311,7 @@ AVAILABLE TOOLS: {tools}
             if not isinstance(configs, list):
                 raise ValueError("Configuration file must contain a list of agent configurations")
             
+            self.sub_agents_config = configs  # Store the raw configs
             self.sub_agents = []
             for config in configs:
                 try:

@@ -22,14 +22,17 @@
 		@for (agent of agents(); track agent.id) {
 			<a
 				class="agent-card"
-				[routerLink]="['/agents', 'edit', agent.id]"
+				role="button"
+				tabindex="0"
+				(click)="onAgentClick(agent)"
+				(keydown.enter)="onAgentClick(agent)"
 				[attr.data-agent-type]="getAgentType(agent)"
 			>
 				<div class="card-header">
 					<img class="avatar" [src]="getAgentAvatar(agent)" alt="" />
 					<div class="agent-info">
 						<span class="agent-name">{{ agent.name }}</span>
-						<span class="agent-privacy-tag">{{ 'AGENTS.STATUS_PUBLIC'  | translate }}</span>
+						<span class="agent-privacy-tag">{{ (agent.isPublic ? 'AGENTS.STATUS_PUBLIC' : 'AGENTS.STATUS_PRIVATE') | translate }}</span>
 					</div>
 				</div>
 				<div class="card-body">

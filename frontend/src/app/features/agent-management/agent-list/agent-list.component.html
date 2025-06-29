@@ -105,18 +105,29 @@
 				@if (agents.length > 0) {
 				<div [ngClass]="(viewMode$ | async) === 'grid' ? 'agent-grid' : 'agent-list'">
 					@for (agent of agents; track agent.id) {
-					<mat-card class="agent-card" [attr.data-agent-type]="getAgentType(agent)" (click)="editAgent(agent.id)">
+					<mat-card
+						class="agent-card"
+						[class.non-interactive]="!canModifyAgent(agent)"
+						[attr.data-agent-type]="getAgentType(agent)"
+						(click)="canModifyAgent(agent) ? editAgent(agent.id) : null"
+					>
 						<mat-card-header>
 							<div mat-card-avatar class="agent-avatar-wrapper">
 								<img [src]="getAgentAvatar(agent)" alt="Agent Avatar" />
 							</div>
 							<div mat-card-title>{{ agent.name }}</div>
 							<div mat-card-subtitle>
-								<span class="status-tag public">
-									{{ 'AGENTS.STATUS_PUBLIC' | translate }}
+								<span class="status-tag" [class.public]="agent.isPublic" [class.private]="!agent.isPublic">
+									{{ (agent.isPublic ? 'AGENTS.STATUS_PUBLIC' : 'AGENTS.STATUS_PRIVATE') | translate }}
 								</span>
 							</div>
-							<button mat-icon-button class="more-options-btn" [matMenuTriggerFor]="agentMenu" (click)="$event.stopPropagation()">
+							<button
+								mat-icon-button
+								class="more-options-btn"
+								[matMenuTriggerFor]="agentMenu"
+								[disabled]="!canModifyAgent(agent)"
+								(click)="$event.stopPropagation()"
+							>
 								<mat-icon>more_vert</mat-icon>
 							</button>
 							<mat-menu #agentMenu="matMenu">

@@ -306,26 +306,55 @@ class AgentSystemManager:
             logger.error(f"Error processing request: {e}")
             return f"❌ Error processing request: {str(e)}"
     
-    def process_user_request_with_details(self, user_input: str, history: List[Dict[str, Any]] = None) -> Dict[str, Any]:
+    def process_user_request_with_details(self, user_input: str, history: List[Dict[str, Any]] = None, user_id: str = None) -> Dict[str, Any]:
         """Process a user request with conversation history and return detailed execution information."""
-        if not self.master_agent:
+        if not self.agent_manager or not self.agent_manager.sub_agents_config:
             return {
-                "response": "❌ System not initialized properly",
-                "agents_used": [],
-                "tools_used": [],
-                "execution_steps": [],
-                "total_steps": 0,
-                "available_agents": {"total_agents": 0, "agents": []},
-                "available_tools": [],
+                "response": "❌ System not initialized properly, no agent configurations loaded.",
                 "error": "System not initialized"
             }
-        
+
         try:
+            # Filter agents based on user_id and is_public flag
+            permitted_configs = []
+            if user_id:
+                for config in self.agent_manager.sub_agents_config:
+                    is_public = config.get('is_public', False)
+                    owner_id = config.get('created_by_id')
+                    if is_public or (owner_id and owner_id == user_id):
+                        permitted_configs.append(config)
+            else: # For anonymous or system requests, only allow public agents
+                permitted_configs = [config for config in self.agent_manager.sub_agents_config if config.get('is_public', False)]
+
+            if not permitted_configs:
+                return {
+                    "response": "You do not have permission to use any agents, or no agents are available, if no have agent, please direct to agent management page to create new agent",
+                    "error": "No permitted agents found for this user."
+                }
+
+            # Create agent tools from the permitted configurations
+            permitted_agents = []
+            for config in permitted_configs:
+                try:
+                    agent_tool = self.agent_manager.create_sub_agent(config)
+                    permitted_agents.append(agent_tool)
+                except Exception as e:
+                    logger.error(f"Failed to create agent {config.get('agent_name')}: {e}")
+
+            if not permitted_agents:
+                 return {
+                    "response": "Could not create any permitted agents.",
+                    "error": "Agent creation failed."
+                }
+
+            # Create a temporary master agent for this request
+            master_agent = create_master_agent(permitted_agents)
+            
             # Process with conversation history if provided
             if history:
-                result = self.master_agent.process_request_with_details_and_history(user_input, history)
+                result = master_agent.process_request_with_details_and_history(user_input, history)
             else:
-                result = self.master_agent.process_request_with_details(user_input)
+                result = master_agent.process_request_with_details(user_input)
             
             # Add available agents list to the result
             result["available_agents"] = self.get_agent_info()
@@ -552,7 +581,7 @@ def chat():
             }), 500
         
         # Use the detailed processing method with conversation history
-        execution_result = system_manager.process_user_request_with_details(message, history)
+        execution_result = system_manager.process_user_request_with_details(message, history, user_id=user_id)
         
         # Return enhanced response with detailed information
         return jsonify({

@@ -157,6 +157,12 @@
 		color: var(--text-color-primary);
 	}
 
+	.tools-info {
+		display: flex;
+		align-items: center;
+		gap: 1rem;
+	}
+
 	.tools-count {
 		font-size: 0.875rem;
 		color: var(--text-color-secondary);
@@ -164,6 +170,12 @@
 		padding: 0.25rem 0.75rem;
 		border-radius: 12px;
 		border: 1px solid var(--border-color);
+	}
+
+	.tool-warning {
+		font-size: 0.875rem;
+		color: var(--color-error-dark);
+		font-weight: 500;
 	}
 }
 

@@ -268,9 +268,18 @@
 		<div class="form-group">
 			<div class="tools-section-header">
 				<label for="tools">{{ 'AGENTS.TOOLS_TITLE' | translate }}</label>
-				<span class="tools-count" *ngIf="tools.length > 0">
-					({{ connectedTools.length }}/{{ tools.length }} {{ 'AGENTS.CONNECTED' | translate | lowercase }})
-				</span>
+				<div class="tools-info">
+					<span class="tools-count" *ngIf="tools.length > 0">
+						({{ connectedTools.length }}/{{ tools.length }}
+						{{ 'AGENTS.CONNECTED' | translate | lowercase }})
+					</span>
+					<span
+						class="tool-warning"
+						*ngIf="!loadingTools && tools.length > 0 && connectedTools.length === 0"
+					>
+						{{ 'AGENTS.TOOLS_REQUIRED_WARNING' | translate }}
+					</span>
+				</div>
 			</div>
 			<div class="tools-description">
 				<p>{{ 'AGENTS.TOOLS_HELP' | translate }}</p>
@@ -319,6 +328,7 @@
 									<img *ngSwitchCase="'gmail-tool'" src="/assets/icons/google.svg" alt="Gmail icon" class="tool-icon" />
 									<img *ngSwitchCase="'knowledge-search-tool'" src="/assets/icons/knowledge-tool.svg" alt="Figma icon" class="tool-icon" />
 									<img *ngSwitchCase="'jira-tool'" src="/assets/icons/jira.svg" alt="Cursor icon" class="tool-icon" />
+									<img *ngSwitchCase="'confluence-tool'" src="/assets/icons/confluence.svg" alt="Confluence icon" class="tool-icon" />
 									<img *ngSwitchDefault src="assets/icons/icon-file.svg" alt="Tool icon" class="tool-icon" />
 								</ng-container>
 							</div>
@@ -370,7 +380,11 @@
 
 		<div class="form-actions">
 			<button type="button" class="cancel-button" (click)="cancel()">{{ 'COMMON.CANCEL' | translate }}</button>
-			<button type="submit" class="save-button" [disabled]="agentForm.invalid || loading">
+			<button
+				type="submit"
+				class="save-button"
+				[disabled]="agentForm.invalid || loading || connectedTools.length === 0"
+			>
 				{{ isEditMode ? ('AGENTS.SAVE_CHANGES' | translate) : ('AGENTS.CREATE_AGENT' | translate) }}
 			</button>
 		</div>

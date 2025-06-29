@@ -214,7 +214,7 @@
     "CANCEL": "Cancel",
     "DELETE": "Delete",
     "NO_AGENTS": "No agents found",
-    "CREATE_FIRST_AGENT": "Create your first agent",
+    "CREATE_FIRST_AGENT": "You haven't created any agents yet. Get started by creating your first one!",
     "AGENT_LIST": "Agent List",
     "AGENT_DETAILS": "Agent Details",
     "AGENT_SETTINGS": "Agent Settings",
@@ -248,7 +248,8 @@
     "FAILED_LOAD_TOOLS": "Failed to load tools. Please try again.",
     "INVALID_AGENT_ID": "Invalid agent ID",
     "AGENT_ID_NOT_PROVIDED": "Agent ID not provided",
-    "SELECT_DEPARTMENT": "Select department",
+    "TOOLS_REQUIRED_WARNING": "At least 1 tool must be connected.",
+    "SELECT_DEPARTMENT": "Select Department",
     "DESCRIBE_AGENT": "Describe what this agent does",
     "ENTER_INSTRUCTIONS": "Enter specific instructions for the agent",
     "INSTRUCTIONS_HELP": "Provide detailed instructions on how this agent should behave and respond.",
@@ -387,7 +388,8 @@
     "COMING_SOON": "Coming Soon",
     "KNOWLEDGE_BASE_TITLE": "Knowledge Base",
     "KNOWLEDGE_BASE_DESCRIPTION": "Upload files to provide your agent with specific knowledge.",
-    "ADD_FILES": "Add Files"
+    "ADD_FILES": "Add Files",
+    "AGENT_EDIT_PERMISSION_ERROR": "You do not have permission to edit this agent"
   },
   "FILES": {
     "FILES": "Files",

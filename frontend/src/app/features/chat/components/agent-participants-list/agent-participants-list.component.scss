@@ -339,4 +339,20 @@
 		background-color: var(--color-agent-gray-bg);
 		color: var(--color-agent-gray-tag-text);
 	}
+}
+
+.tool-icon-container {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 32px;
+	height: 32px;
+	border-radius: 50%;
+	background-color: var(--background-color-secondary);
+	margin-right: 8px;
+
+	.tool-icon {
+		width: 20px;
+		height: 20px;
+	}
 } 

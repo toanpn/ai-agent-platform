@@ -233,6 +233,7 @@
     "IS_PUBLIC": "Agent công khai",
     "IS_PUBLIC_HELP": "Agent công khai có thể được sử dụng bởi bất kỳ ai trong tổ chức.",
     "AGENT_ID_NOT_PROVIDED": "ID agent không được cung cấp",
+    "TOOLS_REQUIRED_WARNING": "Cần kết nối ít nhất một công cụ.",
     "SELECT_DEPARTMENT": "Chọn phòng ban",
     "DESCRIBE_AGENT": "Mô tả agent này làm gì",
     "ENTER_INSTRUCTIONS": "Nhập hướng dẫn cụ thể cho agent",
@@ -370,7 +371,8 @@
     "BACK_TO_LIST": "Quay lại danh sách",
     "START_CHAT": "Bắt đầu trò chuyện",
     "NAME": "Tên agent",
-    "READY_TO_USE": "Agent của bạn đã sẵn sàng để sử dụng"
+    "READY_TO_USE": "Agent của bạn đã sẵn sàng để sử dụng",
+    "AGENT_EDIT_PERMISSION_ERROR": "Bạn không có quyền chỉnh sửa trợ lý này"
   },
   "FILES": {
     "FILES": "Tệp",
