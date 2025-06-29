@@ -18,10 +18,28 @@ namespace AgentPlatform.API.Services
             _configuration = configuration;
             _runtimeClient = runtimeClient;
             _logger = logger;
-            _basePath = _configuration["FileStorage:BasePath"] ?? "./uploads";
+            
+            // Get the base path from configuration
+            var configuredPath = _configuration["FileStorage:BasePath"] ?? "./uploads";
+            
+            // Convert relative path to absolute path to ensure consistency
+            _basePath = Path.IsPathRooted(configuredPath) 
+                ? configuredPath 
+                : Path.GetFullPath(configuredPath);
+            
+            _logger.LogInformation("File storage base path resolved to: {BasePath}", _basePath);
             
             // Ensure upload directory exists
-            Directory.CreateDirectory(_basePath);
+            try
+            {
+                Directory.CreateDirectory(_basePath);
+                _logger.LogInformation("Upload directory created/verified: {BasePath}", _basePath);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to create upload directory: {BasePath}", _basePath);
+                throw;
+            }
         }
 
         public async Task<string> UploadFileAsync(IFormFile file, int agentId, int userId)
@@ -51,9 +69,21 @@ namespace AgentPlatform.API.Services
             var uniqueFileName = $"{fileName}_{Guid.NewGuid()}{extension}";
             var filePath = Path.Combine(_basePath, uniqueFileName);
 
-            using (var stream = new FileStream(filePath, FileMode.Create))
+            _logger.LogInformation("Uploading file: {OriginalFileName} -> {FilePath}", file.FileName, filePath);
+
+            try
             {
-                await file.CopyToAsync(stream);
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    await file.CopyToAsync(stream);
+                }
+                _logger.LogInformation("File successfully saved to: {FilePath}", filePath);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to save file to: {FilePath}. Directory exists: {DirectoryExists}", 
+                    filePath, Directory.Exists(_basePath));
+                throw;
             }
 
             var agentFile = new AgentFile
@@ -158,7 +188,8 @@ namespace AgentPlatform.API.Services
 
             if (!File.Exists(file.FilePath))
             {
-                _logger.LogError("Physical file not found for indexing: {FilePath}", file.FilePath);
+                _logger.LogError("Physical file not found for indexing: {FilePath}. Directory exists: {DirectoryExists}", 
+                    file.FilePath, Directory.Exists(Path.GetDirectoryName(file.FilePath)));
                 return false;
             }
 

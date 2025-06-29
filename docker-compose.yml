@@ -39,7 +39,7 @@ services:
       agent-core:
         condition: service_started
     volumes:
-      - ./backend/uploads:/app/uploads
+      - shared_uploads:/app/uploads
     networks:
       - agentplatform-network
 
@@ -59,9 +59,9 @@ services:
       - GOOGLE_APPLICATION_CREDENTIALS=/app/gcp-credentials.json
       - CHROMA_DB_PATH=/app/db
     ports:
-      - "8000:8000"
+      - "8000:8000"  
     volumes:
-      - ./backend/AgentPlatform.Core/uploads:/app/uploads
+      - shared_uploads:/app/uploads
       - ./backend/AgentPlatform.Core:/app/AgentPlatform.Core
       - ./gcp-credentials.json:/app/gcp-credentials.json:ro
       - chroma_db_data:/app/db
@@ -99,6 +99,7 @@ services:
 volumes:
   sqlserver_data:
   chroma_db_data:
+  shared_uploads:
 
 networks:
   agentplatform-network:

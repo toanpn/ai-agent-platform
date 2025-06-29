@@ -18,4 +18,6 @@ RUN dotnet publish "AgentPlatform.API.csproj" -c Release -o /app/publish
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
+# Create uploads directory with proper permissions
+RUN mkdir -p /app/uploads && chmod 755 /app/uploads
 ENTRYPOINT ["dotnet", "AgentPlatform.API.dll"] 
