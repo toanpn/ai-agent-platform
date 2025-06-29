@@ -777,6 +777,7 @@ export class AgentFormComponent implements OnInit {
 			knowledge_search_tool: 'Knowledge Search',
 			gmail_tool: 'Gmail',
 			jira_tool: 'Jira',
+			confluence_tool: 'Confluence',
 		};
 		return nameMap[toolName] || toolName;
 	}
@@ -971,6 +972,7 @@ export class AgentFormComponent implements OnInit {
 			knowledge_tool: 'assets/icons/knowledge-tool.svg',
 			gmail_tool: 'assets/icons/email.svg',
 			jira_tool: 'assets/icons/jira.svg',
+			confluence_tool: 'assets/icons/confluence.svg',
 			playwright_browser_toolkit: 'assets/icons/playwright.svg',
 			gitlab_toolkit: 'assets/icons/gitlab.svg',
 			sql_database_toolkit: 'assets/icons/sql.svg',

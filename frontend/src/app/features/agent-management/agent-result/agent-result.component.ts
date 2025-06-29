@@ -67,6 +67,7 @@ export class AgentResultComponent implements OnInit {
       knowledge_search_tool: 'Knowledge Search',
       gmail_tool: 'Gmail',
       jira_tool: 'Jira',
+      confluence_tool: 'Confluence',
     };
     return nameMap[toolName] || toolName;
   }

@@ -19,7 +19,7 @@
 		<form [formGroup]="configForm" class="config-form" *ngIf="parameters.length > 0">
 			<div *ngFor="let param of parameters; trackBy: trackByParameterKey" class="form-group">
 				<label [for]="param.key" class="form-label">
-					{{ param.key }}
+					{{ getParameterLabel(param.key) | translate: { fallback: param.key } }}
 					<span *ngIf="param.details.required" class="required-indicator">*</span>
 				</label>
 				<input
