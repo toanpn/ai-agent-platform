@@ -25,6 +25,11 @@ class MasterAgent:
         """
         self.sub_agents = self._sanitize_sub_agent_tools(sub_agents_as_tools)
         self.agent_executor = self._create_master_agent_executor()
+        # Initialize LLM for comparison summaries
+        self.comparison_llm = ChatGoogleGenerativeAI(
+            model="gemini-2.5-flash", 
+            temperature=0.3
+        )
     
     def _sanitize_sub_agent_tools(self, sub_agents: List[BaseTool]) -> List[BaseTool]:
         """
@@ -53,6 +58,171 @@ class MasterAgent:
                 agent_tool.name = sanitized_name
         
         return sub_agents
+    
+    def _detect_comparison_request(self, user_input: str) -> Dict[str, Any]:
+        """
+        Detect if user is asking for a comparison between business models.
+        
+        Args:
+            user_input: The user's query
+            
+        Returns:
+            dict: Contains is_comparison flag and list of models to compare
+        """
+        comparison_keywords = [
+            "so sánh", "compare", "chọn giữa", "choose between", "khác nhau", "difference", 
+            "nên chọn", "should choose", "phù hợp hơn", "more suitable", "tốt hơn", "better",
+            "ưu nhược điểm", "pros and cons", "lựa chọn", "choice", "quyết định", "decide"
+        ]
+        
+        model_keywords = {
+            "fnb": ["fnb", "f&b", "food", "beverage", "nhà hàng", "restaurant", "quán ăn", "món ăn", "thức uống"],
+            "booking": ["booking", "đặt phòng", "hotel", "khách sạn", "resort", "homestay", "accommodation"]
+        }
+        
+        # Check if it's a comparison request
+        is_comparison = any(keyword.lower() in user_input.lower() for keyword in comparison_keywords)
+        
+        # Detect which models are mentioned
+        detected_models = []
+        for model_type, keywords in model_keywords.items():
+            if any(keyword.lower() in user_input.lower() for keyword in keywords):
+                detected_models.append(model_type)
+        
+        return {
+            "is_comparison": is_comparison and len(detected_models) >= 2,
+            "models": detected_models,
+            "comparison_type": "business_models" if is_comparison and detected_models else None
+        }
+    
+    def _find_agents_by_model_type(self, model_types: List[str]) -> List[BaseTool]:
+        """
+        Find sub-agents that match the requested model types.
+        
+        Args:
+            model_types: List of model types (e.g., ['fnb', 'booking'])
+            
+        Returns:
+            List of matching agents
+        """
+        matching_agents = []
+        
+        for model_type in model_types:
+            for agent in self.sub_agents:
+                agent_name_lower = agent.name.lower()
+                if f"sale_support_{model_type}" in agent_name_lower or f"{model_type}" in agent_name_lower:
+                    matching_agents.append(agent)
+                    break
+        
+        return matching_agents
+    
+    def _call_multiple_agents(self, agents: List[BaseTool], user_query: str) -> Dict[str, str]:
+        """
+        Call multiple agents and collect their responses.
+        
+        Args:
+            agents: List of agents to call
+            user_query: The user's question
+            
+        Returns:
+            dict: Agent name -> response mapping
+        """
+        responses = {}
+        
+        for agent in agents:
+            try:
+                print(f"🔄 Calling agent: {agent.name}")
+                
+                # Prepare the query for the specific agent
+                agent_specific_query = f"""Hãy giải thích về mô hình kinh doanh mà bạn hỗ trợ, bao gồm:
+1. Đặc điểm chính của mô hình
+2. Ưu điểm và lợi ích
+3. Đối tượng khách hàng phù hợp
+4. Các tính năng hỗ trợ chính
+
+Câu hỏi gốc từ người dùng: {user_query}
+
+Vui lòng trả lời bằng tiếng Việt một cách chi tiết và cụ thể."""
+                
+                # Call the agent
+                response = agent.invoke(agent_specific_query)
+                responses[agent.name] = response
+                
+                print(f"✅ Received response from {agent.name}")
+                
+            except Exception as e:
+                print(f"❌ Error calling agent {agent.name}: {str(e)}")
+                responses[agent.name] = f"Lỗi khi gọi agent {agent.name}: {str(e)}"
+        
+        return responses
+    
+    def _summarize_comparison_responses(self, responses: Dict[str, str], user_query: str) -> str:
+        """
+        Summarize and compare responses from multiple agents.
+        
+        Args:
+            responses: Agent name -> response mapping
+            user_query: Original user query
+            
+        Returns:
+            str: Summarized comparison response
+        """
+        try:
+            # Format responses for comparison
+            formatted_responses = []
+            for agent_name, response in responses.items():
+                # Extract model type from agent name
+                model_type = "FNB" if "fnb" in agent_name.lower() else "Booking" if "booking" in agent_name.lower() else agent_name
+                formatted_responses.append(f"**Mô hình {model_type}:**\n{response}")
+            
+            combined_responses = "\n\n" + "="*50 + "\n\n".join(formatted_responses)
+            
+            # Create comparison prompt
+            comparison_prompt = ChatPromptTemplate.from_messages([
+                ("system", """Bạn là một chuyên gia tư vấn kinh doanh của KiotViet. Nhiệm vụ của bạn là phân tích và so sánh các mô hình kinh doanh để đưa ra lời khuyên phù hợp cho khách hàng.
+
+Hãy dựa vào thông tin từ các chuyên gia về từng mô hình kinh doanh để tạo ra một bản so sánh chi tiết và khuyến nghị phù hợp.
+
+YỂU CẦU PHẢN HỒI:
+1. Tóm tắt ngắn gọn đặc điểm của từng mô hình
+2. Bảng so sánh ưu nhược điểm
+3. Khuyến nghị dựa trên loại hình kinh doanh và quy mô
+4. Kết luận và lời khuyên cụ thể
+
+Trả lời bằng tiếng Việt, cấu trúc rõ ràng và dễ hiểu."""),
+                ("human", """Câu hỏi từ khách hàng: {user_query}
+
+Thông tin từ các chuyên gia:
+{agent_responses}
+
+Hãy tạo một bản phân tích so sánh chi tiết và đưa ra khuyến nghị phù hợp.""")
+            ])
+            
+            # Generate comparison response
+            chain = comparison_prompt | self.comparison_llm
+            result = chain.invoke({
+                "user_query": user_query,
+                "agent_responses": combined_responses
+            })
+            
+            return result.content
+            
+        except Exception as e:
+            print(f"❌ Error in comparison summary: {str(e)}")
+            
+            # Fallback: Return formatted responses
+            fallback_response = f"""**So sánh mô hình kinh doanh**
+
+Dựa trên câu hỏi: "{user_query}"
+
+"""
+            for agent_name, response in responses.items():
+                model_type = "FNB" if "fnb" in agent_name.lower() else "Booking" if "booking" in agent_name.lower() else agent_name
+                fallback_response += f"## Mô hình {model_type}:\n{response}\n\n"
+                
+            fallback_response += """**Kết luận:** Vui lòng liên hệ với đội ngũ tư vấn KiotViet để được hỗ trợ chi tiết hơn trong việc lựa chọn mô hình kinh doanh phù hợp."""
+            
+            return fallback_response
     
     def _create_master_agent_executor(self) -> AgentExecutor:
         """Creates the Master Agent executor with sub-agents as its tools."""
@@ -158,20 +328,50 @@ Remember: You are a smart router, not an answerer. Trust your specialists to han
     
     def process_request(self, user_input: str) -> str:
         """
-        Process a user request by routing it to the appropriate sub-agent.
+        Process a user request by routing it to the appropriate sub-agent(s).
+        For comparison requests, calls multiple agents and summarizes responses.
         
         Args:
             user_input: The user's query or request
             
         Returns:
-            str: The response from the appropriate sub-agent
+            str: The response from the appropriate sub-agent(s) or comparison summary
         """
         try:
             # Log the incoming request with analysis
             print(f"\n🎯 MASTER AGENT: Phân tích yêu cầu từ user...")
             print(f"📝 User Input: {user_input}")
             
-            # Analyze request for better routing
+            # Check if this is a comparison request
+            comparison_analysis = self._detect_comparison_request(user_input)
+            
+            if comparison_analysis["is_comparison"]:
+                print(f"🔍 COMPARISON REQUEST DETECTED!")
+                print(f"📊 Models to compare: {comparison_analysis['models']}")
+                
+                # Find matching agents for comparison
+                matching_agents = self._find_agents_by_model_type(comparison_analysis["models"])
+                
+                if len(matching_agents) >= 2:
+                    print(f"✅ Found {len(matching_agents)} agents for comparison: {[agent.name for agent in matching_agents]}")
+                    
+                    # Call multiple agents
+                    agent_responses = self._call_multiple_agents(matching_agents, user_input)
+                    
+                    # Summarize and compare responses
+                    comparison_summary = self._summarize_comparison_responses(agent_responses, user_input)
+                    
+                    print(f"✅ MASTER AGENT: Đã tạo bản so sánh từ {len(matching_agents)} agents")
+                    return comparison_summary
+                    
+                else:
+                    print(f"⚠️ Could not find enough matching agents for comparison. Found: {[agent.name for agent in matching_agents]}")
+                    print(f"📋 Available agents: {[agent.name for agent in self.sub_agents]}")
+                    
+                    # Fallback to normal routing if not enough agents found
+                    print("🔄 Falling back to normal single-agent routing...")
+            
+            # Normal single-agent routing
             self._log_routing_analysis(user_input)
             
             # Process the request through the agent executor
@@ -202,6 +402,14 @@ Vui lòng thử lại hoặc liên hệ với bộ phận hỗ trợ kỹ thuậ
         """Log analysis for routing decision debugging."""
         print(f"\n🔍 ROUTING ANALYSIS:")
         
+        # Check for comparison request first
+        comparison_analysis = self._detect_comparison_request(user_input)
+        if comparison_analysis["is_comparison"]:
+            print(f"🔄 COMPARISON MODE: Detected request to compare {comparison_analysis['models']}")
+            matching_agents = self._find_agents_by_model_type(comparison_analysis["models"])
+            print(f"🎯 Target agents for comparison: {[agent.name for agent in matching_agents]}")
+            return
+        
         # Check for key domain indicators
         hr_keywords = ["nhân sự", "HR", "employee", "nhân viên", "chính sách", "policy", "nghỉ phép", "leave", "lương", "salary", "benefits", "tuyển dụng", "recruitment", "onboarding", "offboarding", "xin nghỉ việc", "nghỉ việc", "resignation", "thủ tục"]
         pe_keywords = ["sản phẩm", "product", "dự án", "project", "phát triển", "development", "business", "kinh doanh", "yêu cầu", "requirements", "user story", "sprint", "scrum", "JIRA", "ticket", "stakeholder", "phân tích", "analysis", "documentation", "tài liệu", "workflow", "process", "strategy", "chiến lược", "market", "thị trường", "competitor", "đối thủ", "research", "nghiên cứu"]
@@ -227,6 +435,7 @@ Vui lòng thử lại hoặc liên hệ với bộ phận hỗ trợ kỹ thuậ
     def process_request_with_details(self, user_input: str) -> dict:
         """
         Process a user request and return both response and execution details.
+        Handles both single-agent routing and multi-agent comparison.
         
         Args:
             user_input: The user's query or request
@@ -238,7 +447,47 @@ Vui lòng thử lại hoặc liên hệ với bộ phận hỗ trợ kỹ thuậ
             # Log the incoming request
             print(f"Master Agent received request: {user_input}")
             
-            # Process the request through the agent executor
+            # Check if this is a comparison request
+            comparison_analysis = self._detect_comparison_request(user_input)
+            
+            if comparison_analysis["is_comparison"]:
+                print(f"Processing comparison request for models: {comparison_analysis['models']}")
+                
+                # Find matching agents for comparison
+                matching_agents = self._find_agents_by_model_type(comparison_analysis["models"])
+                
+                if len(matching_agents) >= 2:
+                    # Call multiple agents for comparison
+                    agent_responses = self._call_multiple_agents(matching_agents, user_input)
+                    
+                    # Summarize and compare responses
+                    comparison_summary = self._summarize_comparison_responses(agent_responses, user_input)
+                    
+                    # Return comparison details
+                    return {
+                        "response": comparison_summary,
+                        "agents_used": [agent.name for agent in matching_agents],
+                        "tools_used": [agent.name for agent in matching_agents],  # Agents are also tools
+                        "execution_steps": [
+                            {
+                                "tool_name": agent.name,
+                                "tool_input": f"Comparison query about business models",
+                                "observation": agent_responses.get(agent.name, "No response")
+                            } for agent in matching_agents
+                        ] + [
+                            {
+                                "tool_name": "comparison_summarizer",
+                                "tool_input": "Summarize comparison responses",
+                                "observation": "Comparison summary generated"
+                            }
+                        ],
+                        "total_steps": len(matching_agents) + 1,
+                        "comparison_mode": True
+                    }
+                else:
+                    print(f"Not enough agents found for comparison, falling back to normal routing")
+            
+            # Normal single-agent processing
             result = self.agent_executor.invoke({"input": user_input})
             
             # Extract the output
@@ -270,19 +519,20 @@ Vui lòng thử lại hoặc liên hệ với bộ phận hỗ trợ kỹ thuậ
                             # It's a regular tool, not a sub-agent
                             pass
                     
-                                    # Record execution step
-                execution_steps.append({
-                    "tool_name": getattr(action, 'tool', 'unknown'),
-                    "tool_input": getattr(action, 'tool_input', ''),
-                    "observation": str(observation)
-                })
+                    # Record execution step
+                    execution_steps.append({
+                        "tool_name": getattr(action, 'tool', 'unknown'),
+                        "tool_input": getattr(action, 'tool_input', ''),
+                        "observation": str(observation)
+                    })
             
             return {
                 "response": output,
                 "agents_used": list(agents_used),
                 "tools_used": list(tools_used),
                 "execution_steps": execution_steps,
-                "total_steps": len(intermediate_steps)
+                "total_steps": len(intermediate_steps),
+                "comparison_mode": False
             }
             
         except Exception as e:
@@ -294,12 +544,14 @@ Vui lòng thử lại hoặc liên hệ với bộ phận hỗ trợ kỹ thuậ
                 "tools_used": [],
                 "execution_steps": [],
                 "total_steps": 0,
-                "error": str(e)
+                "error": str(e),
+                "comparison_mode": False
             }
-
+    
     def process_request_with_details_and_history(self, user_input: str, history: List[dict]) -> dict:
         """
         Process a user request with conversation history and return both response and execution details.
+        Handles both single-agent routing and multi-agent comparison with history context.
         
         Args:
             user_input: The user's current query or request
@@ -325,7 +577,47 @@ Current User Message: {user_input}
 
 Please respond to the current user message while taking into account the conversation history above. Maintain context and continuity from previous exchanges."""
             
-            # Process the request through the agent executor with context
+            # Check if this is a comparison request (using original user input for detection)
+            comparison_analysis = self._detect_comparison_request(user_input)
+            
+            if comparison_analysis["is_comparison"]:
+                print(f"Processing comparison request with history for models: {comparison_analysis['models']}")
+                
+                # Find matching agents for comparison
+                matching_agents = self._find_agents_by_model_type(comparison_analysis["models"])
+                
+                if len(matching_agents) >= 2:
+                    # Call multiple agents for comparison with context
+                    agent_responses = self._call_multiple_agents(matching_agents, contextual_input)
+                    
+                    # Summarize and compare responses
+                    comparison_summary = self._summarize_comparison_responses(agent_responses, user_input)
+                    
+                    # Return comparison details
+                    return {
+                        "response": comparison_summary,
+                        "agents_used": [agent.name for agent in matching_agents],
+                        "tools_used": [agent.name for agent in matching_agents],
+                        "execution_steps": [
+                            {
+                                "tool_name": agent.name,
+                                "tool_input": f"Comparison query with history context",
+                                "observation": agent_responses.get(agent.name, "No response")
+                            } for agent in matching_agents
+                        ] + [
+                            {
+                                "tool_name": "comparison_summarizer",
+                                "tool_input": "Summarize comparison responses with history",
+                                "observation": "Comparison summary generated"
+                            }
+                        ],
+                        "total_steps": len(matching_agents) + 1,
+                        "comparison_mode": True
+                    }
+                else:
+                    print(f"Not enough agents found for comparison, falling back to normal routing")
+            
+            # Normal single-agent processing with context
             result = self.agent_executor.invoke({"input": contextual_input})
             
             # Extract the output
@@ -369,7 +661,8 @@ Please respond to the current user message while taking into account the convers
                 "agents_used": list(agents_used),
                 "tools_used": list(tools_used),
                 "execution_steps": execution_steps,
-                "total_steps": len(intermediate_steps)
+                "total_steps": len(intermediate_steps),
+                "comparison_mode": False
             }
             
         except Exception as e:
@@ -381,7 +674,8 @@ Please respond to the current user message while taking into account the convers
                 "tools_used": [],
                 "execution_steps": [],
                 "total_steps": 0,
-                "error": str(e)
+                "error": str(e),
+                "comparison_mode": False
             }
     
     def _format_conversation_history(self, history: List[dict]) -> str:
