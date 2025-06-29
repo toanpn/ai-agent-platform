@@ -1,4 +1,4 @@
-import { Component, inject, ChangeDetectionStrategy, ViewChild } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy, ViewChild, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ChatSidebarComponent } from '../components/chat-sidebar/chat-sidebar.component';
 import { ChatMessagesComponent } from '../components/chat-messages/chat-messages.component';
@@ -23,7 +23,7 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 	styleUrls: ['./chat-page.component.scss'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ChatPageComponent {
+export class ChatPageComponent implements OnInit {
 	readonly chatState = inject(ChatStateService);
 	private readonly translate = inject(TranslateService);
 
@@ -35,6 +35,10 @@ export class ChatPageComponent {
 		'CHAT.SUGGESTED_PROMPTS.MARKETING_MIX',
 		'CHAT.SUGGESTED_PROMPTS.CONVERSION_RATE',
 	];
+
+	ngOnInit(): void {
+		this.chatState.loadConversations();
+	}
 
 	onConversationSelected(conversation: Conversation): void {
 		this.chatState.selectConversation(conversation);
