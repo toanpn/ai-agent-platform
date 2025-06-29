@@ -57,8 +57,15 @@ export class ToolConfigDialogComponent implements OnInit {
 			return;
 		}
 
+		let ignoredKeys = ['query'];
+		// For tools like Confluence and Jira that use an action/parameters pattern,
+		// we don't want to show those in the configuration pop-up.
+		if (this.tool.id === 'confluence_tool' || this.tool.id === 'jira_tool') {
+			ignoredKeys = ['query', 'action', 'parameters'];
+		}
+
 		this.parameters = Object.entries(this.tool.parameters)
-			.filter(([key]) => key.toLowerCase() !== 'query')
+			.filter(([key]) => !ignoredKeys.includes(key.toLowerCase()))
 			.map(([key, details]) => ({
 				key,
 				details,
@@ -88,6 +95,11 @@ export class ToolConfigDialogComponent implements OnInit {
 
 	onCancel(): void {
 		this.dialogRef.close();
+	}
+
+	getParameterLabel(paramKey: string): string {
+		const toolKey = this.tool.id.replace(/_tool$/, '');
+		return `AGENTS.TOOLS_CONFIG.PARAMS.${toolKey}.${paramKey}`;
 	}
 
 	get toolDisplayName(): string {

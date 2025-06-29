@@ -319,7 +319,27 @@
       "FIELD_REQUIRED": "Trường này là bắt buộc.",
       "SAVE_SUCCESS": "Lưu cấu hình công cụ thành công",
       "SAVE_ERROR": "Không thể lưu cấu hình công cụ",
-      "NO_CONFIG_NEEDED": "Công cụ này đã sẵn sàng để sử dụng và không cần cấu hìnhเพิ่มเติม.",
+      "NO_CONFIG_NEEDED": "Công cụ này không yêu cầu cấu hình bổ sung.",
+      "PARAMS": {
+        "google_search": {
+          "google_api_key": "Khóa API Google",
+          "google_cse_id": "ID Công cụ tìm kiếm tùy chỉnh của Google",
+          "num_results": "Số lượng kết quả"
+        },
+        "gmail": {
+          "gmail_credentials_path": "Đường dẫn thông tin xác thực Gmail"
+        },
+        "jira": {
+          "jira_base_url": "URL cơ sở của Jira",
+          "jira_username": "Tên người dùng Jira",
+          "jira_api_token": "Mã thông báo API Jira"
+        },
+        "confluence": {
+          "confluence_base_url": "URL cơ sở của Confluence",
+          "confluence_username": "Tên người dùng Confluence",
+          "confluence_api_token": "Mã thông báo API Confluence"
+        }
+      },
       "CONNECT_TO": "Kết nối với",
       "TEST_CONNECTION": "Kiểm tra kết nối"
     },
@@ -409,5 +429,15 @@
     "UNKNOWN_ERROR": "Đã xảy ra lỗi không xác định.",
     "UNKNOWN": "Đã xảy ra lỗi không xác định.",
     "NETWORK_ERROR": "Lỗi mạng. Vui lòng kiểm tra kết nối của bạn."
+  },
+  "SETTINGS": {
+    "TITLE": "Cài đặt"
+  },
+  "EXECUTION_STEP": {
+    "TOOL_INPUT": "Đầu vào công cụ",
+    "OBSERVATION": "Quan sát"
+  },
+  "EXECUTION_DETAILS": {
+    "TITLE": "Chi tiết thực thi ({{totalSteps}} bước)"
   }
 }

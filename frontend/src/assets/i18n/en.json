@@ -337,9 +337,29 @@
       "FIELD_REQUIRED": "This field is required.",
       "SAVE_SUCCESS": "Tool configuration saved successfully",
       "SAVE_ERROR": "Failed to save tool configuration",
-      "NO_CONFIG_NEEDED": "This tool is ready to use and requires no additional configuration.",
+      "NO_CONFIG_NEEDED": "This tool does not require any additional configuration.",
       "CONNECT_TO": "Connect to",
-      "TEST_CONNECTION": "Test Connection"
+      "TEST_CONNECTION": "Test Connection",
+      "PARAMS": {
+        "google_search": {
+          "google_api_key": "Google API Key",
+          "google_cse_id": "Google Custom Search Engine ID",
+          "num_results": "Number of Results"
+        },
+        "gmail": {
+          "gmail_credentials_path": "Gmail Credentials Path"
+        },
+        "jira": {
+          "jira_base_url": "Jira Base URL",
+          "jira_username": "Jira Username",
+          "jira_api_token": "Jira API Token"
+        },
+        "confluence": {
+          "confluence_base_url": "Confluence Base URL",
+          "confluence_username": "Confluence Username",
+          "confluence_api_token": "Confluence API Token"
+        }
+      }
     },
     "LLM": {
       "TITLE": "LLM Configuration",
@@ -446,5 +466,12 @@
   },
   "SETTINGS": {
     "TITLE": "Settings"
+  },
+  "EXECUTION_STEP": {
+    "TOOL_INPUT": "Tool Input",
+    "OBSERVATION": "Observation"
+  },
+  "EXECUTION_DETAILS": {
+    "TITLE": "Execution Details ({{totalSteps}} steps)"
   }
 }
