@@ -72,12 +72,12 @@
       "action": {
         "type": "string",
         "description": "Hành động JIRA cần thực hiện (create_issue, search_issues, get_issue, get_projects)",
-        "required": true
+        "required": false
       },
       "parameters": {
         "type": "object",
         "description": "Tham số cho hành động JIRA (ví dụ: {\"summary\": \"tiêu đề\", \"description\": \"mô tả\"})",
-        "required": true
+        "required": false
       },
       "jira_base_url": {
         "type": "string",
@@ -94,6 +94,43 @@
       "jira_api_token": {
         "type": "string",
         "description": "JIRA API Token để xác thực",
+        "required": true,
+        "is_credential": true
+      }
+    }
+  },
+  {
+    "id": "confluence_tool",
+    "name": "confluence_tool",
+    "description": "Công cụ Confluence để quản lý các trang. Hỗ trợ tìm kiếm, lấy nội dung, tạo và cập nhật các trang.",
+    "file": "confluence_tool.py",
+    "instruction": "Use this unified Confluence tool for all Confluence operations including searching for pages, getting page content, creating new pages, and updating existing pages. Use the 'action' parameter to specify the operation and the 'parameters' object for the arguments.",
+    "parameters": {
+      "action": {
+        "type": "string",
+        "description": "Hành động Confluence cần thực hiện (e.g., 'page_search', 'get_page_content', 'create_page', 'update_page')",
+        "required": false
+      },
+      "parameters": {
+        "type": "object",
+        "description": "Các tham số cho hành động được chỉ định.",
+        "required": false
+      },
+      "confluence_base_url": {
+        "type": "string",
+        "description": "URL cơ sở của Confluence instance",
+        "required": true,
+        "is_credential": true
+      },
+      "confluence_username": {
+        "type": "string",
+        "description": "Email đăng nhập Confluence",
+        "required": true,
+        "is_credential": true
+      },
+      "confluence_api_token": {
+        "type": "string",
+        "description": "Confluence API Token để xác thực",
         "required": true,
         "is_credential": true
       }

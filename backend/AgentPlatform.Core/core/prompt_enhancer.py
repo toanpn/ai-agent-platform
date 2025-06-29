@@ -1,3 +1,11 @@
+"""
+Prompt Enhancer Module
+
+This module enhances a raw user query through a four-stage process.
+It uses a LLM to classify the intent, extract key entities, and generate a user-facing prompt.
+The enhanced prompt is then used to route the request to the most appropriate agent.
+"""
+
 import json
 from typing import Dict, Any, List
 from langchain_core.prompts import ChatPromptTemplate

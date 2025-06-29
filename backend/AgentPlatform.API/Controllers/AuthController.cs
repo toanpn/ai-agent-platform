@@ -31,6 +31,11 @@ namespace AgentPlatform.API.Controllers
         [HttpPost("register")]
         public async Task<ActionResult<AuthResponseDto>> Register([FromBody] RegisterRequestDto registerRequest)
         {
+            if (!registerRequest.RegistrationKey.Equals("ababila", StringComparison.OrdinalIgnoreCase))
+            {
+                return BadRequest(new { message = "Invalid registration key" });
+            }
+            
             var response = await _userService.RegisterAsync(registerRequest);
             
             if (response == null)

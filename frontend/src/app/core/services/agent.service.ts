@@ -1,5 +1,10 @@
-import { inject, Injectable } from '@angular/core';
+import {
+	inject,
+	Injectable,
+} from '@angular/core';
+
 import { Observable } from 'rxjs';
+
 import { ApiService } from './api.service';
 
 export interface User {
@@ -76,6 +81,7 @@ export interface Agent {
 	updatedAt?: Date;
 	files: AgentFile[];
 	functions: AgentFunction[];
+	isPublic?: boolean;
 }
 
 export interface CreateAgentRequest {
@@ -86,6 +92,7 @@ export interface CreateAgentRequest {
 	llmConfig: LlmConfig;
 	tools?: string[];
 	toolConfigs?: string; // JSON string sent to backend
+	isPublic?: boolean;
 }
 
 export interface UpdateAgentRequest {
@@ -97,6 +104,7 @@ export interface UpdateAgentRequest {
 	tools?: string[];
 	toolConfigs?: string; // JSON string sent to backend
 	isActive?: boolean;
+	isPublic?: boolean;
 }
 
 export interface CreateAgentFunctionRequest {

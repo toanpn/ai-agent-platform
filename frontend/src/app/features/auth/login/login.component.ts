@@ -1,9 +1,15 @@
-import { Component, inject, DestroyRef, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import {
+	Component,
+	DestroyRef,
+	inject,
+	OnInit,
+} from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
 	AbstractControl,
 	FormBuilder,
 	FormControl,
-	FormGroup,
 	FormGroupDirective,
 	NgForm,
 	ReactiveFormsModule,
@@ -11,22 +17,40 @@ import {
 	ValidatorFn,
 	Validators,
 } from '@angular/forms';
-import { Router, RouterModule } from '@angular/router';
-import { CommonModule } from '@angular/common';
-import { MatCardModule } from '@angular/material/card';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule, MatIconRegistry } from '@angular/material/icon';
+import { MatCardModule } from '@angular/material/card';
+import { ErrorStateMatcher } from '@angular/material/core';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import {
+	MatIconModule,
+	MatIconRegistry,
+} from '@angular/material/icon';
+import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { DomSanitizer } from '@angular/platform-browser';
+import {
+	Router,
+	RouterModule,
+} from '@angular/router';
+
+import {
+	catchError,
+	exhaustMap,
+	finalize,
+	of,
+	Subject,
+} from 'rxjs';
+
+import {
+	TranslateModule,
+	TranslateService,
+} from '@ngx-translate/core';
+
 import { AuthService } from '../../../core/services/auth.service';
 import { NotificationService } from '../../../core/services/notification.service';
-import { finalize, Subject, exhaustMap, catchError, of } from 'rxjs';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { ErrorStateMatcher } from '@angular/material/core';
-import { DomSanitizer } from '@angular/platform-browser';
-import { LanguagePickerComponent } from '../../../shared/components/language-picker/language-picker.component';
+import {
+	LanguagePickerComponent,
+} from '../../../shared/components/language-picker/language-picker.component';
 
 export const passwordMatchValidator: ValidatorFn = (
 	control: AbstractControl
@@ -113,6 +137,7 @@ export class LoginComponent implements OnInit {
 			email: ['', [Validators.required, Validators.email]],
 			password: ['', [Validators.required, Validators.minLength(6)]],
 			confirmPassword: ['', [Validators.required]],
+			registrationKey: ['', [Validators.required]],
 		},
 		{ validators: passwordMatchValidator }
 	);
@@ -155,6 +180,10 @@ export class LoginComponent implements OnInit {
 				'assets/icons/vn-flag.svg'
 			)
 		);
+		this.matIconRegistry.addSvgIcon(
+			'key',
+			this.domSanitizer.bypassSecurityTrustResourceUrl('assets/icons/key.svg')
+		);
 	}
 
 	ngOnInit(): void {
@@ -184,7 +213,7 @@ export class LoginComponent implements OnInit {
 					const rawCreds = this.loginForm.getRawValue();
 					const credentials = {
 						email: rawCreds.email ?? '',
-						password: rawCreds.password ?? '',
+						password: rawCreds.password ?? ''
 					};
 					return this.authService.login(credentials).pipe(
 						finalize(() => (this.isLoading = false)),
@@ -218,6 +247,7 @@ export class LoginComponent implements OnInit {
 						lastName: lastName,
 						email: rawData.email ?? '',
 						password: rawData.password ?? '',
+						registrationKey: rawData.registrationKey ?? '',
 					};
 					return this.authService.register(userData).pipe(
 						finalize(() => (this.isLoading = false)),

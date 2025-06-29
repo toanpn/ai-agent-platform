@@ -210,6 +210,20 @@
 						</mat-error>
 					</mat-form-field>
 
+					<mat-form-field appearance="outline">
+						<mat-icon matPrefix svgIcon="lock"></mat-icon>
+						<mat-label>{{ 'AUTH.REGISTRATION_KEY' | translate }}</mat-label>
+						<input
+							matInput
+							formControlName="registrationKey"
+							placeholder="{{ 'AUTH.REGISTRATION_KEY_PLACEHOLDER' | translate }}"
+							required
+						/>
+						<mat-error *ngIf="registerForm.get('registrationKey')?.hasError('required')">
+							{{ 'VALIDATION.REGISTRATION_KEY_REQUIRED' | translate }}
+						</mat-error>
+					</mat-form-field>
+
 					<button
 						mat-raised-button
 						color="primary"

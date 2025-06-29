@@ -7,37 +7,45 @@
       "knowledge_search_tool"
     ],
     "tool_configs": {
+      "jira_tool": {
+        "jira_base_url": "https://citigo.atlassian.net",
+        "jira_username": "anh.nt15@kiotviet.com",
+        "jira_api_token": "ATATT3xFfGF00wdPMH-CET_2tDevSUe_VIjKngwxlJ6FdTCmspFtIUbK8avuQEjucgavwGbRV2bPRxa_vKqC9iFzMiSsb_eysxqIwyIZN492TDLQab35wxfikOcJ_Df_AD-7f-vrurRBa6nuZwTvOyxd3TNI_PHaF5LHj0HAlYfM2KNEHzZyGSg=ECAB72D8"
+      },
+      "confluence_tool": {
+        "confluence_base_url": "https://citigo.atlassian.net",
+        "confluence_email": "anh.nt15@kiotviet.com",
+        "confluence_api_token": "ATATT3xFfGF00wdPMH-CET_2tDevSUe_VIjKngwxlJ6FdTCmspFtIUbK8avuQEjucgavwGbRV2bPRxa_vKqC9iFzMiSsb_eysxqIwyIZN492TDLQab35wxfikOcJ_Df_AD-7f-vrurRBa6nuZwTvOyxd3TNI_PHaF5LHj0HAlYfM2KNEHzZyGSg=ECAB72D8"
+      },
+      "gmail_tool": {
+        "gmail_credentials_path": "C:\\Users\\anh.nt15\\Downloads\\gmail_credentials.json"
+      },
       "google_search_tool": {
         "google_api_key": "AIzaSyB3dGLjXqjb9_1hIFt4RxKctqf2GA3VZ5E",
         "google_cse_id": "f18557e4b4de94ffe",
         "num_results": 5
       },
       "knowledge_search_tool": {
-        "max_results": 3
+        "max_results": 5
       }
     },
     "llm_config": {
       "model_name": "gemini-2.5-flash",
       "temperature": 0.4
-    }
+    },
+    "IsPublic": false
   },
   {
     "agent_name": "PE_Agent",
     "description": "Specialized agent for PE support tasks including JIRA issue management, knowledge base search, Gmail communication, and Google search.",
     "tools": [
-      "jira_tool",
       "gmail_tool",
       "google_search_tool",
       "knowledge_search_tool"
     ],
     "tool_configs": {
-      "jira_tool": {
-        "jira_base_url": "https://your-domain.atlassian.net",
-        "jira_username": "your_email@company.com",
-        "jira_api_token": "your_jira_api_token_here"
-      },
       "gmail_tool": {
-        "gmail_credentials_path": "/path/to/gmail/credentials.json"
+        "gmail_credentials_path": "C:\\Users\\anh.nt15\\Downloads\\gmail_credentials.json"
       },
       "google_search_tool": {
         "google_api_key": "AIzaSyB3dGLjXqjb9_1hIFt4RxKctqf2GA3VZ5E",
@@ -51,6 +59,7 @@
     "llm_config": {
       "model_name": "gemini-2.5-flash",
       "temperature": 0.2
-    }
+    },
+    "IsPublic": true
   }
 ]

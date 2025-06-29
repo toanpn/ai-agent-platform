@@ -1,10 +1,23 @@
-import { Injectable, inject, signal } from '@angular/core';
-import { ApiService } from './api.service';
-import { Observable, tap, of, catchError, concatMap, map } from 'rxjs';
-import { StorageService } from './storage.service';
-import { ChatStateService } from '../../features/chat/chat-state.service';
+import {
+	inject,
+	Injectable,
+	signal,
+} from '@angular/core';
 import { Router } from '@angular/router';
+
+import {
+	catchError,
+	concatMap,
+	map,
+	Observable,
+	of,
+	tap,
+} from 'rxjs';
+
 import { AgentStateService } from '../../features/chat/agent-state.service';
+import { ChatStateService } from '../../features/chat/chat-state.service';
+import { ApiService } from './api.service';
+import { StorageService } from './storage.service';
 
 export interface User {
 	id: number;
@@ -20,6 +33,14 @@ export interface AuthResponse {
 	token: string;
 	expiresAt: Date;
 	user: User;
+}
+
+export interface RegisterPayload {
+	email: string;
+	password: string;
+	firstName: string;
+	lastName: string;
+	registrationKey: string;
 }
 
 @Injectable({
@@ -83,7 +104,7 @@ export class AuthService {
 		return this.apiService.get<User>('/user/me');
 	}
 
-	register(userInfo: Omit<User, 'id'>): Observable<AuthResponse> {
+	register(userInfo: RegisterPayload): Observable<AuthResponse> {
 		return this.apiService.post<AuthResponse>('/auth/register', userInfo).pipe(
 			tap((response) => {
 				this.storageService.setItem('authToken', response.token);
