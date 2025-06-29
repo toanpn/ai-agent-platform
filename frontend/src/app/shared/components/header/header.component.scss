@@ -38,7 +38,18 @@
 		.logo-text {
 			font-size: 20px;
 			font-weight: bold;
-			color: var(--text-color-primary);
+			text-decoration: none;
+			background: linear-gradient(
+				90deg,
+				var(--color-primary),
+				var(--color-success),
+				var(--color-primary)
+			);
+			background-size: 200% 200%;
+			background-clip: text;
+			-webkit-background-clip: text;
+			color: transparent;
+			animation: gradient-animation 10s ease infinite;
 		}
 	}
 
@@ -128,4 +139,16 @@
 	height: 1px;
 	background-color: var(--border-color);
 	margin: 8px 0;
+}
+
+@keyframes gradient-animation {
+	0% {
+		background-position: 0% 50%;
+	}
+	50% {
+		background-position: 100% 50%;
+	}
+	100% {
+		background-position: 0% 50%;
+	}
 } 

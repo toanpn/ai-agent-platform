@@ -56,9 +56,26 @@
 		color: var(--color-login-text-header);
 		margin: 0 0 0.5rem;
 	}
+
+	.auth-title {
+		font-size: 30px;
+		font-weight: 700;
+		margin: 0 0 0.5rem;
+		background: linear-gradient(
+			90deg,
+			var(--color-primary),
+			var(--color-success),
+			var(--color-primary)
+		);
+		background-size: 200% 200%;
+		background-clip: text;
+		-webkit-background-clip: text;
+		color: transparent;
+		animation: gradient-animation 10s ease infinite;
+	}
 	p {
 		font-size: 16px;
-		color: var(--color-login-text-subheader);
+		color: var(--color-slate-600);
 		margin: 0;
 	}
 }
@@ -269,4 +286,16 @@ form {
 	font-family: 'Inter', sans-serif;
 	color: #374151 !important;
 	font-weight: 500;
+}
+
+@keyframes gradient-animation {
+	0% {
+		background-position: 0% 50%;
+	}
+	50% {
+		background-position: 100% 50%;
+	}
+	100% {
+		background-position: 0% 50%;
+	}
 }

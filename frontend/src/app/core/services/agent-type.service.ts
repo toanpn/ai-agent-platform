@@ -14,30 +14,30 @@ export class AgentTypeService {
 	// A map from a searchable keyword to its full configuration
 	private readonly departmentConfigs: Record<string, DepartmentConfig> = {
 		// Marketing & HR
-		marketing: { type: 'marketing', avatar: 'assets/icons/agent-marketing-avatar.svg', color: 'teal' },
-		hr: { type: 'hr', avatar: 'assets/icons/agent-hr-avatar.svg', color: 'teal' },
-		'l&d': { type: 'ld', avatar: 'assets/icons/agent-ld-avatar.svg', color: 'cyan' },
-		ic: { type: 'ic', avatar: 'assets/icons/agent-ic-avatar.svg', color: 'emerald' },
-		employee: { type: 'employee', avatar: 'assets/icons/agent-employee-avatar.svg', color: 'sky' },
+		marketing: { type: 'marketing', avatar: 'assets/icons/agent-marketing-avatar.png', color: 'teal' },
+		hr: { type: 'hr', avatar: 'assets/icons/agent-marketing-avatar.png', color: 'teal' },
+		'l&d': { type: 'ld', avatar: 'assets/icons/agent-marketing-avatar.png', color: 'cyan' },
+		ic: { type: 'ic', avatar: 'assets/icons/agent-marketing-avatar.png', color: 'emerald' },
+		employee: { type: 'employee', avatar: 'assets/icons/agent-marketing-avatar.png', color: 'sky' },
 
 		// Finance & Business
-		finance: { type: 'finance', avatar: 'assets/icons/agent-finance-avatar.svg', color: 'sky' },
-		financial: { type: 'finance', avatar: 'assets/icons/agent-finance-avatar.svg', color: 'sky' },
-		om: { type: 'om', avatar: 'assets/icons/agent-om-avatar.svg', color: 'emerald' },
-		cnb: { type: 'cnb', avatar: 'assets/icons/agent-cnb-avatar.svg', color: 'lime' },
-		booking: { type: 'booking', avatar: 'assets/icons/agent-booking-avatar.svg', color: 'sky' },
-		retail: { type: 'retail', avatar: 'assets/icons/agent-retail-avatar.svg', color: 'cyan' },
-		fnb: { type: 'fnb', avatar: 'assets/icons/agent-fnb-avatar.svg', color: 'cyan' },
+		finance: { type: 'finance', avatar: 'assets/icons/agent-finance-avatar.png', color: 'sky' },
+		financial: { type: 'finance', avatar: 'assets/icons/agent-finance-avatar.png', color: 'sky' },
+		om: { type: 'om', avatar: 'assets/icons/agent-finance-avatar.png', color: 'emerald' },
+		cnb: { type: 'cnb', avatar: 'assets/icons/agent-finance-avatar.png', color: 'lime' },
+		booking: { type: 'booking', avatar: 'assets/icons/agent-finance-avatar.png', color: 'sky' },
+		retail: { type: 'retail', avatar: 'assets/icons/agent-finance-avatar.png', color: 'cyan' },
+		fnb: { type: 'fnb', avatar: 'assets/icons/agent-finance-avatar.png', color: 'cyan' },
 
 		// Data & Technology
-		data: { type: 'data', avatar: 'assets/icons/agent-data-avatar.svg', color: 'emerald' },
-		it: { type: 'it', avatar: 'assets/icons/agent-it-avatar.svg', color: 'sky' },
-		'ai research': { type: 'ai-research', avatar: 'assets/icons/agent-ai-research-avatar.svg', color: 'teal' },
-		kms: { type: 'kms', avatar: 'assets/icons/agent-kms-avatar.svg', color: 'cyan' },
+		data: { type: 'data', avatar: 'assets/icons/agent-data-avatar.png', color: 'emerald' },
+		it: { type: 'it', avatar: 'assets/icons/agent-data-avatar.png', color: 'sky' },
+		'ai research': { type: 'ai-research', avatar: 'assets/icons/agent-data-avatar.png', color: 'teal' },
+		kms: { type: 'kms', avatar: 'assets/icons/agent-data-avatar.png', color: 'cyan' },
 
 		// Default
-		general: { type: 'default', avatar: 'assets/icons/agent.svg', color: 'cyan' },
-		default: { type: 'default', avatar: 'assets/icons/agent.svg', color: 'cyan' },
+		general: { type: 'default', avatar: 'assets/icons/user-avatar.png', color: 'cyan' },
+		default: { type: 'default', avatar: 'assets/icons/user-avatar.png', color: 'cyan' },
 	};
 
 	private findConfig(departmentName: string): DepartmentConfig {
