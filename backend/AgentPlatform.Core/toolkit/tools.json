@@ -141,5 +141,48 @@
         "is_credential": true
       }
     }
+  },
+  {
+    "id": "gitlab_tool",
+    "name": "gitlab_tool",
+    "description": "Công cụ GitLab tích hợp toàn diện để quản lý repository, issues và merge requests. Hỗ trợ đầy đủ 8 hành động chính: lấy danh sách issues, xem chi tiết issue, bình luận issues, tạo merge request, tạo file, đọc file, cập nhật file và xóa file.",
+    "file": "gitlab_tool.py",
+    "instruction": "Use this comprehensive GitLab tool for all GitLab operations. All 8 main actions are supported: get_issues (list all issues), get_issue (get specific issue details), comment_issue (add comments), create_merge_request (create MR), create_file (add new files), read_file (read file content), update_file (modify files), delete_file (remove files). The master agent will automatically provide action and parameters.",
+    "parameters": {
+      "parameters": {
+        "description": "Các tham số cho hành động GitLab được master agent cung cấp",
+        "required": false,
+        "default": {},
+        "hidden": true
+      },
+      "gitlab_url": {
+        "description": "URL của GitLab instance (mặc định: https://gitlab.com)",
+        "required": false,
+        "default": "https://gitlab.com",
+        "is_credential": true
+      },
+      "gitlab_personal_access_token": {
+        "description": "GitLab Personal Access Token với quyền read_api, read_repository, write_repository",
+        "required": true,
+        "is_credential": true
+      },
+      "gitlab_repository": {
+        "description": "Tên repository GitLab theo định dạng username/repo-name (ví dụ: johndoe/my-project)",
+        "required": true,
+        "is_credential": true
+      },
+      "gitlab_branch": {
+        "description": "Branch để thực hiện các thay đổi và commits (mặc định: main)",
+        "required": false,
+        "default": "main",
+        "is_credential": true
+      },
+      "gitlab_base_branch": {
+        "description": "Base branch làm đích cho merge requests (mặc định: main)",
+        "required": false,
+        "default": "main",
+        "is_credential": true
+      }
+    }
   }
 ]
