@@ -22,6 +22,7 @@ import { ChatMessageComponent } from '../chat-message/chat-message.component';
 export class ChatMessagesComponent {
 	messages = input.required<Message[]>();
 	isLoading = input<boolean>(false);
+	isSending = input<boolean>(false);
 
 	private messagesContainer = viewChild<ElementRef>('messagesContainer');
 

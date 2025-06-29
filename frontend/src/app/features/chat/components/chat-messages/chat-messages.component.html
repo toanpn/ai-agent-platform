@@ -2,7 +2,7 @@
 	@for (message of messages(); track message.id) {
 		<app-chat-message [message]="message"></app-chat-message>
 	}
-	@if (isLoading()) {
+	@if (isSending()) {
 		<div class="loading-indicator">
 			<p>{{ 'CHAT.ASSISTANT_THINKING' | translate }}</p>
 		</div>

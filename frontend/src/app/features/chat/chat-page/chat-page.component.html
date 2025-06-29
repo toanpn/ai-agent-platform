@@ -21,13 +21,14 @@
 				class="chat-content"
 				[messages]="chatState.messages()"
 				[isLoading]="chatState.isLoading()"
+				[isSending]="chatState.isSending()"
 			></app-chat-messages>
 		}
 		<app-chat-input
 			class="chat-input"
 			(sendMessage)="onSendMessage($event)"
 			(typing)="onTyping($event)"
-			[disabled]="chatState.isLoading()"
+			[disabled]="chatState.isLoading() || chatState.isSending()"
 		></app-chat-input>
 	</div>
 
