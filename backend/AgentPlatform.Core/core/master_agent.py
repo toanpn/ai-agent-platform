@@ -118,10 +118,10 @@ class MasterAgent:
     
     def _call_multiple_agents(self, agents: List[BaseTool], user_query: str) -> Dict[str, str]:
         """
-        Call multiple agents and collect their responses.
+        Master agent calls multiple sub-agents as tools and collects their responses.
         
         Args:
-            agents: List of agents to call
+            agents: List of agent tools to call
             user_query: The user's question
             
         Returns:
@@ -129,100 +129,113 @@ class MasterAgent:
         """
         responses = {}
         
+        print(f"🎯 Master Agent orchestrating calls to {len(agents)} specialist agents")
+        
         for agent in agents:
             try:
-                print(f"🔄 Calling agent: {agent.name}")
+                print(f"🔄 Master Agent calling specialist: {agent.name}")
                 
-                # Prepare the query for the specific agent
-                agent_specific_query = f"""Hãy giải thích về mô hình kinh doanh mà bạn hỗ trợ, bao gồm:
-1. Đặc điểm chính của mô hình
-2. Ưu điểm và lợi ích
-3. Đối tượng khách hàng phù hợp
-4. Các tính năng hỗ trợ chính
+                # Prepare a concise query for comparison purposes
+                agent_specific_query = f"""Câu hỏi từ người dùng: {user_query}
 
-Câu hỏi gốc từ người dùng: {user_query}
+Hãy trả lời NGẮN GỌN và TÓM TẮT về mô hình kinh doanh mà bạn chuyên về:
 
-Vui lòng trả lời bằng tiếng Việt một cách chi tiết và cụ thể."""
+1. **Mô tả ngắn gọn mô hình** (2-3 câu)
+2. **3 ưu điểm chính**
+3. **Đối tượng khách hàng phù hợp** (1-2 câu)
+4. **Tính năng nổi bật trong KiotViet** (1-2 câu)
+
+**YỀU CẦU**: 
+- Trả lời bằng tiếng Việt
+- TỐI ĐA 150 từ
+- Tập trung vào điểm mạnh và đặc trưng chính
+- Không cần bảng biểu hay format phức tạp"""
                 
-                # Call the agent
+                # Call the agent tool directly
                 response = agent.invoke(agent_specific_query)
                 responses[agent.name] = response
                 
-                print(f"✅ Received response from {agent.name}")
+                print(f"✅ Master Agent received response from {agent.name}")
+                print(f"📄 Response length: {len(str(response))} characters")
                 
             except Exception as e:
-                print(f"❌ Error calling agent {agent.name}: {str(e)}")
-                responses[agent.name] = f"Lỗi khi gọi agent {agent.name}: {str(e)}"
+                error_msg = f"Lỗi khi Master Agent gọi {agent.name}: {str(e)}"
+                print(f"❌ Master Agent error calling {agent.name}: {str(e)}")
+                responses[agent.name] = error_msg
         
+        print(f"🎯 Master Agent completed calling all {len(agents)} specialists")
         return responses
     
     def _summarize_comparison_responses(self, responses: Dict[str, str], user_query: str) -> str:
         """
-        Summarize and compare responses from multiple agents.
+        Master agent analyzes and compares responses from multiple specialist agents.
+        Returns only the Master agent's concise opinion and recommendation.
         
         Args:
             responses: Agent name -> response mapping
             user_query: Original user query
             
         Returns:
-            str: Summarized comparison response
+            str: Master agent's concise comparison opinion and recommendation
         """
         try:
-            # Format responses for comparison
+            print(f"🤖 Master Agent starting comparison analysis...")
+            
+            # Format responses for analysis (internal use only)
             formatted_responses = []
             for agent_name, response in responses.items():
-                # Extract model type from agent name
                 model_type = "FNB" if "fnb" in agent_name.lower() else "Booking" if "booking" in agent_name.lower() else agent_name
-                formatted_responses.append(f"**Mô hình {model_type}:**\n{response}")
+                formatted_responses.append(f"=== {model_type.upper()} SPECIALIST ===\n{response}")
             
-            combined_responses = "\n\n" + "="*50 + "\n\n".join(formatted_responses)
+            combined_responses = "\n\n".join(formatted_responses)
             
-            # Create comparison prompt
+            # Create concise comparison prompt for Master agent
             comparison_prompt = ChatPromptTemplate.from_messages([
-                ("system", """Bạn là một chuyên gia tư vấn kinh doanh của KiotViet. Nhiệm vụ của bạn là phân tích và so sánh các mô hình kinh doanh để đưa ra lời khuyên phù hợp cho khách hàng.
+                ("system", """Bạn là Master Agent của KiotViet. Dựa trên thông tin từ các chuyên gia, hãy đưa ra phân tích so sánh NGẮN GỌN và khuyến nghị cụ thể.
 
-Hãy dựa vào thông tin từ các chuyên gia về từng mô hình kinh doanh để tạo ra một bản so sánh chi tiết và khuyến nghị phù hợp.
+🎯 YÊU CẦU PHẢN HỒI:
+- TỐI ĐA 200 từ
+- Chỉ trả lời quan điểm và khuyến nghị của Master Agent
+- KHÔNG bao gồm thông tin chi tiết từ các chuyên gia
+- KHÔNG tạo bảng so sánh
 
-YỂU CẦU PHẢN HỒI:
-1. Tóm tắt ngắn gọn đặc điểm của từng mô hình
-2. Bảng so sánh ưu nhược điểm
-3. Khuyến nghị dựa trên loại hình kinh doanh và quy mô
-4. Kết luận và lời khuyên cụ thể
+📋 CẤU TRÚC:
+1. **So sánh ngắn gọn** (2-3 câu về sự khác biệt chính)
+2. **Khuyến nghị cụ thể** (nên chọn gì và tại sao)
+3. **Kết luận** (1 câu)
 
-Trả lời bằng tiếng Việt, cấu trúc rõ ràng và dễ hiểu."""),
-                ("human", """Câu hỏi từ khách hàng: {user_query}
+Trả lời bằng tiếng Việt, súc tích và trực tiếp."""),
+                ("human", """Câu hỏi khách hàng: {user_query}
 
-Thông tin từ các chuyên gia:
+Thông tin từ chuyên gia:
 {agent_responses}
 
-Hãy tạo một bản phân tích so sánh chi tiết và đưa ra khuyến nghị phù hợp.""")
+Hãy đưa ra phân tích ngắn gọn và khuyến nghị của Master Agent.""")
             ])
             
-            # Generate comparison response
+            print(f"🧠 Master Agent processing concise comparison...")
+            
+            # Generate concise comparison response
             chain = comparison_prompt | self.comparison_llm
             result = chain.invoke({
                 "user_query": user_query,
                 "agent_responses": combined_responses
             })
             
+            print(f"✅ Master Agent completed concise comparison analysis")
             return result.content
             
         except Exception as e:
-            print(f"❌ Error in comparison summary: {str(e)}")
+            print(f"❌ Master Agent error in comparison analysis: {str(e)}")
             
-            # Fallback: Return formatted responses
-            fallback_response = f"""**So sánh mô hình kinh doanh**
+            # Concise fallback response
+            return f"""**KHUYẾN NGHỊ TỪ MASTER AGENT**
 
-Dựa trên câu hỏi: "{user_query}"
+Dựa trên phân tích các mô hình kinh doanh, cả FNB và Booking đều có ưu điểm riêng phù hợp với từng loại hình doanh nghiệp.
 
-"""
-            for agent_name, response in responses.items():
-                model_type = "FNB" if "fnb" in agent_name.lower() else "Booking" if "booking" in agent_name.lower() else agent_name
-                fallback_response += f"## Mô hình {model_type}:\n{response}\n\n"
-                
-            fallback_response += """**Kết luận:** Vui lòng liên hệ với đội ngũ tư vấn KiotViet để được hỗ trợ chi tiết hơn trong việc lựa chọn mô hình kinh doanh phù hợp."""
-            
-            return fallback_response
+**Khuyến nghị:** Vui lòng liên hệ đội ngũ tư vấn KiotViet để được phân tích cụ thể dựa trên đặc điểm kinh doanh của bạn.
+
+*Lỗi kỹ thuật trong quá trình phân tích tự động.*"""
     
     def _create_master_agent_executor(self) -> AgentExecutor:
         """Creates the Master Agent executor with sub-agents as its tools."""
@@ -353,15 +366,18 @@ Remember: You are a smart router, not an answerer. Trust your specialists to han
                 matching_agents = self._find_agents_by_model_type(comparison_analysis["models"])
                 
                 if len(matching_agents) >= 2:
-                    print(f"✅ Found {len(matching_agents)} agents for comparison: {[agent.name for agent in matching_agents]}")
+                    print(f"✅ Found {len(matching_agents)} specialist agents for comparison: {[agent.name for agent in matching_agents]}")
+                    print(f"🎯 Master Agent will orchestrate calls to specialists and create comparison summary")
                     
-                    # Call multiple agents
+                    # Master agent calls multiple specialists
                     agent_responses = self._call_multiple_agents(matching_agents, user_input)
                     
-                    # Summarize and compare responses
+                    print(f"📋 Master Agent now analyzing and comparing {len(agent_responses)} specialist responses...")
+                    
+                    # Master agent summarizes and compares responses
                     comparison_summary = self._summarize_comparison_responses(agent_responses, user_input)
                     
-                    print(f"✅ MASTER AGENT: Đã tạo bản so sánh từ {len(matching_agents)} agents")
+                    print(f"✅ MASTER AGENT: Completed comparison analysis from {len(matching_agents)} specialists")
                     return comparison_summary
                     
                 else:
