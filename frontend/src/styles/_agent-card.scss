@@ -8,22 +8,22 @@ It should be imported into the component's SCSS file that uses the agent-card.
 @use 'sass:map';
 
 $agent-types: (
-	'marketing': ('color': 'purple', 'header-style': 'tag-bg'),
-	'employee': ('color': 'purple', 'header-style': 'tag-bg'),
-	'finance': ('color': 'blue', 'header-style': 'tag-bg'),
-	'data': ('color': 'green', 'header-style': 'tag-bg'),
-	'hr': ('color': 'red', 'header-style': 'header-bg'),
-	'ld': ('color': 'lime', 'header-style': 'header-bg'),
+	'marketing': ('color': 'teal', 'header-style': 'tag-bg'),
+	'employee': ('color': 'sky', 'header-style': 'tag-bg'),
+	'finance': ('color': 'sky', 'header-style': 'tag-bg'),
+	'data': ('color': 'emerald', 'header-style': 'tag-bg'),
+	'hr': ('color': 'teal', 'header-style': 'header-bg'),
+	'ld': ('color': 'cyan', 'header-style': 'header-bg'),
 	'ic': ('color': 'emerald', 'header-style': 'header-bg'),
-	'om': ('color': 'orange', 'header-style': 'header-bg'),
-	'cnb': ('color': 'yellow', 'header-style': 'header-bg'),
-	'booking': ('color': 'pink', 'header-style': 'header-bg'),
-	'retail': ('color': 'indigo', 'header-style': 'header-bg'),
+	'om': ('color': 'emerald', 'header-style': 'header-bg'),
+	'cnb': ('color': 'lime', 'header-style': 'header-bg'),
+	'booking': ('color': 'sky', 'header-style': 'header-bg'),
+	'retail': ('color': 'cyan', 'header-style': 'header-bg'),
 	'fnb': ('color': 'cyan', 'header-style': 'header-bg'),
 	'it': ('color': 'sky', 'header-style': 'header-bg'),
 	'ai-research': ('color': 'teal', 'header-style': 'header-bg'),
-	'kms': ('color': 'gray', 'header-style': 'header-bg'),
-	'default': ('color': 'gray', 'header-style': 'header-bg')
+	'kms': ('color': 'cyan', 'header-style': 'header-bg'),
+	'default': ('color': 'cyan', 'header-style': 'header-bg')
 );
 
 @mixin generate-agent-styles($header-selector) {
