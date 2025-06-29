@@ -48,6 +48,19 @@
 	--color-neutral-900: #212121;
 	--color-neutral-950: #121212;
 
+	/* Slate Color Scale - NEW */
+	--color-slate-50: #f8fafc;
+	--color-slate-100: #f1f5f9;
+	--color-slate-200: #e2e8f0;
+	--color-slate-300: #cbd5e1;
+	--color-slate-400: #94a3b8;
+	--color-slate-500: #64748b;
+	--color-slate-600: #475569;
+	--color-slate-700: #334155;
+	--color-slate-800: #1e293b;
+	--color-slate-900: #0f172a;
+	--color-slate-950: #020617;
+
 	/* Semantic Colors */
 	--color-primary: var(--color-blue-700);
 	--color-primary-light: var(--color-blue-300);
@@ -80,28 +93,28 @@
 	--color-info-dark: var(--color-blue-800);
 
 	/* Surface & Background Colors */
-	--color-background: var(--color-neutral-50);
+	--color-background: var(--color-slate-50);
 	--color-surface: #ffffff;
-	--color-surface-variant: var(--color-neutral-100);
-	--color-background-alt: var(--color-neutral-100);
-	--color-background-alt-hover: var(--color-neutral-200);
-	--color-background-light: var(--color-neutral-50);
+	--color-surface-variant: var(--color-slate-100);
+	--color-background-alt: var(--color-slate-100);
+	--color-background-alt-hover: var(--color-slate-200);
+	--color-background-light: var(--color-slate-50);
 	--color-background-light-alt: #ffffff;
 
 	/* Text Colors */
-	--color-text: var(--color-neutral-900);
-	--color-text-light: var(--color-neutral-900);
-	--color-text-secondary: var(--color-neutral-700);
-	--color-text-secondary-light: var(--color-neutral-600);
-	--color-text-tertiary: var(--color-neutral-600);
-	--color-text-tertiary-light: var(--color-neutral-500);
-	--color-text-quaternary: var(--color-neutral-500);
-	--color-text-disabled: var(--color-neutral-400);
+	--color-text: var(--color-slate-900);
+	--color-text-light: var(--color-slate-900);
+	--color-text-secondary: var(--color-slate-700);
+	--color-text-secondary-light: var(--color-slate-600);
+	--color-text-tertiary: var(--color-slate-600);
+	--color-text-tertiary-light: var(--color-slate-500);
+	--color-text-quaternary: var(--color-slate-500);
+	--color-text-disabled: var(--color-slate-400);
 	--color-text-on-primary: #ffffff;
 
 	/* Border Colors */
-	--color-border: var(--color-neutral-300);
-	--color-border-hover: var(--color-neutral-400);
+	--color-border: var(--color-slate-300);
+	--color-border-hover: var(--color-slate-400);
 	--color-border-focus: var(--color-blue-700);
 
 	/* Other UI Elements */
@@ -341,28 +354,28 @@
 		--color-info-dark: var(--color-blue-400);
 
 		/* Surface & Background Colors - Dark Mode */
-		--color-background: var(--color-neutral-50);
-		--color-surface: var(--color-neutral-100);
-		--color-surface-variant: var(--color-neutral-200);
-		--color-background-alt: var(--color-neutral-100);
-		--color-background-alt-hover: var(--color-neutral-300);
-		--color-background-light: var(--color-neutral-200);
-		--color-background-light-alt: var(--color-neutral-300);
+		--color-background: var(--color-slate-900);
+		--color-surface: var(--color-slate-800);
+		--color-surface-variant: var(--color-slate-700);
+		--color-background-alt: var(--color-slate-800);
+		--color-background-alt-hover: var(--color-slate-700);
+		--color-background-light: var(--color-slate-700);
+		--color-background-light-alt: var(--color-slate-600);
 
 		/* Text Colors - Dark Mode */
-		--color-text: var(--color-neutral-900);
-		--color-text-light: var(--color-neutral-950);
-		--color-text-secondary: var(--color-neutral-700);
-		--color-text-secondary-light: var(--color-neutral-800);
-		--color-text-tertiary: var(--color-neutral-600);
-		--color-text-tertiary-light: var(--color-neutral-700);
-		--color-text-quaternary: var(--color-neutral-600);
-		--color-text-disabled: var(--color-neutral-400);
+		--color-text: var(--color-slate-200);
+		--color-text-light: var(--color-slate-50);
+		--color-text-secondary: var(--color-slate-400);
+		--color-text-secondary-light: var(--color-slate-300);
+		--color-text-tertiary: var(--color-slate-500);
+		--color-text-tertiary-light: var(--color-slate-400);
+		--color-text-quaternary: var(--color-slate-500);
+		--color-text-disabled: var(--color-slate-600);
 		--color-text-on-primary: #000000;
 
 		/* Border Colors - Dark Mode */
-		--color-border: var(--color-neutral-300);
-		--color-border-hover: var(--color-neutral-400);
+		--color-border: var(--color-slate-700);
+		--color-border-hover: var(--color-slate-600);
 		--color-border-focus: var(--color-blue-600);
 
 		/* Other UI Elements - Dark Mode */
@@ -471,28 +484,28 @@
 	--color-info-dark: var(--color-blue-400);
 
 	/* Surface & Background Colors - Dark Mode */
-	--color-background: var(--color-neutral-50);
-	--color-surface: var(--color-neutral-100);
-	--color-surface-variant: var(--color-neutral-200);
-	--color-background-alt: var(--color-neutral-100);
-	--color-background-alt-hover: var(--color-neutral-300);
-	--color-background-light: var(--color-neutral-200);
-	--color-background-light-alt: var(--color-neutral-300);
+	--color-background: var(--color-slate-900);
+	--color-surface: var(--color-slate-800);
+	--color-surface-variant: var(--color-slate-700);
+	--color-background-alt: var(--color-slate-800);
+	--color-background-alt-hover: var(--color-slate-700);
+	--color-background-light: var(--color-slate-700);
+	--color-background-light-alt: var(--color-slate-600);
 
 	/* Text Colors - Dark Mode */
-	--color-text: var(--color-neutral-900);
-	--color-text-light: var(--color-neutral-950);
-	--color-text-secondary: var(--color-neutral-700);
-	--color-text-secondary-light: var(--color-neutral-800);
-	--color-text-tertiary: var(--color-neutral-600);
-	--color-text-tertiary-light: var(--color-neutral-700);
-	--color-text-quaternary: var(--color-neutral-600);
-	--color-text-disabled: var(--color-neutral-400);
+	--color-text: var(--color-slate-200);
+	--color-text-light: var(--color-slate-50);
+	--color-text-secondary: var(--color-slate-400);
+	--color-text-secondary-light: var(--color-slate-300);
+	--color-text-tertiary: var(--color-slate-500);
+	--color-text-tertiary-light: var(--color-slate-400);
+	--color-text-quaternary: var(--color-slate-500);
+	--color-text-disabled: var(--color-slate-600);
 	--color-text-on-primary: #000000;
 
 	/* Border Colors - Dark Mode */
-	--color-border: var(--color-neutral-300);
-	--color-border-hover: var(--color-neutral-400);
+	--color-border: var(--color-slate-700);
+	--color-border-hover: var(--color-slate-600);
 	--color-border-focus: var(--color-blue-600);
 
 	/* Other UI Elements - Dark Mode */
@@ -601,28 +614,28 @@
 	--color-info-dark: var(--color-blue-800);
 
 	/* Surface & Background Colors - Light Mode */
-	--color-background: var(--color-neutral-50);
+	--color-background: var(--color-slate-50);
 	--color-surface: #ffffff;
-	--color-surface-variant: var(--color-neutral-100);
-	--color-background-alt: var(--color-neutral-100);
-	--color-background-alt-hover: var(--color-neutral-200);
-	--color-background-light: var(--color-neutral-50);
+	--color-surface-variant: var(--color-slate-100);
+	--color-background-alt: var(--color-slate-100);
+	--color-background-alt-hover: var(--color-slate-200);
+	--color-background-light: var(--color-slate-50);
 	--color-background-light-alt: #ffffff;
 
 	/* Text Colors - Light Mode */
-	--color-text: var(--color-neutral-900);
-	--color-text-light: var(--color-neutral-900);
-	--color-text-secondary: var(--color-neutral-700);
-	--color-text-secondary-light: var(--color-neutral-600);
-	--color-text-tertiary: var(--color-neutral-600);
-	--color-text-tertiary-light: var(--color-neutral-500);
-	--color-text-quaternary: var(--color-neutral-500);
-	--color-text-disabled: var(--color-neutral-400);
+	--color-text: var(--color-slate-900);
+	--color-text-light: var(--color-slate-900);
+	--color-text-secondary: var(--color-slate-700);
+	--color-text-secondary-light: var(--color-slate-600);
+	--color-text-tertiary: var(--color-slate-600);
+	--color-text-tertiary-light: var(--color-slate-500);
+	--color-text-quaternary: var(--color-slate-500);
+	--color-text-disabled: var(--color-slate-400);
 	--color-text-on-primary: #ffffff;
 
 	/* Border Colors - Light Mode */
-	--color-border: var(--color-neutral-300);
-	--color-border-hover: var(--color-neutral-400);
+	--color-border: var(--color-slate-300);
+	--color-border-hover: var(--color-slate-400);
 	--color-border-focus: var(--color-blue-700);
 
 	/* Other UI Elements - Light Mode */
