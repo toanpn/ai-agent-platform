@@ -6,6 +6,12 @@
     "file": "rag_tool.py",
     "instruction": "Use this tool when you need to search for relevant information from the agent's knowledge base. This tool uses RAG (Retrieval-Augmented Generation) to find and retrieve information from uploaded and processed documents.",
     "parameters": {
+      "query": {
+        "type": "string",
+        "description": "Từ khóa tìm kiếm trên cơ sở tri thức của agent",
+        "required": true,
+        "hidden": true
+      },
       "max_results": {
         "type": "integer",
         "description": "Số lượng kết quả tối đa trả về",
