@@ -10,6 +10,16 @@
 }
 .step-section {
   margin-bottom: 1rem;
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+h4 {
+  font-weight: bold;
+  display: block;
+  margin-bottom: 0.5rem;
+  color: var(--color-text-primary);
+  font-size: 0.875rem;
 }
 label {
   font-weight: bold;

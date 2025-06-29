@@ -1,19 +1,23 @@
 <mat-expansion-panel class="execution-step">
   <mat-expansion-panel-header>
-    <mat-panel-title>
+    <mat-panel-title class="step-header">
       <mat-icon>build</mat-icon>
       <span class="step-title">{{ step.toolName }}</span>
     </mat-panel-title>
   </mat-expansion-panel-header>
 
   <div class="step-content">
-    <div class="step-section">
-      <label>Tool Input:</label>
-      <pre><code>{{ step.toolInput }}</code></pre>
-    </div>
-    <div class="step-section">
-      <label>Observation:</label>
-      <pre><code>{{ step.observation }}</code></pre>
-    </div>
+    @if (step.toolInput) {
+      <div class="step-section">
+        <h4>{{ 'EXECUTION_STEP.TOOL_INPUT' | translate }}</h4>
+        <pre><code>{{ formattedToolInput }}</code></pre>
+      </div>
+    }
+    @if (step.observation) {
+      <div class="step-section">
+        <h4>{{ 'EXECUTION_STEP.OBSERVATION' | translate }}</h4>
+        <pre><code>{{ step.observation }}</code></pre>
+      </div>
+    }
   </div>
 </mat-expansion-panel>

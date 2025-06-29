@@ -19,7 +19,7 @@
   </div>
 </div>
 
-@if (msg.executionDetails) {
+@if (msg.executionDetails && msg.executionDetails.executionSteps && msg.executionDetails.executionSteps.length > 0) {
 <app-execution-details [details]="msg.executionDetails"></app-execution-details>
 }
 
