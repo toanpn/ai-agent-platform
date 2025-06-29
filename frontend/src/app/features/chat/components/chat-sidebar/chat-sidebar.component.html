@@ -9,12 +9,11 @@
 			<img src="assets/icons/arrow-down.svg" class="collapse-icon" alt="Toggle sidebar" />
 		</button>
 	</div>
+	<button class="new-chat-btn" (click)="onStartNewChat()">
+		<img src="assets/icons/plus.svg" alt="New Chat" class="new-chat-icon" />
+		<span>{{ 'CHAT.NEW_CHAT' | translate }}</span>
+	</button>
 	<div class="sidebar-content">
-		<button class="new-chat-btn" (click)="onStartNewChat()">
-			<img src="assets/icons/plus.svg" alt="New Chat" class="new-chat-icon" />
-			<span>{{ 'CHAT.NEW_CHAT' | translate }}</span>
-		</button>
-
 		<div class="conversations-list-container">
 			<app-conversation-list
 				[selectedConversation]="selectedConversation()"

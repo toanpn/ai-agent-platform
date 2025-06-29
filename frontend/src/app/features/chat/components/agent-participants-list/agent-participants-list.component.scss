@@ -29,11 +29,8 @@
 			display: none;
 		}
 
-		.header-actions {
-			gap: var(--spacing-smd);
-			.collapse-icon {
-				transform: rotate(-90deg);
-			}
+		.collapse-icon {
+			transform: rotate(90deg);
 		}
 	}
 }
@@ -50,7 +47,7 @@
 		font-size: 16px;
 		font-weight: 600;
 		color: var(--color-text-strong);
-		margin: 0;
+		margin: 0 auto;
 		white-space: nowrap;
 		overflow: hidden;
 		text-overflow: ellipsis;
@@ -86,7 +83,7 @@
 	&.collapse-btn {
 		.collapse-icon {
 			transition: transform 0.3s ease-in-out;
-			transform: rotate(90deg);
+			transform: rotate(-90deg);
 		}
 	}
 }

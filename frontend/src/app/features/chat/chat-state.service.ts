@@ -1,11 +1,12 @@
 import { effect, inject, Injectable, signal, computed, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import { EMPTY, forkJoin, lastValueFrom, BehaviorSubject, Subject } from 'rxjs';
-import { catchError, tap, debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
+import { catchError, tap, debounceTime, distinctUntilChanged, switchMap, filter } from 'rxjs/operators';
 import { Agent } from '../../core/services/agent.service';
 import { ChatService, Conversation, Message } from '../../core/services/chat.service';
 import { NotificationService } from '../../core/services/notification.service';
 import { AgentStateService } from './agent-state.service';
+import { AuthService } from '../../core/services/auth.service';
 
 @Injectable({
 	providedIn: 'root',
@@ -15,6 +16,7 @@ export class ChatStateService {
 	private notificationService = inject(NotificationService);
 	private destroyRef = inject(DestroyRef);
 	private agentState = inject(AgentStateService);
+	private authService = inject(AuthService);
 
 	// --- Private state management ---
 	private readonly searchTrigger = new BehaviorSubject<string>('');
@@ -57,6 +59,7 @@ export class ChatStateService {
 			.pipe(
 				debounceTime(300),
 				distinctUntilChanged(),
+				filter(() => this.authService.isAuthenticated()),
 				tap(() => this.isSearching.set(true)),
 				switchMap((query) => {
 					const request = query
@@ -116,7 +119,6 @@ export class ChatStateService {
 
 	initialize(): void {
 		// Initialization logic can be triggered from auth service
-		this.loadConversations();
 	}
 
 	destroy(): void {

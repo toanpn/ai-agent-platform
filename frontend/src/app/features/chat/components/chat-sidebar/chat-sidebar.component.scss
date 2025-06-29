@@ -29,7 +29,13 @@
 		}
 
 		.collapse-icon {
-			transform: rotate(90deg);
+			transform: rotate(-90deg);
+		}
+		.new-chat-btn {
+			justify-content: center;
+			span {
+				display: none;
+			}
 		}
 	}
 }
@@ -51,6 +57,17 @@
 		flex-shrink: 1;
 		min-width: 0;
 	}
+
+	.collapse-icon {
+		width: 16px;
+		height: 16px;
+		transition: transform 0.3s ease-in-out;
+		transform: rotate(-90deg);
+	}
+
+	&:hover {
+		opacity: 0.8;
+	}
 }
 
 .collapse-btn {
@@ -67,7 +84,7 @@
 		width: 16px;
 		height: 16px;
 		transition: transform 0.3s ease-in-out;
-		transform: rotate(-90deg);
+		transform: rotate(90deg);
 	}
 
 	&:hover {
