@@ -19,7 +19,7 @@ from langchain_core.prompts import ChatPromptTemplate
 from core.dynamic_tool_manager import DynamicToolManager
 
 # Import all available tools for backward compatibility
-from toolkit import jira_tool, rag_tool
+from toolkit import jira_tool, rag_tool, confluence_tool
 
 class AgentManager:
     def __init__(self):
