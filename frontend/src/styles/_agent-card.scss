@@ -9,6 +9,7 @@ It should be imported into the component's SCSS file that uses the agent-card.
 
 $agent-types: (
 	'marketing': ('color': 'purple', 'header-style': 'tag-bg'),
+	'employee': ('color': 'purple', 'header-style': 'tag-bg'),
 	'finance': ('color': 'blue', 'header-style': 'tag-bg'),
 	'data': ('color': 'green', 'header-style': 'tag-bg'),
 	'hr': ('color': 'red', 'header-style': 'header-bg'),
@@ -21,7 +22,8 @@ $agent-types: (
 	'fnb': ('color': 'cyan', 'header-style': 'header-bg'),
 	'it': ('color': 'sky', 'header-style': 'header-bg'),
 	'ai-research': ('color': 'teal', 'header-style': 'header-bg'),
-	'kms': ('color': 'gray', 'header-style': 'header-bg')
+	'kms': ('color': 'gray', 'header-style': 'header-bg'),
+	'default': ('color': 'gray', 'header-style': 'header-bg')
 );
 
 @mixin generate-agent-styles($header-selector) {
@@ -43,6 +45,25 @@ $agent-types: (
 
 			.tag {
 				background-color: var(--color-agent-#{$color}-bg);
+				color: var(--color-agent-#{$color}-tag-text);
+			}
+		}
+	}
+}
+
+@mixin generate-agent-message-styles() {
+	@each $type, $details in $agent-types {
+		$color: map-get($details, 'color');
+
+		&[data-agent-type='#{$type}'] {
+			background-color: var(--color-agent-#{$color}-bg);
+
+			.agent-name {
+				color: var(--color-agent-#{$color}-text);
+			}
+
+			.agent-specialty-tag {
+				background-color: var(--color-agent-#{$color}-tag-bg);
 				color: var(--color-agent-#{$color}-tag-text);
 			}
 		}
