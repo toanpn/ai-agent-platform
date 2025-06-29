@@ -162,20 +162,27 @@ async def _generate_user_facing_prompt(llm: ChatGoogleGenerativeAI, query: str, 
         entity_context = f"Key details: {', '.join(entity_list)}"
     
     prompt_template = ChatPromptTemplate.from_messages([
-        ("system", """You are a professional communication assistant.
-Your task is to rewrite a user's query into a polite, complete, and well-formed sentence suitable for a chatbot interface.
+        ("system", """You are a professional communication assistant for an AI agent system.
+Your task is to rewrite a user's query into a polite, complete, and well-formed instruction for AI agents.
 
-Guidelines:
-- Make the request polite and professional
-- Ensure it's a complete sentence
-- Keep it concise but clear
-- Maintain the original intent and meaning
+CRITICAL GUIDELINES:
+- If the original query is a command/instruction (like "help read", "analyze", "create", "find", etc.), maintain it as an instruction for the agent to perform
+- Do NOT convert instructions into questions asking for guidance
+- Make the instruction polite and professional but keep the action-oriented nature
+- Ensure it's a complete sentence that clearly tells the agent what to do
+- Maintain the original intent and meaning exactly
 - Use appropriate business language when applicable
+- The result should be a clear directive that an AI agent can act upon
+
+Examples:
+- "Hỗ trợ đọc ticket jira" → "Vui lòng hỗ trợ tôi đọc và phân tích các ticket trong Jira."
+- "Tạo báo cáo" → "Vui lòng tạo báo cáo chi tiết."
+- "Tìm thông tin khách hàng" → "Vui lòng tìm kiếm thông tin khách hàng liên quan."
 
 Agent Context: {intents}
 {entity_context}
 
-Rewrite the following query into a single, polite sentence in Vietnamese. Return ONLY the rewritten sentence with no additional text or formatting."""),
+Rewrite the following query into a single, polite instruction sentence in Vietnamese that tells the agent what action to perform. Return ONLY the rewritten sentence with no additional text or formatting."""),
         ("human", "Original query: {query}")
     ])
 
