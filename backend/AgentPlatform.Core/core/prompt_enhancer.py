@@ -153,7 +153,7 @@ Do not add any explanatory text, markdown formatting, or other content."""),
 
 
 async def _generate_user_facing_prompt(llm: ChatGoogleGenerativeAI, query: str, intents: List[str], entities: Dict[str, Any]) -> str:
-    """Generates a polite, complete sentence suitable for chatbot UI."""
+    """Generates a polite, complete sentence suitable for chatbot UI, in Vietnamese."""
     
     intent_str = ", ".join(intents)
     entity_context = ""
@@ -175,7 +175,7 @@ Guidelines:
 Agent Context: {intents}
 {entity_context}
 
-Rewrite the following query into a single, polite sentence. Return ONLY the rewritten sentence with no additional text or formatting."""),
+Rewrite the following query into a single, polite sentence in Vietnamese. Return ONLY the rewritten sentence with no additional text or formatting."""),
         ("human", "Original query: {query}")
     ])
 
