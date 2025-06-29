@@ -450,20 +450,20 @@ def create_master_agent(sub_agents_as_tools: List[BaseTool]) -> MasterAgent:
 
 async def summarize_conversation_async(messages: List[dict]) -> str:
     """
-    Generates a concise summary for a given conversation history.
+    Generates a concise Vietnamese summary for a given conversation history.
 
     Args:
         messages: A list of message dictionaries, e.g., [{"role": "user", "content": "..."}]
 
     Returns:
-        A short string summarizing the conversation.
+        A short Vietnamese string summarizing the conversation.
     """
     try:
         # Format the conversation history for the prompt
         history = "\n".join([f"{msg['role']}: {msg['content']}" for msg in messages])
         
         prompt_template = ChatPromptTemplate.from_messages([
-            ("system", "Based on the following conversation, create a short, descriptive title of 5 words or less. Do not use quotes.\n\n<conversation_history>"),
+            ("system", "Dựa vào cuộc hội thoại sau, hãy tạo một tiêu đề ngắn gọn, mô tả bằng tiếng Việt trong vòng 5 từ hoặc ít hơn. Không sử dụng dấu ngoặc kép.\n\n<conversation_history>"),
             ("human", "{history}")
         ])
 
@@ -480,4 +480,4 @@ async def summarize_conversation_async(messages: List[dict]) -> str:
         return summary
     except Exception as e:
         print(f"Error during conversation summarization: {e}")
-        return "New Chat" # Fallback title 
+        return "Cuộc trò chuyện mới" # Fallback title 
