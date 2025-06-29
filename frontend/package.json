@@ -28,6 +28,7 @@
     "@ngx-translate/http-loader": "^16.0.1",
     "marked": "^15.0.0",
     "ngx-markdown": "^20.0.0",
+    "ngx-toastr": "^19.0.0",
     "prismjs": "^1.30.0",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",

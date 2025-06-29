@@ -1,14 +1,9 @@
 import { Injectable, inject } from '@angular/core';
-import {
-	MatSnackBar,
-	MatSnackBarConfig,
-	MatSnackBarRef,
-	TextOnlySnackBar,
-} from '@angular/material/snack-bar';
+import { ActiveToast, IndividualConfig, ToastrService } from 'ngx-toastr';
 
 /**
  * NotificationService provides a consistent interface for displaying toast notifications
- * throughout the application, utilizing Angular Material's SnackBar component.
+ * throughout the application, utilizing ngx-toastr.
  *
  * The service supports four notification types (success, error, info, warning)
  * with appropriate styling and duration for each type.
@@ -17,88 +12,73 @@ import {
 	providedIn: 'root',
 })
 export class NotificationService {
-	/** Angular Material SnackBar service for displaying notifications */
-	private snackBar = inject(MatSnackBar);
-
-	/** Default duration for notifications in milliseconds */
-	private readonly DEFAULT_DURATION = 5000;
-
-	/** Duration for error notifications in milliseconds */
-	private readonly ERROR_DURATION = 10000;
-
-	/** Duration for warning notifications in milliseconds */
-	private readonly WARNING_DURATION = 7000;
-
-	/** Default configuration for all snackbars */
-	private defaultConfig: MatSnackBarConfig = {
-		duration: this.DEFAULT_DURATION,
-		horizontalPosition: 'end',
-		verticalPosition: 'top',
-		politeness: 'assertive',
-	};
+	/** ngx-toastr service for displaying notifications */
+	private toastr = inject(ToastrService);
 
 	/**
 	 * Show a success notification
 	 * @param message The message to display
-	 * @param config Optional configuration to override defaults
-	 * @returns Reference to the opened snackbar
+	 * @param title Optional title for the toast
+	 * @param override Optional configuration to override defaults
+	 * @returns Reference to the opened toast
 	 */
-	showSuccess(message: string, config?: MatSnackBarConfig): MatSnackBarRef<TextOnlySnackBar> {
-		return this.snackBar.open(message, 'Close', {
-			...this.defaultConfig,
-			...config,
-			panelClass: ['success-snackbar'],
-		});
+	showSuccess(
+		message: string,
+		title?: string,
+		override?: Partial<IndividualConfig>,
+	): ActiveToast<any> {
+		return this.toastr.success(message, title, override);
 	}
 
 	/**
 	 * Show an error notification with longer display duration
 	 * @param message The message to display
-	 * @param config Optional configuration to override defaults
-	 * @returns Reference to the opened snackbar
+	 * @param title Optional title for the toast
+	 * @param override Optional configuration to override defaults
+	 * @returns Reference to the opened toast
 	 */
-	showError(message: string, config?: MatSnackBarConfig): MatSnackBarRef<TextOnlySnackBar> {
-		return this.snackBar.open(message, 'Close', {
-			...this.defaultConfig,
-			...config,
-			panelClass: ['error-snackbar'],
-			duration: this.ERROR_DURATION,
-		});
+	showError(
+		message: string,
+		title?: string,
+		override?: Partial<IndividualConfig>,
+	): ActiveToast<any> {
+		return this.toastr.error(message, title, override);
 	}
 
 	/**
 	 * Show an info notification
 	 * @param message The message to display
-	 * @param config Optional configuration to override defaults
-	 * @returns Reference to the opened snackbar
+	 * @param title Optional title for the toast
+	 * @param override Optional configuration to override defaults
+	 * @returns Reference to the opened toast
 	 */
-	showInfo(message: string, config?: MatSnackBarConfig): MatSnackBarRef<TextOnlySnackBar> {
-		return this.snackBar.open(message, 'Close', {
-			...this.defaultConfig,
-			...config,
-			panelClass: ['info-snackbar'],
-		});
+	showInfo(
+		message: string,
+		title?: string,
+		override?: Partial<IndividualConfig>,
+	): ActiveToast<any> {
+		return this.toastr.info(message, title, override);
 	}
 
 	/**
 	 * Show a warning notification with medium display duration
 	 * @param message The message to display
-	 * @param config Optional configuration to override defaults
-	 * @returns Reference to the opened snackbar
+	 * @param title Optional title for the toast
+	 * @param override Optional configuration to override defaults
+	 * @returns Reference to the opened toast
 	 */
-	showWarning(message: string, config?: MatSnackBarConfig): MatSnackBarRef<TextOnlySnackBar> {
-		return this.snackBar.open(message, 'Close', {
-			...this.defaultConfig,
-			...config,
-			panelClass: ['warning-snackbar'],
-			duration: this.WARNING_DURATION,
-		});
+	showWarning(
+		message: string,
+		title?: string,
+		override?: Partial<IndividualConfig>,
+	): ActiveToast<any> {
+		return this.toastr.warning(message, title, override);
 	}
 
 	/**
 	 * Dismiss all currently displayed notifications
 	 */
 	dismissAll(): void {
-		this.snackBar.dismiss();
+		this.toastr.clear();
 	}
 }
