@@ -45,6 +45,7 @@ class AgentManager:
         tool_names = config["tools"]
         tool_configs = config.get("tool_configs", {})
         llm_config = config.get("llm_config", {})
+        instruction = config.get("instruction")
         
         # Create dynamic tools for this agent using the new tool manager
         agent_tools = []
@@ -88,7 +89,7 @@ class AgentManager:
             raise RuntimeError(f"Failed to initialize LLM for {agent_name}: {e}")
         
         # Create specialized prompts based on agent type
-        def create_specialized_prompt(agent_name: str, description: str, tools: List[str]) -> ChatPromptTemplate:
+        def create_specialized_prompt(agent_name: str, description: str, tools: List[str], instruction: Optional[str]) -> ChatPromptTemplate:
             base_instructions = f"""
 CRITICAL LANGUAGE REQUIREMENT:
 - You MUST respond to users in Vietnamese (tiếng Việt)
@@ -98,6 +99,8 @@ CRITICAL LANGUAGE REQUIREMENT:
 
 AVAILABLE TOOLS: {tools}
 """
+            if instruction:
+                base_instructions += f"\n\nADDITIONAL INSTRUCTIONS:\n{instruction}"
             
             if "HR" in agent_name:
                 system_prompt = f"""🏢 Bạn là {agent_name} - Chuyên gia Nhân sự hàng đầu của KiotViet.
@@ -234,7 +237,7 @@ AVAILABLE TOOLS: {tools}
                 ("placeholder", "{agent_scratchpad}"),
             ])
         
-        prompt = create_specialized_prompt(agent_name, description, [tool.name for tool in agent_tools])
+        prompt = create_specialized_prompt(agent_name, description, [tool.name for tool in agent_tools], instruction)
         
         # Create the agent executor
         try:

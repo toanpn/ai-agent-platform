@@ -108,7 +108,9 @@
     "FOOTER_PRIVACY": "Bảo mật",
     "FOOTER_HELP": "Trợ giúp",
     "FOOTER_CONTACT": "Liên hệ",
-    "FULL_NAME": "Họ và Tên"
+    "FULL_NAME": "Họ và Tên",
+    "REGISTRATION_KEY": "Khóa đăng ký",
+    "REGISTRATION_KEY_PLACEHOLDER": "Nhập khóa đăng ký của bạn"
   },
   "CHAT": {
     "NEW_CHAT": "Cuộc Trò Chuyện Mới",
@@ -223,6 +225,9 @@
     "FAILED_CREATE_AGENT": "Tạo agent thất bại.",
     "FAILED_LOAD_TOOLS": "Không thể tải danh sách công cụ. Vui lòng thử lại.",
     "INVALID_AGENT_ID": "ID agent không hợp lệ",
+    "SETTINGS_TITLE": "Cài đặt",
+    "IS_PUBLIC": "Agent công khai",
+    "IS_PUBLIC_HELP": "Agent công khai có thể được sử dụng bởi bất kỳ ai trong tổ chức.",
     "AGENT_ID_NOT_PROVIDED": "ID agent không được cung cấp",
     "SELECT_DEPARTMENT": "Chọn phòng ban",
     "DESCRIBE_AGENT": "Mô tả agent này làm gì",
@@ -379,18 +384,19 @@
   },
   "VALIDATION": {
     "REQUIRED": "Trường này là bắt buộc",
-    "EMAIL": "Vui lòng nhập email hợp lệ",
+    "EMAIL": "Vui lòng nhập một địa chỉ email hợp lệ",
     "MIN_LENGTH": "Độ dài tối thiểu là {{min}} ký tự",
     "MAX_LENGTH": "Độ dài tối đa là {{max}} ký tự",
-    "PATTERN": "Vui lòng nhập giá trị hợp lệ",
-    "PASSWORD_MISMATCH": "Mật khẩu không khớp",
+    "PATTERN": "Vui lòng nhập một giá trị hợp lệ",
+    "PASSWORD_MISMATCH": "Mật khẩu không khớp.",
     "INVALID_FORMAT": "Định dạng không hợp lệ",
     "EMAIL_REQUIRED": "Email là bắt buộc.",
     "PASSWORD_REQUIRED": "Mật khẩu là bắt buộc.",
     "FULL_NAME_REQUIRED": "Họ và tên là bắt buộc.",
     "PASSWORD_MIN_LENGTH": "Mật khẩu phải có ít nhất 6 ký tự.",
     "CONFIRM_PASSWORD_REQUIRED": "Yêu cầu xác nhận mật khẩu.",
-    "EMAIL_INVALID": "Vui lòng nhập một địa chỉ email hợp lệ."
+    "EMAIL_INVALID": "Vui lòng nhập một địa chỉ email hợp lệ.",
+    "REGISTRATION_KEY_REQUIRED": "Yêu cầu khóa đăng ký."
   },
   "ERRORS": {
     "GENERIC_TITLE": "Đã xảy ra lỗi",
@@ -401,6 +407,7 @@
     "NOT_FOUND": "Không tìm thấy tài nguyên được yêu cầu.",
     "TIMEOUT": "Yêu cầu hết thời gian chờ. Vui lòng thử lại.",
     "UNKNOWN_ERROR": "Đã xảy ra lỗi không xác định.",
-    "UNKNOWN": "Đã xảy ra lỗi không xác định."
+    "UNKNOWN": "Đã xảy ra lỗi không xác định.",
+    "NETWORK_ERROR": "Lỗi mạng. Vui lòng kiểm tra kết nối của bạn."
   }
 }

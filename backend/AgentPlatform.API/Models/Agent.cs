@@ -39,6 +39,7 @@ namespace AgentPlatform.API.Models
         public DateTime CreatedAt { get; set; }
         
         public DateTime? UpdatedAt { get; set; }
+        public bool IsPublic { get; set; } = false;
         
         // Navigation properties
         public ICollection<AgentFile> Files { get; set; } = new List<AgentFile>();

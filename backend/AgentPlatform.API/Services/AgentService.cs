@@ -33,7 +33,7 @@ namespace AgentPlatform.API.Services
                 .Include(a => a.CreatedBy)
                 .Include(a => a.Files)
                 .Include(a => a.Functions)
-                .Where(a => a.CreatedById == userId && a.IsActive)
+                .Where(a => (a.CreatedById == userId || a.IsPublic) && a.IsActive)
                 .ToListAsync();
 
             return _mapper.Map<List<AgentDto>>(agents);
@@ -118,6 +118,9 @@ namespace AgentPlatform.API.Services
             
             if (request.IsActive.HasValue)
                 agent.IsActive = request.IsActive.Value;
+
+            if (request.IsPublic.HasValue)
+                agent.IsPublic = request.IsPublic.Value;
 
             agent.UpdatedAt = DateTime.UtcNow;
 

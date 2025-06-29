@@ -46,7 +46,9 @@
     "SHARE": "Share",
     "MORE_OPTIONS": "More Options",
     "PRIVATE": "Private",
-    "FULL_NAME": "Full Name"
+    "FULL_NAME": "Full Name",
+    "REGISTRATION_KEY": "Registration Key",
+    "REGISTRATION_KEY_PLACEHOLDER": "Enter your registration key"
   },
   "AUTH": {
     "LOGIN": "Login",
@@ -116,7 +118,9 @@
     "FOOTER_PRIVACY": "Privacy",
     "FOOTER_HELP": "Help",
     "FOOTER_CONTACT": "Contact",
-    "FULL_NAME": "Full Name"
+    "FULL_NAME": "Full Name",
+    "REGISTRATION_KEY": "Registration Key",
+    "REGISTRATION_KEY_PLACEHOLDER": "Enter your registration key"
   },
   "CHAT": {
     "NEW_CHAT": "New Chat",
@@ -187,7 +191,12 @@
       "CONVERSION_RATE": "How to improve conversion rate?"
     },
     "DATE_TODAY": "Today",
-    "DATE_YESTERDAY": "Yesterday"
+    "DATE_YESTERDAY": "Yesterday",
+    "PASSWORD_MIN_LENGTH": "Password must be at least 6 characters long",
+    "PASSWORD_MISMATCH": "Passwords do not match",
+    "FULL_NAME_REQUIRED": "Full name is required",
+    "CONFIRM_PASSWORD_REQUIRED": "Confirm password is required",
+    "REGISTRATION_KEY_REQUIRED": "Registration key is required"
   },
   "AGENTS": {
     "CREATE_AGENT": "Create Agent",
@@ -225,6 +234,9 @@
     "SAVE_CHANGES": "Save Changes",
     "CREATE_NEW_AGENT": "Create New Agent",
     "LOADING_AGENT": "Loading agent details...",
+    "SETTINGS_TITLE": "Settings",
+    "IS_PUBLIC": "Public Agent",
+    "IS_PUBLIC_HELP": "Public agents can be used by anyone in the organization.",
     "CREATING_AGENT": "Creating agent...",
     "FAILED_LOAD_AGENT": "Failed to load agent data.",
     "FAILED_UPDATE_AGENT": "Failed to update agent.",
@@ -410,7 +422,8 @@
     "FULL_NAME_REQUIRED": "Full name is required.",
     "PASSWORD_MIN_LENGTH": "Password must be at least 6 characters.",
     "CONFIRM_PASSWORD_REQUIRED": "Password confirmation is required.",
-    "EMAIL_INVALID": "Please enter a valid email address."
+    "EMAIL_INVALID": "Please enter a valid email address.",
+    "REGISTRATION_KEY_REQUIRED": "Registration key is required."
   },
   "ERRORS": {
     "NETWORK_ERROR": "Network error. Please check your connection.",
@@ -430,5 +443,8 @@
     "SETTINGS": "Settings",
     "GENERAL_SETTINGS": "General Settings",
     "SECURITY": "Security"
+  },
+  "SETTINGS": {
+    "TITLE": "Settings"
   }
 }

@@ -9,9 +9,9 @@ and creates tool instances with the appropriate API keys and parameters for each
 import json
 import os
 import importlib
-from typing import List, Dict, Any, Optional, Type
+from typing import List, Dict, Any, Optional, Type, Union
 from langchain.tools import BaseTool
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, create_model, validator
 
 class DynamicToolManager:
     def __init__(self, tools_config_path: str = "toolkit/tools.json"):
@@ -108,9 +108,9 @@ class DynamicToolManager:
                         schema_fields[param_name] = (int, Field(default=default_value, description=param_description))
                 elif param_type == "object":
                     if is_required and default_value is None:
-                        schema_fields[param_name] = (dict, Field(description=param_description))
+                        schema_fields[param_name] = (Union[dict, str], Field(description=param_description))
                     else:
-                        schema_fields[param_name] = (dict, Field(default=default_value or {}, description=param_description))
+                        schema_fields[param_name] = (Union[dict, str], Field(default=default_value or {}, description=param_description))
                 else:
                     # Default to string type for unknown types
                     if is_required and default_value is None:
@@ -119,8 +119,22 @@ class DynamicToolManager:
                         schema_fields[param_name] = (str, Field(default=default_value, description=param_description))
         
         # Create dynamic input model using create_model
-        from pydantic import create_model
-        DynamicInputModel = create_model(f"{tool_name}Input", **schema_fields)
+        validators = {}
+        for param_name, param_config in tool_parameters.items():
+            if param_config.get("type") == "object" and not param_config.get("is_credential", False):
+                def create_validator(p_name):
+                    @validator(p_name, pre=True, allow_reuse=True)
+                    def _validate_json_string(cls, v):
+                        if isinstance(v, str):
+                            try:
+                                return json.loads(v)
+                            except json.JSONDecodeError:
+                                raise ValueError(f"Invalid JSON string provided for {p_name}")
+                        return v
+                    return _validate_json_string
+                validators[f'validate_{param_name}'] = create_validator(param_name)
+
+        DynamicInputModel = create_model(f"{tool_name}Input", __validators__=validators, **schema_fields)
         
         # Create the dynamic tool class
         class DynamicTool(BaseTool):
@@ -162,6 +176,8 @@ class DynamicToolManager:
                         return self._execute_gmail_tool(tool_module, params)
                     elif self.name == "jira_tool":
                         return self._execute_jira_tool(tool_module, params)
+                    elif self.name == "confluence_tool":
+                        return self._execute_confluence_tool(tool_module, params)
                     elif self.name == "knowledge_search_tool":
                         return self._execute_knowledge_search_tool(tool_module, params)
                     else:
@@ -257,9 +273,14 @@ class DynamicToolManager:
             
             def _execute_jira_tool(self, tool_module, params: Dict[str, Any]) -> str:
                 """Execute unified JIRA tool with dynamic configuration."""
-                jira_url = params.get("jira_base_url")
+                print(f"JIRA_TOOL_EXEC: Received params: {params}")
+                # Langchain's JiraAPIWrapper now expects 'jira_instance_url', so we check for both for compatibility
+                jira_url = params.get("jira_instance_url") or params.get("jira_base_url")
                 jira_username = params.get("jira_username")
                 jira_token = params.get("jira_api_token")
+                print(f"JIRA_TOOL_EXEC: JIRA URL: {jira_url}")
+                print(f"JIRA_TOOL_EXEC: JIRA Username: {jira_username}")
+                print(f"JIRA_TOOL_EXEC: JIRA Token: {jira_token}")
                 
                 if not all([jira_url, jira_username, jira_token]):
                     return "❌ JIRA configuration not complete (missing URL, username, or token)"
@@ -269,7 +290,7 @@ class DynamicToolManager:
                     
                     # Create JIRA tool instance with credentials
                     tool_instance = JiraTool(
-                        jira_base_url=jira_url,
+                        jira_instance_url=jira_url,
                         jira_username=jira_username,
                         jira_api_token=jira_token
                     )
@@ -277,12 +298,72 @@ class DynamicToolManager:
                     # Execute the JIRA tool with action and parameters
                     action = params.get("action", "")
                     action_params = params.get("parameters", {})
+                    print(f"JIRA_TOOL_EXEC: Parsed action='{action}', parameters={action_params} (type: {type(action_params)})")
                     
                     return tool_instance._run(action, action_params)
                     
                 except Exception as e:
+                    print(f"JIRA_TOOL_EXEC: Error during execution: {e}")
                     return f"❌ Error executing JIRA tool: {str(e)}"
             
+            def _execute_confluence_tool(self, tool_module, params: Dict[str, Any]) -> str:
+                """Execute unified Confluence tool with dynamic configuration."""
+                confluence_url = params.get("confluence_url") or params.get("confluence_base_url")
+                confluence_username = params.get("confluence_username") or params.get("confluence_email")
+                confluence_token = params.get("confluence_api_token")
+
+                action = params.get("action")
+                action_params = params.get("parameters", {})
+
+                # If the main 'action' parameter is missing, try to infer it.
+                # This makes the tool more robust if the LLM provides flat parameters.
+                if not action:
+                    print("CONFLUENCE_TOOL_EXEC: 'action' not provided. Attempting to infer from other parameters.")
+                    
+                    # Infer 'get_page_content' from title/space_key
+                    if params.get("title") and params.get("space_key"):
+                        action = "get_page_content"
+                        action_params = {"title": params.get("title"), "space_key": params.get("space_key")}
+                    
+                    # Infer 'get_page_content' from page_id
+                    elif params.get("page_id") and not params.get("content"): # 'content' helps distinguish from 'update'
+                        action = "get_page_content"
+                        action_params = {"page_id": params.get("page_id")}
+                        
+                    # Infer 'page_search' from cql
+                    elif params.get("cql"):
+                        action = "page_search"
+                        action_params = {"cql": params.get("cql")}
+
+                    # Fallback to a general search if a query-like term is provided
+                    elif params.get("query") or params.get("search_term"):
+                        action = "page_search"
+                        query = params.get("query") or params.get("search_term")
+                        cql = f'text ~ "{query}"'
+                        if params.get("space_key"):
+                            cql += f' and space.key = "{params["space_key"]}"'
+                        action_params = {"cql": cql}
+
+                    if action:
+                        print(f"CONFLUENCE_TOOL_EXEC: Inferred action: '{action}' with params: {action_params}")
+                    else:
+                        return "❌ Không thể xác định hành động Confluence. Vui lòng cung cấp 'action' hoặc các tham số như 'title' và 'space_key' để hệ thống tự suy luận."
+
+                try:
+                    from toolkit.confluence_tool import ConfluenceTool
+                    
+                    # The tool's __init__ and _run methods will handle credentials and mocking internally.
+                    tool_instance = ConfluenceTool(
+                        confluence_url=confluence_url,
+                        username=confluence_username,
+                        api_token=confluence_token
+                    )
+                    
+                    return tool_instance._run(action, action_params)
+                    
+                except Exception as e:
+                    return f"❌ Error executing Confluence tool: {str(e)}"
+
             def _execute_knowledge_search_tool(self, tool_module, params: Dict[str, Any]) -> str:
                 """Execute knowledge search tool (RAG) with dynamic configuration."""
                 try:

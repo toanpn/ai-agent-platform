@@ -1,10 +1,24 @@
-import { Injectable, inject, signal } from '@angular/core';
-import { ApiService } from './api.service';
-import { Observable, tap, of, catchError, concatMap, map } from 'rxjs';
-import { StorageService } from './storage.service';
-import { ChatStateService } from '../../features/chat/chat-state.service';
+import {
+	inject,
+	Injectable,
+	signal,
+	Injector,
+} from '@angular/core';
 import { Router } from '@angular/router';
+
+import {
+	catchError,
+	concatMap,
+	map,
+	Observable,
+	of,
+	tap,
+} from 'rxjs';
+
 import { AgentStateService } from '../../features/chat/agent-state.service';
+import { ChatStateService } from '../../features/chat/chat-state.service';
+import { ApiService } from './api.service';
+import { StorageService } from './storage.service';
 
 export interface User {
 	id: number;
@@ -22,6 +36,14 @@ export interface AuthResponse {
 	user: User;
 }
 
+export interface RegisterPayload {
+	email: string;
+	password: string;
+	firstName: string;
+	lastName: string;
+	registrationKey: string;
+}
+
 @Injectable({
 	providedIn: 'root',
 })
@@ -29,8 +51,7 @@ export class AuthService {
 	private apiService = inject(ApiService);
 	private storageService = inject(StorageService);
 	private router = inject(Router);
-	private chatState = inject(ChatStateService);
-	private agentState = inject(AgentStateService);
+	private injector = inject(Injector);
 
 	private currentUserSignal = signal<User | null>(null);
 	readonly currentUser = this.currentUserSignal.asReadonly();
@@ -48,8 +69,8 @@ export class AuthService {
 		return this.getCurrentUser().pipe(
 			tap((user) => {
 				this.currentUserSignal.set(this.formatUser(user));
-				this.chatState.initialize();
-				this.agentState.initialize().subscribe();
+				this.injector.get(ChatStateService).initialize();
+				this.injector.get(AgentStateService).initialize().subscribe();
 			}),
 			map(() => true),
 			catchError(() => {
@@ -72,8 +93,8 @@ export class AuthService {
 			)),
 			tap(({ user }) => {
 				this.currentUserSignal.set(this.formatUser(user));
-				this.chatState.initialize();
-				this.agentState.initialize().subscribe();
+				this.injector.get(ChatStateService).initialize();
+				this.injector.get(AgentStateService).initialize().subscribe();
 			}),
 			map(({ response }) => response)
 		);
@@ -83,7 +104,7 @@ export class AuthService {
 		return this.apiService.get<User>('/user/me');
 	}
 
-	register(userInfo: Omit<User, 'id'>): Observable<AuthResponse> {
+	register(userInfo: RegisterPayload): Observable<AuthResponse> {
 		return this.apiService.post<AuthResponse>('/auth/register', userInfo).pipe(
 			tap((response) => {
 				this.storageService.setItem('authToken', response.token);
@@ -96,8 +117,8 @@ export class AuthService {
 			)),
 			tap(({ user }) => {
 				this.currentUserSignal.set(this.formatUser(user));
-				this.chatState.initialize();
-				this.agentState.initialize().subscribe();
+				this.injector.get(ChatStateService).initialize();
+				this.injector.get(AgentStateService).initialize().subscribe();
 			}),
 			map(({ response }) => response)
 		);
@@ -106,8 +127,8 @@ export class AuthService {
 	logout(): void {
 		this.storageService.removeItem('authToken');
 		this.currentUserSignal.set(null);
-		this.chatState.destroy();
-		this.agentState.destroy();
+		this.injector.get(ChatStateService).destroy();
+		this.injector.get(AgentStateService).destroy();
 		this.router.navigate(['/auth/login']);
 	}
 

@@ -7,19 +7,21 @@ namespace AgentPlatform.API.DTOs
     {
         [Required]
         public string Name { get; set; } = string.Empty;
-        
+
         [Required]
         public string Department { get; set; } = string.Empty;
-        
+
         public string? Description { get; set; }
-        
+
         public string? Instructions { get; set; }
-        
+
         public string[]? Tools { get; set; }
-        
+
         public string? ToolConfigs { get; set; }
-        
+
         public LlmConfigDto? LlmConfig { get; set; }
+        
+        public bool? IsPublic { get; set; }
     }
     
     public class SetToolsRequestDto
@@ -44,6 +46,8 @@ namespace AgentPlatform.API.DTOs
         public LlmConfigDto? LlmConfig { get; set; }
 
         public bool? IsActive { get; set; }
+
+        public bool? IsPublic { get; set; }
     }
 
     public class AgentDto
@@ -58,6 +62,7 @@ namespace AgentPlatform.API.DTOs
         public LlmConfigDto? LlmConfig { get; set; }
         public bool IsActive { get; set; }
         public bool IsMainRouter { get; set; }
+        public bool IsPublic { get; set; }
         public UserDto CreatedBy { get; set; } = null!;
         public DateTime CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
@@ -89,18 +94,27 @@ namespace AgentPlatform.API.DTOs
     {
         [JsonPropertyName("agent_name")]
         public string AgentName { get; set; } = string.Empty;
-        
+
         [JsonPropertyName("description")]
         public string? Description { get; set; }
-        
+
+        [JsonPropertyName("instruction")]
+        public string? Instruction { get; set; }
+
         [JsonPropertyName("tools")]
         public string[]? Tools { get; set; }
-        
+
         [JsonPropertyName("tool_configs")]
         public object? ToolConfigs { get; set; }
-        
+
         [JsonPropertyName("llm_config")]
         public AgentJsonLlmConfigDto? LlmConfig { get; set; }
+
+        [JsonPropertyName("is_public")]
+        public bool IsPublic { get; set; }
+
+        [JsonPropertyName("owner_id")]
+        public string? OwnerId { get; set; }
     }
 
     public class AgentFileDto

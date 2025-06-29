@@ -52,6 +52,8 @@ namespace AgentPlatform.API.Mapping
             // Mapping for agents.json synchronization
             CreateMap<Agent, AgentJsonDto>()
                 .ForMember(dest => dest.AgentName, opt => opt.MapFrom(src => src.Name))
+                .ForMember(dest => dest.Description, opt => opt.MapFrom(src => src.Description))
+                .ForMember(dest => dest.Instruction, opt => opt.MapFrom(src => src.Instructions))
                 .ForMember(dest => dest.Tools, opt => opt.MapFrom(src => src.ToolsArray))
                 .ForMember(dest => dest.ToolConfigs, opt => opt.MapFrom<ToolConfigsValueResolver>())
                 .ForMember(dest => dest.LlmConfig, opt => opt.MapFrom(src => 
