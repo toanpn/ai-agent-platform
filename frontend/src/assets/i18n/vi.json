@@ -172,6 +172,10 @@
     "FORMAT_LIST": "Định dạng danh sách",
     "LIST_FORMAT": "Danh sách",
     "AGENT_RESPONSE_NOTE": "Tất cả các agent sẽ trả lời tin nhắn của bạn",
+    "WELCOME": {
+      "TITLE": "Hôm nay tôi có thể giúp gì cho bạn?",
+      "SUBTITLE": "Bạn có thể bắt đầu bằng cách nhập tin nhắn hoặc chọn một trong các gợi ý bên dưới."
+    },
     "MIC_NOT_FOUND_ERROR": "Không tìm thấy micro. Vui lòng kết nối micro và thử lại.",
     "MIC_GENERIC_ERROR": "Đã xảy ra lỗi khi truy cập micro.",
     "SUGGESTED_PROMPTS": {

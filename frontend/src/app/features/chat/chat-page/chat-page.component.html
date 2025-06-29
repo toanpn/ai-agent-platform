@@ -1,41 +1,35 @@
 <div class="chat-container">
-	<app-chat-sidebar
-		class="chat-sidebar"
-		[selectedConversation]="chatState.activeConversation()"
-		(conversationSelected)="onConversationSelected($event)"
-		(startNewChat)="onStartNewChat()"
-	></app-chat-sidebar>
+	<app-chat-sidebar class="chat-sidebar" [selectedConversation]="chatState.activeConversation()"
+		(conversationSelected)="onConversationSelected($event)" (startNewChat)="onStartNewChat()"></app-chat-sidebar>
 
 	<div class="chat-main">
-		<div class="chat-header">
-			<h2 class="chat-title">{{ chatState.activeConversation()?.title || ('CHAT.DEFAULT_TITLE' | translate) }}</h2>
-			<div class="header-actions">
-				<button class="header-action-btn" [title]="'COMMON.SHARE' | translate">
-					<img src="assets/icons/share.svg" alt="" />
-				</button>
-				<button class="header-action-btn" [title]="'COMMON.MORE_OPTIONS' | translate">
-					<img src="assets/icons/more-horiz.svg" alt="" />
-				</button>
+		@if (chatState.messages().length === 0 && !chatState.isLoading() && !isTyping()) {
+			<app-chat-welcome class="chat-content" (promptClicked)="onPromptClicked($event)"></app-chat-welcome>
+		} @else {
+			<div class="chat-header">
+				<h2 class="chat-title">{{ chatState.activeConversation()?.title || ('CHAT.DEFAULT_TITLE' | translate) }}</h2>
+				<div class="header-actions">
+					<button class="header-action-btn" [title]="'COMMON.SHARE' | translate">
+						<img src="assets/icons/share.svg" alt="" />
+					</button>
+					<button class="header-action-btn" [title]="'COMMON.MORE_OPTIONS' | translate">
+						<img src="assets/icons/more-horiz.svg" alt="" />
+					</button>
+				</div>
 			</div>
-		</div>
-		<app-chat-messages
-			class="chat-messages"
-			[messages]="chatState.messages()"
-			[isLoading]="chatState.isLoading()"
-		></app-chat-messages>
-		<div class="suggested-prompts">
-			@for (prompt of suggestedPrompts; track prompt) {
-			<button class="prompt-btn" (click)="onPromptClicked(prompt)">{{ prompt | translate }}</button>
-			}
-		</div>
+			<app-chat-messages
+				class="chat-content"
+				[messages]="chatState.messages()"
+				[isLoading]="chatState.isLoading()"
+			></app-chat-messages>
+		}
 		<app-chat-input
 			class="chat-input"
 			(sendMessage)="onSendMessage($event)"
+			(typing)="onTyping($event)"
 			[disabled]="chatState.isLoading()"
 		></app-chat-input>
 	</div>
 
-	<app-agent-participants-list
-		class="agent-participants-sidebar"
-	></app-agent-participants-list>
-</div> 
+	<app-agent-participants-list class="agent-participants-sidebar"></app-agent-participants-list>
+</div>

@@ -184,6 +184,10 @@
     "FORMAT_LIST": "Format as List",
     "LIST_FORMAT": "List",
     "AGENT_RESPONSE_NOTE": "All agents will respond to your message",
+    "WELCOME": {
+      "TITLE": "How can I help you today?",
+      "SUBTITLE": "You can start by typing a message or selecting one of the prompts below."
+    },
     "SUGGESTED_PROMPTS": {
       "COMPETITORS": "Tell me more about your competitors",
       "SEO": "I need help with SEO strategy",
@@ -413,7 +417,6 @@
     "UPLOADING": "Uploading...",
     "UPLOAD_SUCCESS": "File uploaded successfully.",
     "UPLOAD_TITLE": "Knowledge",
-    "DRAG_AND_DROP": "Drag files here or click to browse",
     "SUPPORTED_FORMATS": "Supported formats: PDF, DOC, DOCX, XLS, XLSX, PPT, TXT, CSV, Images, Code files",
     "SIZE_LIMIT": "Max 50MB per file, 500MB total",
     "BROWSE": "Browse Files",

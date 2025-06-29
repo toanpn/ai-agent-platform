@@ -35,6 +35,7 @@ import { SpeechService } from '../../../../core/services/speech.service';
 })
 export class ChatInputComponent implements OnInit {
 	sendMessage = output<string>();
+	typing = output<boolean>();
 	disabled = input<boolean>(false);
 	messageText = signal('');
 	isEnhancing = signal(false);
@@ -131,6 +132,7 @@ export class ChatInputComponent implements OnInit {
 	onMessageTextChanged(event: Event): void {
 		const value = (event.target as HTMLInputElement).value;
 		this.messageText.set(value);
+		this.typing.emit(!!value);
 	}
 
 	/**

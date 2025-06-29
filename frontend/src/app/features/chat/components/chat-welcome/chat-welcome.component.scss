@@ -1,0 +1,89 @@
+@use 'variables' as v;
+@use 'mixins' as m;
+
+.chat-welcome-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  padding: 2rem;
+  text-align: center;
+  width: 100%;
+}
+
+.welcome-header {
+  margin-bottom: 2rem;
+  animation: fadeIn 0.8s ease-in-out;
+
+  .welcome-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+    background: linear-gradient(
+      90deg,
+      var(--color-primary),
+      var(--color-success),
+      var(--color-primary)
+    );
+    background-size: 200% 200%;
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+    animation: gradient-animation 10s ease infinite, fadeIn 0.8s ease-in-out;
+  }
+
+  .welcome-subtitle {
+    font-size: 1rem;
+    color: var(--color-success-text);
+    max-width: 450px;
+    margin: 0 auto;
+    animation: fadeIn 0.8s ease-in-out 0.2s;
+    animation-fill-mode: forwards;
+  }
+}
+
+.suggested-prompts-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  justify-content: center;
+}
+
+.prompt-btn {
+  @include m.reset-button;
+  background-color: transparent;
+  border: 1px solid var(--color-border);
+  border-radius: 1.5rem;
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+
+  &:hover {
+    background-color: var(--color-background-alt-hover);
+    border-color: var(--color-border-hover);
+  }
+}
+
+@keyframes gradient-animation {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+} 
