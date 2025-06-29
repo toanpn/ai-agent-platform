@@ -77,6 +77,7 @@ class JiraTool(BaseTool):
     jira_api_token: Optional[str] = None
     jira_cloud: bool = False
     jira_toolkit: Optional[JiraToolkit] = None
+    jira_api_wrapper: Optional[JiraAPIWrapper] = None
     initialization_error: Optional[str] = None
     
     def __init__(self, jira_instance_url: str = None, jira_username: str = None, jira_api_token: str = None, **kwargs):
@@ -92,18 +93,19 @@ class JiraTool(BaseTool):
         
         if JIRA_AVAILABLE and all([self.jira_instance_url, self.jira_username, self.jira_api_token]):
             try:
-                jira_api = JiraAPIWrapper(
+                self.jira_api_wrapper = JiraAPIWrapper(
                     jira_instance_url=self.jira_instance_url,
                     jira_username=self.jira_username,
                     jira_api_token=self.jira_api_token,
                     jira_cloud=self.jira_cloud,
                 )
-                self.jira_toolkit = JiraToolkit.from_jira_api_wrapper(jira_api)
+                self.jira_toolkit = JiraToolkit.from_jira_api_wrapper(self.jira_api_wrapper)
             except Exception as e:
                 error_message = f"Không thể khởi tạo JIRA toolkit. Vui lòng kiểm tra lại thông tin cấu hình (URL, username, token). Lỗi: {e}"
                 logger.error(error_message)
                 self.initialization_error = error_message
                 self.jira_toolkit = None
+                self.jira_api_wrapper = None
         
     def _run(self, action: Optional[str] = None, parameters: Optional[dict] = None) -> str:
         """Execute JIRA action using the unified toolkit."""
@@ -176,25 +178,66 @@ class JiraTool(BaseTool):
             return f"❌ Lỗi khi tạo JIRA issue: {str(e)}"
     
     def _search_issues(self, tools: List[BaseTool], parameters: dict) -> str:
-        """Search JIRA issues using JQL."""
-        search_tool = None
-        for tool in tools:
-            if tool.name == "jql_query":
-                search_tool = tool
-                break
-        
-        if not search_tool:
-            return "❌ Không tìm thấy công cụ tìm kiếm"
-        
+        """Search JIRA issues using JQL, with smart query building."""
+        if not self.jira_api_wrapper:
+            return self._mock_result("search_issues", **parameters)
+
         try:
-            jql = parameters.get("jql", "")
+            jql = parameters.get("jql")
             if not jql:
-                return "❌ Thiếu truy vấn JQL để tìm kiếm"
+                jql_parts = []
+                project = parameters.get("project")
+
+                if project:
+                    all_projects = self.jira_api_wrapper.get_projects()
+                    project_keys = [p["key"].lower() for p in all_projects]
+                    if project.lower() not in project_keys:
+                        project_list_str = ", ".join(p["key"] for p in all_projects)
+                        return f'❌ Project "{project}" không tồn tại. Các project khả dụng: {project_list_str}'
+                    jql_parts.append(f'project = "{project}"')
+
+                # Handle natural language query
+                query = parameters.get("query") or parameters.get("text") or parameters.get("summary")
+                if query:
+                    jql_parts.append(f'text ~ "{query.strip()}"')
+                
+                # Handle other potential fields
+                for field in ["status", "component", "assignee", "issuetype"]:
+                    if field in parameters:
+                        jql_parts.append(f'{field} = "{parameters[field]}"')
+
+                if not jql_parts:
+                    return "❌ Thiếu truy vấn JQL hoặc tham số tìm kiếm (ví dụ: 'query', 'project', 'status'). Vui lòng cung cấp thêm thông tin."
+
+                jql = " AND ".join(jql_parts)
             
-            result = search_tool.run(jql)
+            # Use limit or a default
+            limit = parameters.get("limit", 10)
+            
+            # Use the underlying client for more control
+            search_results = self.jira_api_wrapper.jira.jql(jql, limit=limit)
+
+            # Format the results
+            if not search_results or not search_results.get("issues"):
+                return f"ℹ️ Không tìm thấy issue nào với truy vấn JQL: '{jql}'"
+
+            issues = search_results["issues"]
+            formatted_issues = []
+            for issue in issues:
+                fields = issue.get("fields", {})
+                summary = fields.get("summary", "N/A")
+                status = fields.get("status", {}).get("name", "N/A")
+                assignee = fields.get("assignee")
+                assignee_name = assignee.get("displayName", "Unassigned") if assignee else "Unassigned"
+                issue_str = f'Issue Key: {issue["key"]}, Summary: "{summary}", Status: "{status}", Assignee: "{assignee_name}"'
+                formatted_issues.append(issue_str)
+            
+            result = "\n".join(formatted_issues)
+
             return f"🔍 Kết quả tìm kiếm JIRA với JQL '{jql}':\n\n{result}"
-            
+
         except Exception as e:
+            logger.error(f"Error in JIRA search: {e}", exc_info=True)
             return f"❌ Lỗi khi tìm kiếm JIRA: {str(e)}"
     
     def _get_issue(self, tools: List[BaseTool], parameters: dict) -> str:
@@ -271,6 +314,17 @@ Loại: {parameters.get('issuetype', {}).get('name', 'Task')}
             
         elif action == "search_issues":
             jql = parameters.get("jql", "")
+            if not jql:
+                jql_parts = []
+                if "project" in parameters:
+                    jql_parts.append(f"project = \"{parameters['project']}\"")
+                query = parameters.get("query") or parameters.get("text") or parameters.get("summary")
+                if query:
+                    jql_parts.append(f"text ~ \"{query}\"")
+                if "status" in parameters:
+                    jql_parts.append(f"status = \"{parameters['status']}\"")
+                jql = " AND ".join(jql_parts) if jql_parts else "project = IT"
+
             return f"""🔍 Kết quả tìm kiếm JIRA mô phỏng với JQL '{jql}':
 
 🎫 **Issue 1: IT-1234**
