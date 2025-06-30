@@ -1,3 +1,8 @@
+<!-- 🅰️ Angular | 🟦 TypeScript | ⚙️ .NET 8 | 🐍 Python | 🗄️ SQL Server | 🐳 Docker | 🤖 Google ADK -->
+<p align="center">
+  🅰️ <b>Angular</b> &nbsp;|&nbsp; 🟦 <b>TypeScript</b> &nbsp;|&nbsp; ⚙️ <b>.NET 8</b> &nbsp;|&nbsp; 🐍 <b>Python</b> &nbsp;|&nbsp; 🗄️ <b>SQL Server</b> &nbsp;|&nbsp; 🐳 <b>Docker</b> &nbsp;|&nbsp; 🤖 <b>Google ADK</b>
+</p>
+
 # 🤖 AI Agent Platform
 
 A comprehensive platform for creating, managing, and interacting with specialized AI agents. Built with modern web technologies and a microservices architecture with intelligent agent routing and JSON-based configuration.
@@ -6,14 +11,66 @@ A comprehensive platform for creating, managing, and interacting with specialize
 
 This platform consists of multiple specialized AI agents that can handle different domains (HR, IT, General Support, Search, Personal Assistant) through a central routing system with automatic JSON synchronization.
 
+### Layered Architecture & Workflow
+
+The platform is organized into four main layers, each with a distinct responsibility and technology stack:
+
+#### 1. Frontend (Presentation Layer)
+- **Technology:** Angular 20+, TypeScript, Angular Material, SCSS
+- **Responsibilities:**
+  - User interface and experience
+  - Real-time chat and agent management
+  - Authentication and authorization (JWT)
+  - API communication via HTTP/WebSocket
+
+#### 2. Backend API (Application Layer)
+- **Technology:** .NET 8, Entity Framework Core, Serilog
+- **Responsibilities:**
+  - REST API for frontend and agent core
+  - Business logic and orchestration
+  - Authentication, authorization, and rate limiting
+  - Agent and user management
+  - Synchronization with Agent Core (agents.json)
+
+#### 3. Agent Core (AI/Agent Layer)
+- **Technology:** Python 3, Flask, LangChain, Google ADK
+- **Responsibilities:**
+  - AI agent runtime and orchestration
+  - Tool integration (Jira, Google Search, etc.)
+  - LLM configuration and prompt enhancement
+  - File processing and RAG (Retrieval-Augmented Generation)
+
+#### 4. Database (Persistence Layer)
+- **Technology:** SQL Server
+- **Responsibilities:**
+  - Persistent storage for users, agents, chat history, and configuration
+  - Automatic migrations and data integrity
+
+#### Workflow Diagram
+
+```mermaid
+graph TD
+  A[User (Browser)] -->|HTTP/WebSocket| B[Frontend (Angular)]
+  B -->|REST API| C[Backend API (.NET 8)]
+  C <--> |Sync/REST| D[Agent Core (Python Flask)]
+  C -->|SQL| E[Database (SQL Server)]
+  D -->|File/Tool APIs| F[External Tools/APIs]
+```
+
+- **User** interacts with the **Frontend** via browser.
+- **Frontend** communicates with the **Backend API** for all business operations.
+- **Backend API** manages data, authentication, and synchronizes agent configuration with the **Agent Core**.
+- **Agent Core** executes AI logic, tool integrations, and interacts with external APIs.
+- **Database** stores all persistent data.
+
 ### Services Overview
 
-| Service | Port | Technology | Description |
-|---------|------|------------|-------------|
-| Frontend | 4200 | Angular + TypeScript | Modern web interface |
-| Backend API | 5000 | .NET 8 | REST API and business logic |
-| Database | 1433 | SQL Server | Data persistence |
-| Agent Core | 8000 | Python Flask | AI agent runtime with LangChain |
+| Service         | Port | Technology                | Description                                 |
+|----------------|------|---------------------------|---------------------------------------------|
+| Frontend       | 4200 | Angular 20+ + TypeScript  | Modern web interface                        |
+| Backend API    | 5000 | .NET 8                    | REST API and business logic                 |
+| Database       | 1433 | SQL Server                | Data persistence                            |
+| Agent Core     | 8000 | Python Flask              | AI agent runtime with LangChain             |
 
 ### 🎯 Key Features
 
@@ -48,7 +105,6 @@ This platform consists of multiple specialized AI agents that can handle differe
    ```bash
    # Copy the environment template
    cp env.template .env
-   
    # Edit .env and set your Google API key (required for AgentPlatform.Core)
    # Get your API key from: https://aistudio.google.com/apikey
    ```
@@ -62,7 +118,6 @@ This platform consists of multiple specialized AI agents that can handle differe
    ```bash
    # Backend only (includes database and agent core)
    cd backend && docker-compose up -d
-   
    # Frontend only
    cd frontend && docker-compose up -d
    ```
@@ -91,7 +146,7 @@ This platform consists of multiple specialized AI agents that can handle differe
 - **Agent Configuration**: JSON-based with database synchronization
 - **Logging**: Serilog
 - **Rate Limiting**: AspNetCoreRateLimit
-- **Agent Runtime**: Python FastAPI with Google ADK integration
+- **Agent Runtime**: Python Flask with Google ADK integration
 
 ### Frontend Development Tools
 - **Build System**: Angular CLI with esbuild
@@ -150,8 +205,8 @@ This platform consists of multiple specialized AI agents that can handle differe
 ai-agent-platform/
 ├── docker-compose.yml         # Full stack Docker setup
 ├── env.template               # Environment variables template
-├── backend/                   # .NET 8 Backend
-│   ├── AgentPlatform.API/     # Main REST API
+├── backend/                   # Backend services
+│   ├── AgentPlatform.API/     # .NET 8 REST API
 │   │   ├── Models/            # Entity models with Tools & LLM config
 │   │   ├── DTOs/              # Data transfer objects
 │   │   ├── Services/          # Business logic with JSON sync
@@ -159,7 +214,7 @@ ai-agent-platform/
 │   │   ├── Data/              # Database context & seeding
 │   │   ├── Migrations/        # EF Core migrations
 │   │   └── Dockerfile         # Backend container
-│   ├── AgentPlatform.Core/    # Python Agent Runtime
+│   ├── AgentPlatform.Core/    # Python Agent Runtime (Flask)
 │   │   ├── core/              # Agent management modules
 │   │   ├── toolkit/           # Agent tools (Jira, Search, etc.)
 │   │   ├── agents.json        # Agent definitions (auto-synced)
@@ -167,8 +222,7 @@ ai-agent-platform/
 │   │   ├── main.py            # CLI entry point
 │   │   ├── start_api.py       # API server entry point
 │   │   ├── api_server.py      # Flask API server
-│   │   ├── Dockerfile         # Agent Core container
-│   │   └── .dockerignore      # Docker build optimization
+│   │   └── Dockerfile         # Agent Core container
 │   ├── shared/                # Shared models
 │   └── docker-compose.yml     # Backend services
 ├── frontend/                  # Angular Frontend
@@ -180,7 +234,6 @@ ai-agent-platform/
 │   ├── package.json           # NPM dependencies
 │   ├── tsconfig.json          # TypeScript configuration
 │   ├── Dockerfile             # Frontend container
-│   ├── .dockerignore          # Docker build optimization
 │   └── docker-compose.yml     # Frontend service
 └── docs/                      # Documentation
 ```
@@ -191,10 +244,17 @@ ai-agent-platform/
 
 ```bash
 cd backend
-docker-compose up -d sqlserver  # Start database
+# Start database (SQL Server)
+docker-compose up -d sqlserver
 cd AgentPlatform.API
-dotnet ef database update      # Apply migrations
-dotnet run                     # Start API
+# Apply migrations
+# Option 1: Using EF Core CLI
+dotnet ef database update
+# Option 2: Using provided migration script
+# (edit scripts/migrations.sql as needed, then run)
+# psql or Azure Data Studio, or use scripts/migration-scripts.ps1 for PowerShell
+# Start API
+dotnet run
 ```
 
 ### Frontend Development
@@ -205,127 +265,15 @@ npm install
 ng serve
 ```
 
-### Agent Development
+### Agent Core Development
 
 ```bash
-cd backend/ADKAgentCore
+cd backend/AgentPlatform.Core
 python -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
 python main.py
 ```
-
-## 🔄 Agent Configuration & Synchronization
-
-### Agent Schema
-Each agent has the following configuration:
-```json
-{
-  "agent_name": "IT_Support_Agent",
-  "description": "Handles technical support requests...",
-  "tools": ["jira_ticket_creator", "it_knowledge_base_search"],
-  "llm_config": {
-    "model_name": "gemini-2.0-flash",
-    "temperature": 0.0
-  }
-}
-```
-
-### Database Schema
-```sql
--- Agent table includes:
-- Tools (pipe-separated: "tool1|tool2|tool3")
-- LlmModelName (string)
-- LlmTemperature (double)
-```
-
-### Automatic Synchronization
-- **Database → JSON**: Changes via API automatically update `agents.json`
-- **Consistency**: Database and JSON file stay synchronized
-- **Manual Sync**: `POST /api/agent/sync-json` endpoint available
-
-## 🌟 API Endpoints
-
-### Agent Management
-- `GET /api/agent` - List all agents
-- `GET /api/agent/{id}` - Get specific agent
-- `POST /api/agent` - Create new agent
-- `PUT /api/agent/{id}` - Update agent
-- `DELETE /api/agent/{id}` - Delete agent (soft delete)
-- `POST /api/agent/{id}/functions` - Add function to agent
-- `POST /api/agent/sync-json` - Manual JSON synchronization
-
-### Request/Response Examples
-
-#### Create Agent
-```json
-POST /api/agent
-{
-  "name": "Custom_Agent",
-  "department": "Sales",
-  "description": "Sales support agent",
-  "tools": ["crm_search", "lead_tracker"],
-  "llmConfig": {
-    "modelName": "gemini-2.0-flash",
-    "temperature": 0.3
-  }
-}
-```
-
-#### Response
-```json
-{
-  "id": 7,
-  "name": "Custom_Agent",
-  "department": "Sales",
-  "tools": ["crm_search", "lead_tracker"],
-  "llmConfig": {
-    "modelName": "gemini-2.0-flash",
-    "temperature": 0.3
-  },
-  "isActive": true,
-  "createdAt": "2024-12-21T10:30:00Z"
-}
-```
-
-## 🌟 Features
-
-### For End Users
-- **Multi-Agent Chat**: Seamless conversation with specialized AI agents
-- **Smart Routing**: Automatic routing based on agent capabilities
-- **Tool Integration**: Agents can use external tools (Jira, Google, Calendar)
-- **File Upload**: Share documents for agent analysis
-- **Chat History**: Access previous conversations
-- **Responsive Design**: Works on desktop and mobile
-
-### For Administrators
-- **Agent Management**: Create and configure custom agents with tools
-- **JSON Synchronization**: Automatic sync between database and configuration files
-- **LLM Configuration**: Set model and temperature per agent
-- **Tool Assignment**: Assign specific tools to each agent
-- **User Management**: User registration and authentication
-- **Analytics**: Monitor agent performance and usage
-- **File Management**: Organize and manage agent knowledge files
-
-## 🔐 Security
-
-- JWT-based authentication
-- Rate limiting on API endpoints
-- Input validation and sanitization
-- Secure file upload handling
-- CORS configuration
-- Environment-based configuration
-- Soft delete for data retention
-
-## 📈 Monitoring & Logging
-
-- Structured logging with Serilog
-- Request/response logging
-- Agent operation tracking
-- JSON sync error handling
-- Error tracking and reporting
-- Health check endpoints
-- Docker container logging
 
 ## 🚀 Deployment
 
@@ -352,6 +300,7 @@ ASPNETCORE_ENVIRONMENT=Production
 # Apply migrations in production
 cd backend/AgentPlatform.API
 dotnet ef database update --configuration Release
+# Or use scripts/migration-scripts.ps1 for PowerShell
 ```
 
 ## 🤝 Contributing
@@ -367,17 +316,3 @@ dotnet ef database update --configuration Release
 - Ensure database changes include proper migrations
 - Test JSON synchronization after agent modifications
 - Update documentation for new tools or agents
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 🆘 Support
-
-- 📧 Email: support@agentplatform.com
-- 📖 Documentation: [docs/](./docs/)
-- 🐛 Issues: [GitHub Issues](../../issues)
-
----
-
-**Built with ❤️ using Angular, .NET 8, SQL Server, and Google ADK**
