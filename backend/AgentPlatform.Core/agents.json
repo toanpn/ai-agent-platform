@@ -1,65 +1,110 @@
 [
   {
     "agent_name": "HR_Agent",
-    "description": "Specialized agent for HR support tasks including knowledge base search and Google search.",
+    "description": "Vui lòng giải đáp các thắc mắc của tôi liên quan đến quy trình làm việc và chính sách lương thưởng của công ty.",
+    "instruction": "Vui lòng giải đáp các thắc mắc của tôi liên quan đến quy trình làm việc và chính sách lương thưởng của công ty.",
     "tools": [
       "google_search_tool",
-      "knowledge_search_tool"
+      "knowledge_search_tool",
+      "confluence_tool"
     ],
     "tool_configs": {
-      "jira_tool": {
-        "jira_base_url": "https://citigo.atlassian.net",
-        "jira_username": "anh.nt15@kiotviet.com",
-        "jira_api_token": "ATATT3xFfGF00wdPMH-CET_2tDevSUe_VIjKngwxlJ6FdTCmspFtIUbK8avuQEjucgavwGbRV2bPRxa_vKqC9iFzMiSsb_eysxqIwyIZN492TDLQab35wxfikOcJ_Df_AD-7f-vrurRBa6nuZwTvOyxd3TNI_PHaF5LHj0HAlYfM2KNEHzZyGSg=ECAB72D8"
+      "google_search_tool": {
+        "num_results": "6",
+        "google_api_key": "test",
+        "google_cse_id": "test"
+      },
+      "knowledge_search_tool": {
+        "max_results": 3
       },
       "confluence_tool": {
-        "confluence_base_url": "https://citigo.atlassian.net",
-        "confluence_email": "anh.nt15@kiotviet.com",
-        "confluence_api_token": "ATATT3xFfGF00wdPMH-CET_2tDevSUe_VIjKngwxlJ6FdTCmspFtIUbK8avuQEjucgavwGbRV2bPRxa_vKqC9iFzMiSsb_eysxqIwyIZN492TDLQab35wxfikOcJ_Df_AD-7f-vrurRBa6nuZwTvOyxd3TNI_PHaF5LHj0HAlYfM2KNEHzZyGSg=ECAB72D8"
-      },
-      "gmail_tool": {
-        "gmail_credentials_path": "C:\\Users\\anh.nt15\\Downloads\\gmail_credentials.json"
-      },
-      "google_search_tool": {
-        "google_api_key": "AIzaSyB3dGLjXqjb9_1hIFt4RxKctqf2GA3VZ5E",
-        "google_cse_id": "f18557e4b4de94ffe",
-        "num_results": 5
-      },
-      "knowledge_search_tool": {
-        "max_results": 5
+        "confluence_api_token": "test",
+        "confluence_base_url": "test",
+        "confluence_username": "test"
       }
     },
     "llm_config": {
-      "model_name": "gemini-2.5-flash",
-      "temperature": 0.4
-    },
-    "IsPublic": false
-  },
-  {
-    "agent_name": "PE_Agent",
-    "description": "Specialized agent for PE support tasks including JIRA issue management, knowledge base search, Gmail communication, and Google search.",
-    "tools": [
-      "gmail_tool",
-      "google_search_tool",
-      "knowledge_search_tool"
-    ],
-    "tool_configs": {
-      "gmail_tool": {
-        "gmail_credentials_path": "C:\\Users\\anh.nt15\\Downloads\\gmail_credentials.json"
-      },
-      "google_search_tool": {
-        "google_api_key": "AIzaSyB3dGLjXqjb9_1hIFt4RxKctqf2GA3VZ5E",
-        "google_cse_id": "f18557e4b4de94ffe",
-        "num_results": 5
-      },
-      "knowledge_search_tool": {
-        "max_results": 5
-      }
-    },
-    "llm_config": {
-      "model_name": "gemini-2.5-flash",
+      "model_name": "gemini-2.5-flash-lite-preview-06-17",
       "temperature": 0.2
     },
-    "IsPublic": true
+    "is_public": true,
+    "owner_id": null
+  },
+  {
+    "agent_name": "Sale_Support_FNB",
+    "description": "Vui lòng cung cấp mô tả chi tiết về gian hàng, bao gồm thông tin sản phẩm, khách hàng và mục tiêu, để tôi có thể phân tích và đề xuất các gợi ý cũng như kịch bản bán phần mềm Kiotviet FnB cá nhân hóa, giúp bạn tự tin chốt đơn và đạt mục tiêu doanh số.",
+    "instruction": "Vui lòng phân tích dữ liệu người dùng cung cấp, bao gồm thông tin sản phẩm, khách hàng, mục tiêu bán hàng và kênh tư vấn, sau đó xây dựng một kịch bản bán hàng hoàn chỉnh, rõ ràng và dễ hiểu, bao gồm lời mở đầu, giới thiệu lợi ích sản phẩm, xử lý từ chối và kêu gọi hành động, đồng thời hướng dẫn khách hàng thao tác trên phần mềm KiotViet.",
+    "tools": [
+      "knowledge_search_tool",
+      "google_search_tool"
+    ],
+    "tool_configs": {
+      "knowledge_search_tool": {
+        "max_results": "5"
+      },
+      "google_search_tool": {
+        "google_api_key": "test",
+        "google_cse_id": "test",
+        "num_results": "5"
+      }
+    },
+    "llm_config": {
+      "model_name": "gemini-2.5-flash-lite-preview-06-17",
+      "temperature": 0.1
+    },
+    "is_public": true,
+    "owner_id": null
+  },
+  {
+    "agent_name": "Sale_support_booking",
+    "description": "Vui lòng cung cấp cho tôi mô tả chi tiết về gian hàng của bạn, bao gồm thông tin về sản phẩm, khách hàng và mục tiêu, để tôi có thể phân tích và đưa ra các gợi ý cũng như kịch bản bán hàng cá nhân hóa, giúp bạn tự tin chốt đơn và đạt được mục tiêu doanh số.",
+    "instruction": "Vui lòng phân tích dữ liệu người dùng cung cấp, bao gồm thông tin sản phẩm, khách hàng, mục tiêu bán hàng và kênh tư vấn, sau đó xây dựng một kịch bản bán hàng hoàn chỉnh, rõ ràng và dễ hiểu, bao gồm lời mở đầu, giới thiệu lợi ích sản phẩm, xử lý từ chối và kêu gọi hành động, đồng thời hướng dẫn khách hàng thao tác trên phần mềm KiotViet.",
+    "tools": [
+      "knowledge_search_tool",
+      "google_search_tool"
+    ],
+    "tool_configs": {
+      "knowledge_search_tool": {
+        "max_results": "test"
+      },
+      "google_search_tool": {
+        "google_api_key": "test",
+        "google_cse_id": "test",
+        "num_results": "5"
+      }
+    },
+    "llm_config": {
+      "model_name": "gemini-2.5-flash-lite-preview-06-17",
+      "temperature": 0.2
+    },
+    "is_public": true,
+    "owner_id": null
+  },
+  {
+    "agent_name": "Agent_Confluence",
+    "description": "Vui lòng theo dõi tiến độ của các task trong Jira, tổng hợp thông tin từ các ticket, và tìm kiếm cũng như tổng hợp tài liệu liên quan từ Confluence.",
+    "instruction": "Vui lòng theo dõi tiến độ Jira và tổng hợp tài liệu Confluence theo các chỉ dẫn chi tiết đã cung cấp để cung cấp một cái nhìn tổng quan toàn diện về tiến độ dự án.",
+    "tools": [
+      "confluence_tool",
+      "jira_tool"
+    ],
+    "tool_configs": {
+      "confluence_tool": {
+        "confluence_api_token": "test",
+        "confluence_base_url": "test",
+        "confluence_username": "test"
+      },
+      "jira_tool": {
+        "jira_api_token": "test",
+        "jira_base_url": "test",
+        "jira_username": "test"
+      }
+    },
+    "llm_config": {
+      "model_name": "gemini-2.0-flash",
+      "temperature": 0.1
+    },
+    "is_public": true,
+    "owner_id": null
   }
 ]
