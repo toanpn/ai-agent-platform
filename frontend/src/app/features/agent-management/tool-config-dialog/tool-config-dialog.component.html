@@ -8,7 +8,7 @@
 				<img *ngSwitchCase="'jira_tool'" src="/assets/icons/jira.svg" alt="Jira icon" class="tool-icon" />
 				<img *ngSwitchDefault src="assets/icons/icon-file.svg" alt="Tool icon" class="tool-icon" />
 			</div>
-			<h2 class="title">{{ 'AGENTS.TOOLS_CONFIG.CONNECT_TO' | translate }} {{ toolDisplayName }}</h2>
+			<h2 class="title">{{ 'AGENTS.TOOLS_CONFIG.TITLE' | translate: { toolName: toolDisplayName } }}</h2>
 		</div>
 		<button class="close-button" (click)="onCancel()">
 			<mat-icon>close</mat-icon>

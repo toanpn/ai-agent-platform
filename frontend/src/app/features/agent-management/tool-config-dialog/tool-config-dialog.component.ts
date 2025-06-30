@@ -7,7 +7,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatIconModule } from '@angular/material/icon';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { Tool, ToolParameter } from '../../../core/services/agent.service';
 
 export interface ToolConfigDialogData {
@@ -37,6 +37,8 @@ export class ToolConfigDialogComponent implements OnInit {
 	tool: Tool;
 	parameters: { key: string; details: ToolParameter }[] = [];
 	isEditing: boolean;
+
+	private translateService = inject(TranslateService);
 
 	constructor(
 		private fb: FormBuilder,
@@ -103,7 +105,15 @@ export class ToolConfigDialogComponent implements OnInit {
 	}
 
 	get toolDisplayName(): string {
-		return this.tool.name.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+		const toolKey = this.tool.id.replace(/_tool$/, '');
+		const translationKey = `AGENTS.TOOL_NAMES.${toolKey}`;
+		const translation = this.translateService.instant(translationKey);
+
+		if (translation === translationKey) {
+			return this.tool.name.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+		}
+
+		return translation;
 	}
 
 	/**
@@ -118,11 +128,21 @@ export class ToolConfigDialogComponent implements OnInit {
 	 */
 	getParameterPlaceholder(param: { key: string; details: ToolParameter }): string {
 		if (param.details.default) {
-			return `Default: ${param.details.default}`;
+			return this.translateService.instant('AGENTS.TOOLS_CONFIG.PLACEHOLDERS.DEFAULT', {
+				defaultValue: param.details.default,
+			});
 		}
 		if (param.details.is_credential) {
-			return 'Enter secure credential';
+			return this.translateService.instant('AGENTS.TOOLS_CONFIG.PLACEHOLDERS.ENTER_CREDENTIAL');
 		}
-		return `Enter ${param.key}`;
+
+		const paramLabelKey = this.getParameterLabel(param.key);
+		let paramName = this.translateService.instant(paramLabelKey);
+
+		if (paramName === paramLabelKey) {
+			paramName = param.key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+		}
+
+		return this.translateService.instant('AGENTS.TOOLS_CONFIG.PLACEHOLDERS.ENTER_VALUE', { paramName });
 	}
 }

@@ -96,7 +96,7 @@
     "PLATFORM_SUBTITLE": "Trao quyền cho nhân viên của bạn bằng tự động hóa thông minh",
     "LOGIN_TAB": "Đăng nhập",
     "REGISTER_TAB": "Đăng ký",
-    "EMAIL_PLACEHOLDER": "your@example.com",
+    "EMAIL_PLACEHOLDER": "your@kiotviet.com",
     "PASSWORD_PLACEHOLDER": "Nhập mật khẩu của bạn",
     "FULL_NAME_PLACEHOLDER": "Nhập họ và tên của bạn",
     "CONFIRM_PASSWORD_PLACEHOLDER": "Xác nhận lại mật khẩu",
@@ -268,7 +268,18 @@
       "SUPPORTED_FORMATS": "Định dạng được hỗ trợ: PDF, DOC, DOCX, XLS, XLSX, PPT, TXT, CSV, Hình ảnh, Tệp mã",
       "SIZE_LIMIT": "Tối đa 50MB mỗi tệp, tổng 500MB",
       "BROWSE": "Duyệt tệp",
-      "PROCESSING": "Đang xử lý..."
+      "PROCESSING": "Đang xử lý...",
+      "FILENAME": "Tên tệp",
+      "SIZE": "Kích thước",
+      "INDEX_STATUS": "Trạng thái chỉ mục",
+      "CREATED_AT": "Ngày tải lên",
+      "INDEXED": "Đã chỉ mục",
+      "NOT_INDEXED": "Chưa chỉ mục",
+      "INDEXING": "Đang chỉ mục...",
+      "DELETE_FILE_CONFIRM": "Bạn có chắc chắn muốn xóa tệp này không?",
+      "DELETE_FILE_SUCCESS": "Đã xóa tệp thành công",
+      "DELETE_FILE_ERROR": "Không thể xóa tệp",
+      "INDEXING_IN_PROGRESS": "Đang lập chỉ mục tệp, vui lòng đợi."
     },
     "CREATED_BY": "Người tạo",
     "LAST_UPDATED": "Cập nhật lần cuối",
@@ -319,34 +330,53 @@
     "NO_TOOLS_DESCRIPTION": "Hiện tại không có công cụ nào khả dụng cho agent này.",
     "REQUIRES_CONFIGURATION": "Yêu cầu cấu hình",
     "TOOLS_CONFIG": {
-      "TITLE": "Cấu hình Công cụ",
+      "TITLE": "Cấu hình {{toolName}}",
+      "CONNECT_ACCOUNT": "Kết nối {{toolName}}",
+      "DISCONNECT": "Ngắt kết nối",
+      "TEST_CONNECTION": "Kiểm tra kết nối",
+      "SAVE_CONFIG": "Lưu cấu hình",
       "INSTRUCTION": "Vui lòng cung cấp thông tin cần thiết để cấu hình công cụ này.",
       "FIELD_REQUIRED": "Trường này là bắt buộc.",
       "SAVE_SUCCESS": "Lưu cấu hình công cụ thành công",
       "SAVE_ERROR": "Không thể lưu cấu hình công cụ",
       "NO_CONFIG_NEEDED": "Công cụ này không yêu cầu cấu hình bổ sung.",
+      "CONNECT_TO": "Kết nối với",
+      "PLACEHOLDERS": {
+        "DEFAULT": "Mặc định: {{defaultValue}}",
+        "ENTER_CREDENTIAL": "Nhập thông tin xác thực an toàn",
+        "ENTER_VALUE": "Nhập {{paramName}}"
+      },
       "PARAMS": {
+        "knowledge_search": {
+          "max_results": "Số kết quả tối đa"
+        },
         "google_search": {
-          "google_api_key": "Khóa API Google",
-          "google_cse_id": "ID Công cụ tìm kiếm tùy chỉnh của Google",
-          "num_results": "Số lượng kết quả"
+          "num_results": "Số lượng kết quả",
+          "google_api_key": "Google API Key",
+          "google_cse_id": "Google Custom Search Engine ID"
         },
         "gmail": {
-          "gmail_credentials_path": "Đường dẫn thông tin xác thực Gmail"
+          "gmail_credentials_path": "Đường dẫn tệp xác thực Gmail"
         },
         "jira": {
           "jira_base_url": "URL cơ sở của Jira",
           "jira_username": "Tên người dùng Jira",
-          "jira_api_token": "Mã thông báo API Jira"
+          "jira_api_token": "Jira API Token"
         },
         "confluence": {
           "confluence_base_url": "URL cơ sở của Confluence",
           "confluence_username": "Tên người dùng Confluence",
-          "confluence_api_token": "Mã thông báo API Confluence"
+          "confluence_api_token": "Confluence API Token"
+        },
+        "gitlab": {
+          "parameters": "Tham số",
+          "gitlab_url": "URL GitLab",
+          "gitlab_personal_access_token": "GitLab Personal Access Token",
+          "gitlab_repository": "Kho chứa GitLab",
+          "gitlab_branch": "Nhánh GitLab",
+          "gitlab_base_branch": "Nhánh cơ sở GitLab"
         }
-      },
-      "CONNECT_TO": "Kết nối với",
-      "TEST_CONNECTION": "Kiểm tra kết nối"
+      }
     },
     "LLM": {
       "TITLE": "Cấu hình LLM",
@@ -372,7 +402,17 @@
     "START_CHAT": "Bắt đầu trò chuyện",
     "NAME": "Tên agent",
     "READY_TO_USE": "Agent của bạn đã sẵn sàng để sử dụng",
-    "AGENT_EDIT_PERMISSION_ERROR": "Bạn không có quyền chỉnh sửa trợ lý này"
+    "AGENT_EDIT_PERMISSION_ERROR": "Bạn không có quyền chỉnh sửa agent này",
+    "ADD_FILES": "Thêm tệp",
+    "AGENT_NOT_FOUND": "Không tìm thấy agent.",
+    "TOOL_NAMES": {
+      "knowledge_search": "Tìm kiếm tri thức",
+      "google_search": "Tìm kiếm Google",
+      "gmail": "Gmail",
+      "jira": "Jira",
+      "confluence": "Confluence",
+      "gitlab": "GitLab"
+    }
   },
   "FILES": {
     "FILES": "Tệp",
@@ -445,5 +485,8 @@
   },
   "EXECUTION_DETAILS": {
     "TITLE": "Chi tiết thực thi ({{totalSteps}} bước)"
+  },
+  "MODAL": {
+    "CONFIRMATION_TITLE": "Xác nhận hành động"
   }
 }
