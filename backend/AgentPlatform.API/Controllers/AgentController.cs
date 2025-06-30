@@ -102,28 +102,6 @@ namespace AgentPlatform.API.Controllers
             return Ok(new { message = "Agents JSON synchronized successfully" });
         }
 
-        [HttpPost("sync-from-json")]
-        public async Task<ActionResult> SyncAgentsFromJson()
-        {
-            try
-            {
-                await _agentService.SyncAgentsFromJsonAsync();
-                return Ok(new { message = "Agents synchronized from JSON successfully" });
-            }
-            catch (FileNotFoundException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
-            catch (InvalidOperationException ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = $"An error occurred while syncing agents from JSON: {ex.Message}" });
-            }
-        }
-
         [HttpPost("update-from-json")]
         public async Task<ActionResult> UpdateAgentsFromJson([FromBody] UpdateAgentsFromJsonRequestDto request)
         {
@@ -135,7 +113,7 @@ namespace AgentPlatform.API.Controllers
                 if (success)
                 {
                     return Ok(new { 
-                        message = $"Successfully updated {request.Agents.Count} agents from JSON",
+                        message = $"Successfully replaced all agents from JSON with {request.Agents.Count} new agents",
                         agentsProcessed = request.Agents.Count
                     });
                 }

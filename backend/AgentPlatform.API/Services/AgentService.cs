@@ -311,58 +311,53 @@ namespace AgentPlatform.API.Services
         {
             try
             {
-                _logger.LogInformation("Updating {Count} agents from JSON for user {UserId}", agents.Count, userId);
+                _logger.LogInformation("Replacing all agents from JSON for user {UserId} with {Count} new agents", userId, agents.Count);
 
+                // Get all existing agents for the user
+                var existingAgents = await _context.Agents
+                    .Where(a => a.CreatedById == userId && a.IsActive)
+                    .ToListAsync();
+
+                _logger.LogInformation("Found {Count} existing agents to remove", existingAgents.Count);
+
+                // Hard delete all existing agents
+                if (existingAgents.Any())
+                {
+                    foreach (var existingAgent in existingAgents)
+                    {
+                        _logger.LogInformation("Deleting existing agent: {AgentName}", existingAgent.Name);
+                    }
+                    _context.Agents.RemoveRange(existingAgents);
+                }
+
+                // Create new agents from the request
                 foreach (var agentJson in agents)
                 {
-                    // Check if agent already exists by name
-                    var existingAgent = await _context.Agents
-                        .FirstOrDefaultAsync(a => a.Name == agentJson.AgentName && a.CreatedById == userId);
-
-                    if (existingAgent != null)
+                    var newAgent = new Agent
                     {
-                        // Update existing agent
-                        existingAgent.Description = agentJson.Description;
-                        existingAgent.Instructions = agentJson.Instruction;
-                        existingAgent.ToolsArray = agentJson.Tools ?? Array.Empty<string>();
-                        existingAgent.ToolConfigs = agentJson.ToolConfigs != null 
+                        Name = agentJson.AgentName,
+                        Department = "Imported", // Default department for imported agents
+                        Description = agentJson.Description,
+                        Instructions = agentJson.Instruction,
+                        ToolsArray = agentJson.Tools ?? Array.Empty<string>(),
+                        ToolConfigs = agentJson.ToolConfigs != null 
                             ? JsonSerializer.Serialize(agentJson.ToolConfigs) 
-                            : null;
-                        existingAgent.LlmModelName = agentJson.LlmConfig?.ModelName;
-                        existingAgent.LlmTemperature = agentJson.LlmConfig?.Temperature;
-                        existingAgent.IsPublic = agentJson.IsPublic;
-                        existingAgent.UpdatedAt = DateTime.UtcNow;
+                            : null,
+                        LlmModelName = agentJson.LlmConfig?.ModelName,
+                        LlmTemperature = agentJson.LlmConfig?.Temperature,
+                        IsPublic = agentJson.IsPublic,
+                        CreatedById = userId,
+                        CreatedAt = DateTime.UtcNow,
+                        IsActive = true
+                    };
 
-                        _logger.LogInformation("Updated existing agent: {AgentName}", agentJson.AgentName);
-                    }
-                    else
-                    {
-                        // Create new agent
-                        var newAgent = new Agent
-                        {
-                            Name = agentJson.AgentName,
-                            Department = "Imported", // Default department for imported agents
-                            Description = agentJson.Description,
-                            Instructions = agentJson.Instruction,
-                            ToolsArray = agentJson.Tools ?? Array.Empty<string>(),
-                            ToolConfigs = agentJson.ToolConfigs != null 
-                                ? JsonSerializer.Serialize(agentJson.ToolConfigs) 
-                                : null,
-                            LlmModelName = agentJson.LlmConfig?.ModelName,
-                            LlmTemperature = agentJson.LlmConfig?.Temperature,
-                            IsPublic = agentJson.IsPublic,
-                            CreatedById = userId,
-                            CreatedAt = DateTime.UtcNow,
-                            IsActive = true
-                        };
-
-                        _context.Agents.Add(newAgent);
-                        _logger.LogInformation("Created new agent: {AgentName}", agentJson.AgentName);
-                    }
+                    _context.Agents.Add(newAgent);
+                    _logger.LogInformation("Created new agent: {AgentName}", agentJson.AgentName);
                 }
 
                 await _context.SaveChangesAsync();
-                _logger.LogInformation("Successfully saved {Count} agents to database", agents.Count);
+                _logger.LogInformation("Successfully replaced all agents: removed {RemovedCount}, added {AddedCount}", 
+                    existingAgents.Count, agents.Count);
 
                 // Sync with Agent Core
                 await SyncAgentsJsonAsync();
