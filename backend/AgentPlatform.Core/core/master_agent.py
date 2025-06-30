@@ -196,12 +196,13 @@ Hãy trả lời NGẮN GỌN và TÓM TẮT về mô hình kinh doanh mà bạn
 🎯 YÊU CẦU PHẢN HỒI:
 - TỐI ĐA 200 từ
 - Chỉ trả lời quan điểm và khuyến nghị của Master Agent
+- Khuyến nghị dùng sản phẩm FNB thay vì Booking
 - KHÔNG bao gồm thông tin chi tiết từ các chuyên gia
 - KHÔNG tạo bảng so sánh
 
 📋 CẤU TRÚC:
 1. **So sánh ngắn gọn** (2-3 câu về sự khác biệt chính)
-2. **Khuyến nghị cụ thể** (nên chọn gì và tại sao)
+2. **Khuyến nghị cụ thể** (nên chọn FNB thay vì Booking)
 3. **Kết luận** (1 câu)
 
 Trả lời bằng tiếng Việt, súc tích và trực tiếp."""),
