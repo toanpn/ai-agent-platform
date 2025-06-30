@@ -66,7 +66,15 @@ class JiraTool(BaseTool):
     
     Hướng dẫn sử dụng:
     - Để tạo issue: action="create_issue", parameters={{"summary": "tiêu đề", "description": "mô tả", "project": {{"key": "PROJECT_KEY"}}, "issuetype": {{"name": "Task"}}}}
-    - Để tìm kiếm: action="search_issues", parameters={{"jql": "project = KEY AND status = 'Open'"}}
+    - Để tìm kiếm: action="search_issues". Có thể dùng JQL trực tiếp hoặc các tham số:
+        - jql: "project = KEY AND status = 'Open'" (ghi đè các tham số khác)
+        - project: "IT"
+        - query/text/summary: "lỗi đăng nhập" (tìm kiếm trong tóm tắt, mô tả)
+        - status: "In Progress"
+        - status_not_in: ["Done", "Closed"]
+        - labels: ["bug", "urgent"]
+        - assignee: "user@example.com"
+        - overdue: true (cho các issue quá hạn)
     - Để lấy chi tiết issue: action="get_issue", parameters={{"issue_key": "PROJECT-123"}} (cũng chấp nhận "issue_id")
     - Để lấy danh sách projects: action="get_projects", parameters={{}}
     """
@@ -186,8 +194,9 @@ class JiraTool(BaseTool):
             jql = parameters.get("jql")
             if not jql:
                 jql_parts = []
+                
+                # Project
                 project = parameters.get("project")
-
                 if project:
                     all_projects = self.jira_api_wrapper.get_projects()
                     project_keys = [p["key"].lower() for p in all_projects]
@@ -196,13 +205,42 @@ class JiraTool(BaseTool):
                         return f'❌ Project "{project}" không tồn tại. Các project khả dụng: {project_list_str}'
                     jql_parts.append(f'project = "{project}"')
 
-                # Handle natural language query
+                # Due date
+                if parameters.get("overdue") is True:
+                    jql_parts.append("dueDate < now()")
+                elif "dueDate" in parameters:
+                    jql_parts.append(f"dueDate {parameters['dueDate']}")
+
+                # Status
+                status = parameters.get("status")
+                if status:
+                    if isinstance(status, str):
+                        jql_parts.append(f'status = "{status}"')
+                    elif isinstance(status, list):
+                        s_list = ", ".join([f'"{s}"' for s in status])
+                        jql_parts.append(f'status in ({s_list})')
+                
+                status_not_in = parameters.get("status_not_in")
+                if status_not_in and isinstance(status_not_in, list):
+                    s_list = ", ".join([f'"{s}"' for s in status_not_in])
+                    jql_parts.append(f'status not in ({s_list})')
+
+                # Labels
+                labels = parameters.get("labels")
+                if labels:
+                    if isinstance(labels, str):
+                        jql_parts.append(f'labels = "{labels}"')
+                    elif isinstance(labels, list):
+                        l_list = ", ".join([f'"{l}"' for l in labels])
+                        jql_parts.append(f'labels in ({l_list})')
+
+                # Handle natural language query for summary/description
                 query = parameters.get("query") or parameters.get("text") or parameters.get("summary")
                 if query:
                     jql_parts.append(f'text ~ "{query.strip()}"')
                 
-                # Handle other potential fields
-                for field in ["status", "component", "assignee", "issuetype"]:
+                # Other simple key-value fields
+                for field in ["component", "assignee", "issuetype"]:
                     if field in parameters:
                         jql_parts.append(f'{field} = "{parameters[field]}"')
 
