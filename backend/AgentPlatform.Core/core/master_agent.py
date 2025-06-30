@@ -293,14 +293,8 @@ Dựa trên phân tích các mô hình kinh doanh, cả FNB và Booking đều c
    - ALWAYS ensure Vietnamese responses from sub-agents
 
 Example routing decisions for KiotViet:
-- "Tạo JIRA ticket cho bug POS system" → PE_Agent
+- "Quy trình onboarding nhân viên mới" → HR_Agent
 - "Chính sách nghỉ phép của KiotViet" → HR_Agent  
-- "Phân tích requirements cho tính năng inventory mới" → PE_Agent
-- "Thông tin về benefits nhân viên KiotViet" → HR_Agent
-- "Sprint planning cho KiotViet mobile app" → PE_Agent
-- "Onboarding developer mới vào team Dev" → HR_Agent
-- "Competitor analysis MISA vs KiotViet" → PE_Agent
-- "Quy trình performance review" → HR_Agent
 
 Remember: You are a smart router, not an answerer. Trust your specialists to handle their domains of expertise!"""),
             ("human", "{input}"),

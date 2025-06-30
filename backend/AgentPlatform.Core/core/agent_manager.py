@@ -70,7 +70,7 @@ class AgentManager:
             BaseTool: The sub-agent wrapped as a tool
         """
         agent_name = config["agent_name"]
-        description = config["description"]
+        description = config["instruction"]
         tool_names = config["tools"]
         tool_configs = config.get("tool_configs", {})
         llm_config = config.get("llm_config", {})
