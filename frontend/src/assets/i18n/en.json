@@ -106,7 +106,7 @@
     "PLATFORM_SUBTITLE": "Empowering your business with intelligent automation",
     "LOGIN_TAB": "Login",
     "REGISTER_TAB": "Register",
-    "EMAIL_PLACEHOLDER": "your@example.com",
+    "EMAIL_PLACEHOLDER": "your@kiotviet.com",
     "PASSWORD_PLACEHOLDER": "Enter your password",
     "FULL_NAME_PLACEHOLDER": "Enter your full name",
     "CONFIRM_PASSWORD_PLACEHOLDER": "Confirm your password",
@@ -248,6 +248,7 @@
     "FAILED_LOAD_TOOLS": "Failed to load tools. Please try again.",
     "INVALID_AGENT_ID": "Invalid agent ID",
     "AGENT_ID_NOT_PROVIDED": "Agent ID not provided",
+    "AGENT_NOT_FOUND": "Agent not found.",
     "TOOLS_REQUIRED_WARNING": "At least 1 tool must be connected.",
     "SELECT_DEPARTMENT": "Select Department",
     "DESCRIBE_AGENT": "Describe what this agent does",
@@ -336,16 +337,35 @@
     "NO_TOOLS_AVAILABLE": "No tools available",
     "NO_TOOLS_DESCRIPTION": "No tools are currently available for this agent.",
     "REQUIRES_CONFIGURATION": "Requires configuration",
+    "TOOL_NAMES": {
+      "knowledge_search": "Knowledge Search",
+      "google_search": "Google Search",
+      "gmail": "Gmail",
+      "jira": "Jira",
+      "confluence": "Confluence",
+      "gitlab": "GitLab"
+    },
     "TOOLS_CONFIG": {
-      "TITLE": "Tool Configuration",
+      "TITLE": "Configure {{toolName}}",
+      "CONNECT_ACCOUNT": "Connect {{toolName}}",
+      "DISCONNECT": "Disconnect",
+      "TEST_CONNECTION": "Test Connection",
+      "SAVE_CONFIG": "Save Configuration",
       "INSTRUCTION": "Please provide the required information to configure this tool.",
       "FIELD_REQUIRED": "This field is required.",
       "SAVE_SUCCESS": "Tool configuration saved successfully",
       "SAVE_ERROR": "Failed to save tool configuration",
       "NO_CONFIG_NEEDED": "This tool does not require any additional configuration.",
       "CONNECT_TO": "Connect to",
-      "TEST_CONNECTION": "Test Connection",
+      "PLACEHOLDERS": {
+        "DEFAULT": "Default: {{defaultValue}}",
+        "ENTER_CREDENTIAL": "Enter secure credential",
+        "ENTER_VALUE": "Enter {{paramName}}"
+      },
       "PARAMS": {
+        "knowledge_search": {
+          "max_results": "Max Results"
+        },
         "google_search": {
           "google_api_key": "Google API Key",
           "google_cse_id": "Google Custom Search Engine ID",
@@ -363,6 +383,14 @@
           "confluence_base_url": "Confluence Base URL",
           "confluence_username": "Confluence Username",
           "confluence_api_token": "Confluence API Token"
+        },
+        "gitlab": {
+          "parameters": "Parameters",
+          "gitlab_url": "GitLab URL",
+          "gitlab_personal_access_token": "GitLab Personal Access Token",
+          "gitlab_repository": "GitLab Repository",
+          "gitlab_branch": "GitLab Branch",
+          "gitlab_base_branch": "GitLab Base Branch"
         }
       }
     },
@@ -478,5 +506,8 @@
   },
   "EXECUTION_DETAILS": {
     "TITLE": "Execution Details ({{totalSteps}} steps)"
+  },
+  "MODAL": {
+    "CONFIRMATION_TITLE": "Confirm Action"
   }
 }
