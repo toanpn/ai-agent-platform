@@ -124,6 +124,36 @@ namespace AgentPlatform.API.Controllers
             }
         }
 
+        [HttpPost("update-from-json")]
+        public async Task<ActionResult> UpdateAgentsFromJson([FromBody] UpdateAgentsFromJsonRequestDto request)
+        {
+            try
+            {
+                var userId = GetUserId();
+                var success = await _agentService.UpdateAgentsFromJsonAsync(request.Agents, userId);
+                
+                if (success)
+                {
+                    return Ok(new { 
+                        message = $"Successfully updated {request.Agents.Count} agents from JSON",
+                        agentsProcessed = request.Agents.Count
+                    });
+                }
+                else
+                {
+                    return BadRequest(new { message = "Failed to update agents from JSON" });
+                }
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = $"An error occurred while updating agents from JSON: {ex.Message}" });
+            }
+        }
+
         private int GetUserId()
         {
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);

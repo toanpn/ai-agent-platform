@@ -155,4 +155,10 @@ namespace AgentPlatform.API.DTOs
         
         public string? Headers { get; set; }
     }
+
+    public class UpdateAgentsFromJsonRequestDto
+    {
+        [Required]
+        public List<AgentJsonDto> Agents { get; set; } = new();
+    }
 }
