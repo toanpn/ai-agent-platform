@@ -19,6 +19,7 @@ namespace AgentPlatform.API.DTOs
         public string Role { get; set; } = string.Empty;
         public string? AgentName { get; set; }
         public DateTime CreatedAt { get; set; }
+        public string? Metadata { get; set; }
     }
 
     public class ChatSessionDto

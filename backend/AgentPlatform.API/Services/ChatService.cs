@@ -4,6 +4,7 @@ using AgentPlatform.API.Data;
 using AgentPlatform.API.DTOs;
 using AgentPlatform.API.Models;
 using AgentPlatform.Shared.Models;
+using System.Text.Json;
 
 namespace AgentPlatform.API.Services
 {
@@ -124,7 +125,25 @@ namespace AgentPlatform.API.Services
                 Content = mainResponse, // Use the determined main response
                 Role = "assistant",
                 AgentName = agentName, // Use the determined agent name
-                CreatedAt = DateTime.UtcNow
+                CreatedAt = DateTime.UtcNow,
+                // Store execution details and related metadata as JSON
+                Metadata = JsonSerializer.Serialize(new
+                {
+                    masterAgentThinking = masterAgentThinking,
+                    agentsUsed = runtimeResponse.AgentsUsed,
+                    toolsUsed = runtimeResponse.ToolsUsed,
+                    executionDetails = runtimeResponse.ExecutionDetails != null ? new
+                    {
+                        totalSteps = runtimeResponse.ExecutionDetails.TotalSteps,
+                        executionSteps = runtimeResponse.ExecutionDetails.ExecutionSteps.Select(s => new
+                        {
+                            toolName = s.ToolName,
+                            toolInput = s.ToolInput,
+                            observation = s.Observation
+                        }).ToList()
+                    } : null,
+                    metadata = runtimeResponse.Metadata
+                })
             };
 
             _context.ChatMessages.Add(agentMessage);
@@ -290,7 +309,8 @@ namespace AgentPlatform.API.Services
                     Content = m.Content,
                     Role = m.Role,
                     AgentName = m.AgentName,
-                    CreatedAt = m.CreatedAt
+                    CreatedAt = m.CreatedAt,
+                    Metadata = m.Metadata // Include metadata in the response
                 }).ToList()
             };
         }

@@ -77,6 +77,7 @@ export interface ChatMessageDto {
 	role: string;
 	agentName?: string;
 	createdAt: string;
+	metadata?: string;
 }
 
 export interface ChatSessionDto {
@@ -257,7 +258,7 @@ export class ChatService {
 	 * Helper method to convert the backend ChatMessageDto into the local `Message` model.
 	 */
 	private mapMessageDto(dto: ChatMessageDto, conversationId: number | string): Message {
-		return {
+		const message: Message = {
 			id: dto.id.toString(),
 			text: dto.content,
 			sender: dto.role === 'user' ? 'user' : 'assistant',
@@ -265,5 +266,21 @@ export class ChatService {
 			conversationId: conversationId.toString(),
 			agentName: dto.agentName,
 		};
+
+		// Parse metadata if available for assistant messages
+		if (dto.metadata && dto.role === 'assistant') {
+			try {
+				const metadata = JSON.parse(dto.metadata);
+				message.masterAgentThinking = metadata.masterAgentThinking;
+				message.agentsUsed = metadata.agentsUsed;
+				message.toolsUsed = metadata.toolsUsed;
+				message.executionDetails = metadata.executionDetails;
+				message.metadata = metadata.metadata;
+			} catch (error) {
+				console.warn('Failed to parse message metadata:', error);
+			}
+		}
+
+		return message;
 	}
 }
